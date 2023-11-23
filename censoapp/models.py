@@ -1,5 +1,5 @@
 from django.db import models
-
+from choices import handicap
 # Create your models here.
 
 
@@ -45,13 +45,15 @@ class Sidewalks(models.Model):
 
 
 class CivilState(models.Model):
+    code_state_civil = models.CharField(blank=False, null=False, max_length=1)
     state_civil = models.CharField(blank=False, null=False)
 
     def __str__(self):
-        return self.state_civil
+        return f"{self.code_state_civil} - {self.state_civil}"
 
 
 class EducationLevel(models.Model):
+    code_education_level = models.CharField(blank=False, null=False, max_length=1)
     education_level = models.CharField(blank=False, null=False, unique=True)
 
     def __str__(self):
@@ -67,6 +69,7 @@ class Eps(models.Model):
 
 
 class Kinship(models.Model):
+    code_kinship = models.CharField(blank=False, null=False, max_length=1)
     description_kinship = models.CharField(max_length=15, blank=False, null=False)
 
     def __str__(self):
@@ -88,11 +91,29 @@ class DocumentType(models.Model):
         return f"{self.code_document_type} - {self.document_type}"
 
 
+class Gender(models.Model):
+    gender_code = models.CharField(blank=False, null=False)
+    gender = models.CharField(blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.gender_code} - {self.gender_code}"
+
+
+class SecuritySocial(models.Model):
+    code_security_social = models.CharField(blank=False, null=False, unique=True)
+    affiliation = models.CharField(blank=False, null=False, max_length=30)
+
+    def __str__(self):
+        return f"{self.code_security_social} - {self.affiliation}"
+
+
 class FamilyCard(models.Model):
     address_home = models.CharField(blank=False, null=False, help_text="Registre donde vive la familia")
     sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE)
     latitude = models.CharField(default=0)
     length = models.CharField(default=0)
+    ZONE = [(1, 'Rural'), (2, 'Urbana')]
+    zone = models.CharField(choices=ZONE, blank=False, null=False)
 
     def __str__(self):
         return str(self.id) + '-' + self.address_home
@@ -104,4 +125,13 @@ class Person(models.Model):
     last_name_1 = models.CharField(blank=False, null=False, max_length=30)
     last_name_2 = models.CharField(blank=True, null=True, max_length=30)
     identification_person = models.CharField(blank=False, null=False, unique=True)
+    document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE),
+    cell_phone = models.CharField(blank=True, null=True)
+    personal_email = models.EmailField(blank=True, null=True),
+    gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE)
     date_birth = models.DateField(blank=False, null=False)
+    social_insurance = models.ForeignKey('SecuritySocial', on_delete=models.CASCADE,
+                                         verbose_name="Seguridad Social")
+    kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
+                                   verbose_name="Parentesco")
+    handicap = models.CharField(choices=handicap, default=7, verbose_name="Capacidades Diversas")
