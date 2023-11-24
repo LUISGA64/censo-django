@@ -1,5 +1,5 @@
 from django.db import models
-from choices import handicap
+from .choices import handicap, zone
 # Create your models here.
 
 
@@ -10,7 +10,7 @@ class Association(models.Model):
                                                  help_text="Ingrese NIT")
     association_phone_mobile = models.CharField(max_length=15, help_text="Ingrese número de celular")
     association_phone = models.CharField(max_length=15)
-    association_address = models.CharField(null=False, blank=False)
+    association_address = models.CharField(null=False, blank=False, max_length=50)
     association_departament = models.CharField(null=False, blank=False, max_length=15,
                                                help_text="Registre el departamento")
     association_email = models.EmailField(blank=False, null=False)
@@ -37,7 +37,7 @@ class Organizations(models.Model):
 
 
 class Sidewalks(models.Model):
-    sidewalk_name = models.CharField(blank=False, null=False)
+    sidewalk_name = models.CharField(blank=False, null=False, max_length=30)
     organization_id = models.ForeignKey('Organizations', blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -46,7 +46,7 @@ class Sidewalks(models.Model):
 
 class CivilState(models.Model):
     code_state_civil = models.CharField(blank=False, null=False, max_length=1)
-    state_civil = models.CharField(blank=False, null=False)
+    state_civil = models.CharField(blank=False, null=False, max_length=25)
 
     def __str__(self):
         return f"{self.code_state_civil} - {self.state_civil}"
@@ -54,14 +54,14 @@ class CivilState(models.Model):
 
 class EducationLevel(models.Model):
     code_education_level = models.CharField(blank=False, null=False, max_length=1)
-    education_level = models.CharField(blank=False, null=False, unique=True)
+    education_level = models.CharField(blank=False, null=False, unique=True, max_length=50)
 
     def __str__(self):
         return self.education_level
 
 
 class Eps(models.Model):
-    code_eps = models.CharField(blank=False, null=False, unique=True)
+    code_eps = models.CharField(blank=False, null=False, unique=True, max_length=6)
     name_eps = models.CharField(max_length=50, blank=False, null=False)
 
     def __str__(self):
@@ -77,7 +77,7 @@ class Kinship(models.Model):
 
 
 class Occupancy(models.Model):
-    description_occupancy = models.CharField(blank=False, null=False)
+    description_occupancy = models.CharField(blank=False, null=False, max_length=25)
 
     def __str__(self):
         return self.description_occupancy
@@ -92,15 +92,15 @@ class DocumentType(models.Model):
 
 
 class Gender(models.Model):
-    gender_code = models.CharField(blank=False, null=False)
-    gender = models.CharField(blank=False, null=False)
+    gender_code = models.CharField(blank=False, null=False, max_length=1)
+    gender = models.CharField(blank=False, null=False, max_length=15)
 
     def __str__(self):
         return f"{self.gender_code} - {self.gender_code}"
 
 
 class SecuritySocial(models.Model):
-    code_security_social = models.CharField(blank=False, null=False, unique=True)
+    code_security_social = models.CharField(blank=False, null=False, unique=True, max_length=5)
     affiliation = models.CharField(blank=False, null=False, max_length=30)
 
     def __str__(self):
@@ -108,12 +108,11 @@ class SecuritySocial(models.Model):
 
 
 class FamilyCard(models.Model):
-    address_home = models.CharField(blank=False, null=False, help_text="Registre donde vive la familia")
+    address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia")
     sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE)
-    latitude = models.CharField(default=0)
-    length = models.CharField(default=0)
-    ZONE = [(1, 'Rural'), (2, 'Urbana')]
-    zone = models.CharField(choices=ZONE, blank=False, null=False)
+    latitude = models.CharField(default=0, max_length=15)
+    length = models.CharField(default=0, max_length=15)
+    zone = models.CharField(choices=zone, blank=False, null=False, max_length=1)
 
     def __str__(self):
         return str(self.id) + '-' + self.address_home
@@ -124,14 +123,14 @@ class Person(models.Model):
     first_name_2 = models.CharField(blank=True, null=True, max_length=30)
     last_name_1 = models.CharField(blank=False, null=False, max_length=30)
     last_name_2 = models.CharField(blank=True, null=True, max_length=30)
-    identification_person = models.CharField(blank=False, null=False, unique=True)
+    identification_person = models.CharField(blank=False, null=False, unique=True, max_length=15)
     document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE),
-    cell_phone = models.CharField(blank=True, null=True)
+    cell_phone = models.CharField(blank=True, null=True, max_length=15)
     personal_email = models.EmailField(blank=True, null=True),
     gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE)
     date_birth = models.DateField(blank=False, null=False)
     social_insurance = models.ForeignKey('SecuritySocial', on_delete=models.CASCADE,
-                                         verbose_name="Seguridad Social")
+                                         verbose_name="Seguridad Social", max_length=50)
     kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
-                                   verbose_name="Parentesco")
-    handicap = models.CharField(choices=handicap, default=7, verbose_name="Capacidades Diversas")
+                                   verbose_name="Parentescos")
+    handicap = models.CharField(choices=handicap, default=7, max_length=50, verbose_name="Capacidades Diversas")

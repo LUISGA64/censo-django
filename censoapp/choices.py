@@ -15,3 +15,5 @@ handicap = [
     (6, 'Discapacidad psicosocial'),
     (7, 'Ninguna')
 ]
+
+zone = [(1, 'Rural'), (2, 'Urbana')]
