@@ -55,8 +55,8 @@ ROOT_URLCONF = 'censoProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        # 'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,4 +125,10 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'censoapp/static'),)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Media root
+
+# Redirect Predeterminado
+LOGIN_REDIRECT_URL = '/'
+
+
+# Test de Correos
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
