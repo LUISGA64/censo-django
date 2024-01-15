@@ -1,0 +1,49 @@
+{% extends "base_site.html" %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% load allauth i18n socialaccount %}
+{% block head_title %}
+    {% trans "Signup" %}
+{% endblock head_title %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <!-- Animate.css -->
+    <link href="/static/vendors/animate.css/animate.min.css" rel="stylesheet">
+
+{% endblock stylesheets %}
+
+{% block body_class %}login{% endblock body_class %}
+
+{% block body %}
+    <div>
+        <div class="login_wrapper">
+            <div class="animate form login_form">
+                <section class="login_content">
+                    {% block content %}
+                        {% element h1 %}
+                            Crear una cuenta
+                        {% endelement %}
+
+                        {% url 'account_signup' as action_url %}
+                        <form class="login" method="post" action={% url 'account_signup' %} tags="entrance,signup">
+                            {{ form|crispy }}
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark submit" tags="prominent,signup">
+                                Crear cuenta
+                            </button>
+                        </form>
+                        
+                        <div class="clearfix"></div>
+                        {% url 'account_login' as login_url %}
+                        <div class="separator">
+                                <p class="change_link">
+                                    <a href="{{ login_url }}"><b>Iniciar Sesión</b></a>
+                                </p>
+                            </div>
+                    {% endblock %}
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

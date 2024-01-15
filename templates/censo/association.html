@@ -1,0 +1,72 @@
+{% extends 'base_site.html' %}
+
+
+{% block title %} Projects {% endblock title %}
+
+{% block stylesheets %}
+    {{ block.super }}
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="page-title">
+                <div class="title_left">
+
+                </div>
+
+                <div class="title_right">
+                    <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+                        <div class="input-group">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>Asociación de Cabildos</h2>
+                            <ul class="nav navbar-right panel_toolbox">
+                                <a href="{% url 'createAssociation' %}" class="btn btn-primary">Nuevo</a>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <div class="alignright">
+                                
+                            </div>
+                            {% for object in object_list %}
+                                <div class="col-md-3 col-sm-3 col-xs-12 profile_left">
+                                    <div class="profile_img">
+                                        <div id="crop-avatar">
+                                            <!-- Current avatar -->
+                                            <img class="img-responsive avatar-view" src="../media/{{object.association_logo}}" alt="Avatar" title="Change the avatar">
+                                        </div>
+                                    </div>
+                                    <h3>{{ object.association_name }}</h3>
+
+                                    <ul class="list-unstyled user_data">
+                                        <li><i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_type_document }} - {{ object.association_identification }}
+                                        <li><i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_address }} - {{ object.association_departament }}
+                                        </li>
+
+                                        <li>
+                                            <i class="fa fa-phone user-profile-icon"></i> {{ object.association_phone }} - {{ object.association_phone_mobile }}
+                                        </li>
+
+                                        <li class="m-top-xs">
+                                            <i class="fa fa-envelope user-profile-icon"></i> {{ object.association_email }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

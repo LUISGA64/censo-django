@@ -14,7 +14,7 @@ class Association(models.Model):
     association_departament = models.CharField(null=False, blank=False, max_length=15,
                                                help_text="Registre el departamento")
     association_email = models.EmailField(blank=False, null=False)
-    association_logo = models.ImageField(null=False, blank=False, upload_to="Images")
+    association_logo = models.ImageField(null=True, blank=False, upload_to="Association")
 
     def __str__(self):
         return f"{self.association_name} {self.association_identification}"
