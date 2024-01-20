@@ -109,13 +109,13 @@ class SecuritySocial(models.Model):
 
 class FamilyCard(models.Model):
     address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia")
-    sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE)
-    latitude = models.CharField(default=0, max_length=15)
-    length = models.CharField(default=0, max_length=15)
-    zone = models.CharField(choices=zone, blank=False, null=False, max_length=1)
+    sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE, help_text="Seleccione la vereda")
+    latitude = models.CharField(default=0, max_length=15, help_text="Registre la latitud")
+    length = models.CharField(default=0, max_length=15, help_text="Registre la longitud")
+    zone = models.CharField(choices=zone, blank=False, null=False, max_length=1, help_text="Seleccione la zona")
 
     def __str__(self):
-        return str(self.id) + '-' + self.address_home
+        return str(self.id) + '-' + self.address_home + '-' + str(self.sidewalk_home)
 
 
 class Person(models.Model):

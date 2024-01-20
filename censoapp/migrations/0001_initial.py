@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                 ('organization_phone', models.CharField(max_length=15)),
                 ('organization_address', models.CharField(max_length=50)),
                 ('organization_logo', models.ImageField(upload_to='Images')),
-                ('association_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='censoapp.association')),
+                ('association_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='censoapp.Association')),
             ],
         ),
         migrations.CreateModel(

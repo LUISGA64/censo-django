@@ -18862,7 +18862,7 @@
 
 	// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -18995,7 +18995,7 @@
 
 	// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -19341,7 +19341,7 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -20405,7 +20405,7 @@
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -20553,7 +20553,7 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -20649,7 +20649,7 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -21133,7 +21133,7 @@
 
 	// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -21360,7 +21360,7 @@
 
 	// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -21575,7 +21575,7 @@
 
 	// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -21924,7 +21924,7 @@
 
 	/* WEBPACK VAR INJECTION */(function(Buffer, process) {// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -28234,7 +28234,7 @@
 
 	/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
+	// Permission is hereby granted, free of charge, to any persona obtaining a
 	// copy of this software and associated documentation files (the
 	// "Software"), to deal in the Software without restriction, including
 	// without limitation the rights to use, copy, modify, merge, publish,
@@ -28872,7 +28872,7 @@
 	// Originally from narwhal.js (http://narwhaljs.org)
 	// Copyright (c) 2009 Thomas Robinson <280north.com>
 	//
-	// Permission is hereby granted, free of charge, to any person obtaining a copy
+	// Permission is hereby granted, free of charge, to any persona obtaining a copy
 	// of this software and associated documentation files (the 'Software'), to
 	// deal in the Software without restriction, including without limitation the
 	// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
@@ -67156,7 +67156,7 @@
 	# MIT LICENSE
 	# Copyright (c) 2011 Devon Govett
 	# 
-	# Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+	# Permission is hereby granted, free of charge, to any persona obtaining a copy of this
 	# software and associated documentation files (the "Software"), to deal in the Software 
 	# without restriction, including without limitation the rights to use, copy, modify, merge, 
 	# publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons 

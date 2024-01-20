@@ -175,3 +175,7 @@ ACCOUNT_LOGOUT_ON_GET = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Sesion
+USERSESSIONS_TRACK_ACTIVITY = True
