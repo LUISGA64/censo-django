@@ -46,7 +46,7 @@ class Sidewalks(models.Model):
 
 class CivilState(models.Model):
     code_state_civil = models.CharField(blank=False, null=False, max_length=1)
-    state_civil = models.CharField(blank=False, null=False, max_length=25)
+    state_civil = models.CharField(blank=False, unique=True, null=False, max_length=25)
 
     def __str__(self):
         return f"{self.code_state_civil} - {self.state_civil}"
@@ -113,6 +113,8 @@ class FamilyCard(models.Model):
     latitude = models.CharField(default=0, max_length=15, help_text="Registre la latitud")
     length = models.CharField(default=0, max_length=15, help_text="Registre la longitud")
     zone = models.CharField(choices=zone, blank=False, null=False, max_length=1, help_text="Seleccione la zona")
+    organization_id = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
+                                        help_text="Seleccione la organización", null=False, blank=False)
 
     def __str__(self):
         return str(self.id) + '-' + self.address_home + '-' + str(self.sidewalk_home)
@@ -134,3 +136,14 @@ class Person(models.Model):
     kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Parentescos")
     handicap = models.CharField(choices=handicap, default=7, max_length=50, verbose_name="Capacidades Diversas")
+    education_level = models.ForeignKey('EducationLevel', on_delete=models.CASCADE, verbose_name="Nivel Educativo",
+                                        default='', null=False, blank=False)
+    civil_state = models.ForeignKey('CivilState', blank=False, null=False, on_delete=models.CASCADE,
+                                    verbose_name="Estado Civil", default='')
+    occupation = models.CharField(blank=False, null=False, max_length=50, verbose_name="Ocupación", default='',
+                                  help_text="Registre la ocupación")
+    family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
+                                    blank=False, default='')
+
+    def __str__(self):
+        return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"

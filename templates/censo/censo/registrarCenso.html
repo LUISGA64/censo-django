@@ -36,10 +36,10 @@
                             <div class="clearfix"></div>
                         </div>
                         <div class="x_content">
-                            <div class="alignright">
-                                {{ form }}
-                            </div>
-
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                
+                            </form>
                         </div>
                     </div>
                 </div>

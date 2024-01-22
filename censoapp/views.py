@@ -43,7 +43,7 @@ def registrar_censo(request):
             return redirect('censo_index')
     else:
         form = FormFamilyCard()
-    return render(request, 'censo/censo/registrarCenso.html')
+    return render(request, 'censo/censo/registrarCenso.html', {'form': form})
 
 
 class CreateAssociation(CreateView):
