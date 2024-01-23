@@ -1,9 +1,12 @@
 {% extends 'base_site.html' %}
 
 {% block title %}
-	Censo - Listado
+	Registrar Censo
 {% endblock %}
 
+{% block stylesheets %}
+	{{ block.super }}
+{% endblock %}
 
 {% block content %}
     <div class="right_col" role="main">
@@ -26,17 +29,19 @@
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <div class="x_panel">
                         <div class="x_title">
-                            <h2></h2>
+                            <h2>Registrar Censo</h2>
                             <ul class="nav navbar-right panel_toolbox">
-                                <a href="{% url 'createFamilyCard' %}" class="btn btn-primary">Nuevo</a>
+
                             </ul>
                             <div class="clearfix"></div>
                         </div>
                         <div class="x_content">
-                            <div class="alignright">
+                            <form>
+                                {% csrf_token %}
+{#                                recorrer {{ form }}#}
+                                {{ form.as_p }}
 
-                            </div>
-                            <h1>Censo</h1>
+                            </form>
                         </div>
                     </div>
                 </div>

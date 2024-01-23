@@ -5,8 +5,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView
 
-from censoapp.models import Association, Person
-from censoapp.forms import FormFamilyCard
+from censoapp.models import Association, Person, FamilyCard
+from .forms import FormFamilyCard, FormPerson
 
 
 # Create your views here.
@@ -31,19 +31,14 @@ def association(request):
     return render(request, 'censo/configuracion/association.html', {'associations': associations})
 
 
-def censo_index(request):
-    return render(request, 'censo/censo/censoIndex.html')
+class FamilyCardIndex(ListView):
+    model = FamilyCard
+    template_name = 'censo/censo/censoIndex.html'
 
 
-def registrar_censo(request):
-    if request.method == 'POST':
-        form = FormFamilyCard(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('censo_index')
-    else:
-        form = FormFamilyCard()
-    return render(request, 'censo/censo/registrarCenso.html', {'form': form})
+def create_family_card(request):
+    form = FormFamilyCard()
+    return render(request, 'censo/censo/createFamilyCard.html', {'form': form})
 
 
 class CreateAssociation(CreateView):
@@ -66,4 +61,3 @@ def create_person(request):
     else:
         form = Person()
     return render(request, 'censo/createPerson.html', {'form': form})
-

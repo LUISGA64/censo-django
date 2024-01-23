@@ -105,7 +105,7 @@ WSGI_APPLICATION = 'censoProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.censoweb',
+        'NAME': BASE_DIR / 'db.censoWeb',
     }
 }
 

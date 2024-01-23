@@ -1,76 +1,66 @@
 from django import forms
-from .models import FamilyCard, Person
+from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
+    Occupancy, Sidewalks, Organizations
 from .choices import zone, handicap, ethnic_group
 
-
-class FormFamilyCard(forms.ModelForm):
-    # address = forms.CharField(label='Dirección', max_length=100, required=True)
-    # sidewalk = forms.CharField(label='Vereda', max_length=100, required=True)
-    # latitude = forms.CharField(label='Latitud', max_length=100, required=False)
-    # longitude = forms.CharField(label='Longitud', max_length=100, required=False)
-    # zone = forms.ChoiceField(label='Zona', choices=zone.items(), required=True)
-    # organization = forms.CharField(label='Organización', max_length=100, required=True)
-    class Meta:
-        model = FamilyCard
-        fields = ['address', 'sidewalk', 'latitude', 'longitude', 'zone', 'organization']
-        labels = {
-            'address': 'Dirección',
-            'sidewalk': 'Vereda',
-            'latitude': 'Latitud',
-            'longitude': 'Longitud',
-            'zone': 'Zona',
-            'organization': 'Organización'
-        }
-        widgets = {
-            'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'sidewalk': forms.TextInput(attrs={'class': 'form-control'}),
-            'latitude': forms.TextInput(attrs={'class': 'form-control'}),
-            'longitude': forms.TextInput(attrs={'class': 'form-control'}),
-            'zone': forms.ChoiceField(choices=zone.items(), attrs={'class': 'form-control'}),
-            'organization': forms.Select(attrs={'class': 'form-control'})
-        }
+from django import forms
 
 
-class FormPerson(forms.ModelForm):
-    class Meta:
-        model = Person
-        fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type',
-                  'identification_person', 'cell_phone', 'personal_email', 'gender_id', 'date_birth',
-                  'social_insurance', 'kinship_id', 'handicap', 'education_level', 'civil_state', 'occupation']
-        labels = {
-            'first_name_1': 'Primer Nombre',
-            'first_name_2': 'Segundo Nombre',
-            'last_name_1': 'Primer Apellido',
-            'last_name_2': 'Segundo Apellido',
-            'document_type': 'Tipo de Documento',
-            'identification_person': 'Número de Documento',
-            'cell_phone': 'Celular',
-            'personal_email': 'Correo Personal',
-            'gender_id': 'Género',
-            'date_birth': 'Fecha de Nacimiento',
-            'social_insurance': 'Seguridad Social',
-            'kinship_id': 'Parentesco',
-            'handicap': 'Capacidades Diversas',
-            'education_level': 'Nivel Educativo',
-            'civil_state': 'Estado Civil',
-            'occupation': 'Ocupación'
-        }
-        widgets = {
-            'first_name_1': forms.TextInput(attrs={'class': 'form-control'}),
-            'first_name_2': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name_1': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name_2': forms.TextInput(attrs={'class': 'form-control'}),
-            'document_type': forms.Select(attrs={'class': 'form-control'}),
-            'identification_person': forms.TextInput(attrs={'class': 'form-control'}),
-            'cell_phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'personal_email': forms.TextInput(attrs={'class': 'form-control'}),
-            'gender_id': forms.Select(attrs={'class': 'form-control'}),
-            'date_birth': forms.DateInput(attrs={'class': 'form-control'}),
-            'social_insurance': forms.Select(attrs={'class': 'form-control'}),
-            'kinship_id': forms.Select(attrs={'class': 'form-control'}),
-            'handicap': forms.ChoiceField(choices=handicap, attrs={'class': 'form-control'}),
-            'education_level': forms.Select(attrs={'class': 'form-control'}),
-            'civil_state': forms.Select(attrs={'class': 'form-control'}),
-            'occupation': forms.TextInput(attrs={'class': 'form-control'})
-        }
+class FormFamilyCard(forms.Form):
+    address_home = forms.CharField(max_length=100, label='Dirección de residencia',
+                                   widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'})),
+    sidewalk_home = forms.ModelChoiceField(
+        queryset=Sidewalks.objects.all(),
+        empty_label="Seleccione una vereda",
+        widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Vereda'})
+    ),
+    latitude = forms.CharField(max_length=15, label='Latitud',
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Latitud'})),
+    longitude = forms.CharField(max_length=15, label='Longitud',
+                                widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Longitud'})),
+    zone = forms.ChoiceField(choices=zone, label='Zona',
+                             widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Zona',
+                                                        'required': 'required', 'autofocus': 'autofocus',
+                                                        'id': 'zone'})),
+    organization_id = forms.ModelChoiceField(
+        queryset=Organizations.objects.all(),
+        empty_label="Seleccione una Organización",
+        label='Resguardo Indígena',
+        widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Organización'})
+    )
 
+
+class FormPerson(forms.Form):
+    first_name = forms.CharField(max_length=50, label='Nombres', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Nombres'})),
+    last_name = forms.CharField(max_length=50, label='Apellidos', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Apellidos'})),
+    document_type_id = forms.ModelChoiceField(queryset=DocumentType.objects.all(),
+                                              empty_label="Seleccione un tipo de documento",
+                                              widget=forms.Select(attrs={'class': 'form-control'})),
+    cell_phone = forms.CharField(max_length=10, label='Celular', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Celular'})),
+    personal_email = forms.EmailField(max_length=50, label='Correo personal', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Correo personal'})),
+    gender_id = forms.ModelChoiceField(
+        queryset=Gender.objects.all(), empty_label="Seleccione un género", widget=forms.Select(
+            attrs={'class': 'form-control'})),
+    birth_date = forms.DateField(label='Fecha de nacimiento', widget=forms.DateInput(
+        attrs={'class': 'form-control', 'placeholder': 'Fecha de nacimiento'})),
+    social_insurance = forms.ModelChoiceField(
+        queryset=SecuritySocial.objects.all(), empty_label="Seleccione una EPS", widget=forms.Select(
+            attrs={'class': 'form-control'})),
+    kinship_id = forms.ModelChoiceField(
+        queryset=Kinship.objects.all(), empty_label="Seleccione un parentesco", widget=forms.Select(
+            attrs={'class': 'form-control'})),
+    education_level_id = forms.ModelChoiceField(
+        queryset=EducationLevel.objects.all(), empty_label="Seleccione un nivel de educación", widget=forms.Select(
+            attrs={'class': 'form-control'})),
+    civil_state_id = forms.ModelChoiceField(
+        queryset=CivilState.objects.all(), empty_label="Seleccione un estado civil", widget=forms.Select(
+            attrs={'class': 'form-control'})),
+    occupation_id = forms.ModelChoiceField(
+        queryset=Occupancy.objects.all(), empty_label="Seleccione una ocupación", widget=forms.Select(
+            attrs={'class': 'form-control'})),
+    handicap = forms.ChoiceField(choices=handicap, label='Discapacidad', widget=forms.Select(
+        attrs={'class': 'form-control'}))

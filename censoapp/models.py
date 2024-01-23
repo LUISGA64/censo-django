@@ -1,6 +1,5 @@
 from django.db import models
 from .choices import handicap, zone
-# Create your models here.
 
 
 class Association(models.Model):
@@ -111,7 +110,7 @@ class FamilyCard(models.Model):
     address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia")
     sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE, help_text="Seleccione la vereda")
     latitude = models.CharField(default=0, max_length=15, help_text="Registre la latitud")
-    length = models.CharField(default=0, max_length=15, help_text="Registre la longitud")
+    longitude = models.CharField(default=0, max_length=15, help_text="Registre la longitud")
     zone = models.CharField(choices=zone, blank=False, null=False, max_length=1, help_text="Seleccione la zona")
     organization_id = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
                                         help_text="Seleccione la organización", null=False, blank=False)
@@ -140,8 +139,8 @@ class Person(models.Model):
                                         default='', null=False, blank=False)
     civil_state = models.ForeignKey('CivilState', blank=False, null=False, on_delete=models.CASCADE,
                                     verbose_name="Estado Civil", default='')
-    occupation = models.CharField(blank=False, null=False, max_length=50, verbose_name="Ocupación", default='',
-                                  help_text="Registre la ocupación")
+    occupation = models.ForeignKey('Occupancy', blank=False, null=False, on_delete=models.CASCADE,
+                                   verbose_name="Ocupación", default='')
     family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
                                     blank=False, default='')
 
