@@ -31,9 +31,10 @@ def association(request):
     return render(request, 'censo/configuracion/association.html', {'associations': associations})
 
 
-class FamilyCardIndex(ListView):
-    model = FamilyCard
-    template_name = 'censo/censo/censoIndex.html'
+@login_required
+def family_card_index(request):
+    family_cards = FamilyCard.objects.all()
+    return render(request, 'censo/censo/censoIndex.html', {'family_cards': family_cards, 'form': FormFamilyCard()})
 
 
 def create_family_card(request):
