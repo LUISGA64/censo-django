@@ -36,25 +36,32 @@
                         </div>
                         <div class="x_content">
                             <div class="alignright">
-                                
+
                             </div>
                             {% for object in associations %}
                                 <div class="col-md-3 col-sm-3 col-xs-12 profile_left">
                                     <div class="profile_img">
                                         <div id="crop-avatar">
                                             <!-- Current avatar -->
-                                            <img class="img-responsive avatar-view" src="../media/{{object.association_logo}}" alt="Avatar" title="Change the avatar">
+                                            <img class="img-responsive avatar-view"
+                                                 src="../media/{{ object.association_logo }}" alt="Avatar"
+                                                 title="Change the avatar">
                                         </div>
                                     </div>
                                     <h3>{{ object.association_name }}</h3>
 
                                     <ul class="list-unstyled user_data">
-                                        <li><i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_type_document }} - {{ object.association_identification }}
-                                        <li><i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_address }} - {{ object.association_departament }}
+                                        <li>
+                                            <i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_type_document }}
+                                            - {{ object.association_identification }}
+                                        <li>
+                                            <i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_address }}
+                                            - {{ object.association_departament }}
                                         </li>
 
                                         <li>
-                                            <i class="fa fa-phone user-profile-icon"></i> {{ object.association_phone }} - {{ object.association_phone_mobile }}
+                                            <i class="fa fa-phone user-profile-icon"></i> {{ object.association_phone }}
+                                            - {{ object.association_phone_mobile }}
                                         </li>
 
                                         <li class="m-top-xs">

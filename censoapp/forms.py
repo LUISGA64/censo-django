@@ -11,6 +11,7 @@ class FormFamilyCard(forms.Form):
                                    widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     sidewalk_home = forms.ModelChoiceField(queryset=Sidewalks.objects.all(), label='Vereda',
+                                           empty_label="Seleccione...",
                                            widget=forms.Select(attrs={'class': 'form-control'}))
 
     latitude = forms.CharField(max_length=15, label='Latitud',
@@ -22,6 +23,7 @@ class FormFamilyCard(forms.Form):
     zone = forms.ChoiceField(choices=zone, label='Zona', widget=forms.Select(attrs={'class': 'form-control'}))
 
     organization_id = forms.ModelChoiceField(queryset=Organizations.objects.all(), label='Resguardo Indígena',
+                                             empty_label="Seleccione...",
                                              widget=forms.Select(attrs={'class': 'form-control'}))
 
     # formulario de persona
