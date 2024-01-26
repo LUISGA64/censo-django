@@ -1,10 +1,11 @@
 from django.contrib.auth.views import LoginView
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView
-
+from formtools.wizard.views import SessionWizardView
 from censoapp.models import Association, Person, FamilyCard
 from .forms import FormFamilyCard, FormPerson
 
@@ -51,6 +52,15 @@ class CreateAssociation(CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super(CreateAssociation, self).form_valid(form)
+
+
+class FormWizardView(SessionWizardView):
+    form_list = [FormFamilyCard, FormPerson]
+
+    def done(self, form_list, **kwargs):
+        return render(self.request, 'censo/censo/createFamilyCard.html', {
+            'form_data': [form.cleaned_data for form in form_list],
+        })
 
 
 def create_person(request):

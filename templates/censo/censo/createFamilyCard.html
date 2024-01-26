@@ -1,4 +1,6 @@
 {% extends 'base_site.html' %}
+{% load crispy_forms_filters %}
+{% load i18n %}
 
 {% block title %}
     Registrar Censo
@@ -36,72 +38,27 @@
                         </div>
                         <div class="x_content">
                             <br/>
+                            
                             <form class="form-horizontal form-label-left input_mask">
-                                <div class="row">
-                                    <div class="col-md-12 col-sm-12 col-xs-12">
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.organization_id.label_tag }}
-                                            {{ form.organization_id }}
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.address_home.label_tag }}
-                                            {{ form.address_home }}
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.sidewalk_home.label_tag }}
-                                            {{ form.sidewalk_home }}
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.zone.label_tag }}
-                                            {{ form.zone }}
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.latitude.label_tag }}
-                                            {{ form.latitude }}
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.longitude.label_tag }}
-                                            {{ form.longitude }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="x_title" style="margin-top: 25px">
-                                    <h2>Cabeza de Familia</h2>
-                                    <div class="clearfix"></div>
-                                </div>
-                                
-
-                                <div class="row">
-                                    <div class="col-md-12 col-sm-12 col-xs-12">
-                                        
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.first_name_1.label_tag }}
-                                            {{ form.first_name_1 }}
-                                        </div>
-                                        
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.first_name_2.label_tag }}
-                                            {{ form.first_name_2 }}
-                                        </div>
-                                        
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.last_name_1.label_tag }}
-                                            {{ form.last_name_1 }}
-                                        </div>
-                                        
-                                        <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback">
-                                            {{ form.last_name_2.label_tag }}
-                                            {{ form.last_name_2 }}
-                                        </div>
-                                    </div>
-                                </div>
-
+                                <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+                                <table> -------------
+                                    {{ wizard.management_form }}
+                                    {% if wizard.form.forms %}
+                                        {{ wizard.form.management_form }}
+                                        {% for form in wizard.form.forms %}
+                                            {{ form|crispy }}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ wizard.form|crispy }}
+                                    {% endif %}
+                                </table>
+                                {% if wizard.steps.prev %}
+                                    <button name="wizard_goto_step" type="submit"
+                                            value="{{ wizard.steps.first }}">{% translate "first step" %}</button>
+                                    <button name="wizard_goto_step" type="submit"
+                                            value="{{ wizard.steps.prev }}">{% translate "prev step" %}</button>
+                                {% endif %}
+                                <input type="submit" value="{% translate "submit" %}"/>
                             </form>
                         </div>
                     </div>

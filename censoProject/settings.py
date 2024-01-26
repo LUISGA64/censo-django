@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+
+    'formtools',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
