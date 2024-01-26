@@ -56,11 +56,13 @@ class CreateAssociation(CreateView):
 
 class FormWizardView(SessionWizardView):
     form_list = [FormFamilyCard, FormPerson]
+    template_name = 'censo/censo/createFamilyCard.html'
 
     def done(self, form_list, **kwargs):
-        return render(self.request, 'censo/censo/createFamilyCard.html', {
-            'form_data': [form.cleaned_data for form in form_list],
-        })
+        def done(self, form_list, **kwargs):
+            return render(self.request, 'censo/censo/createFamilyCard.html', {
+                'form_data': [form.cleaned_data for form in form_list],
+            })
 
 
 def create_person(request):
