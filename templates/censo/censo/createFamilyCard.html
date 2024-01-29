@@ -13,19 +13,6 @@
 {% block content %}
     <div class="right_col" role="main">
         <div class="">
-            <div class="page-title">
-                <div class="title_left">
-
-                </div>
-
-                <div class="title_right">
-                    <div class="col-md-12 col-sm-12 col-xs-12">
-                        <div class="input-group">
-
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="row">
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <div class="x_panel">
@@ -37,8 +24,31 @@
                             <div class="clearfix"></div>
                         </div>
                         <div class="x_content">
-                            <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
-                            <form action="" method="post">{% csrf_token %}
+                            <div id="wizard" class="form_wizard wizard_horizontal">
+                                <ul class="wizard_steps">
+                                    <li>
+                                        <a href="#step-1">
+                                            <span class="step_no">1</span>
+                                            <span class="step_descr">
+                                        Step 1<br/>
+                                        <small>Ficha Familiar</small>
+                                    </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#step-2">
+                                            <span class="step_no">2</span>
+                                            <span class="step_descr">
+                                        Step 2<br/>
+                                        <small>Cabeza de Familia</small>
+                                    </span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <form action="" method="post">
+                                {% csrf_token %}
                                 <table>
                                     {{ wizard.management_form }}
                                     {% if wizard.form.forms %}
@@ -66,3 +76,17 @@
         </div>
     </div>
 {% endblock content %}
+{% block javascripts %}
+  {{ block.super}}
+  <!-- jQuery Smart Wizard -->
+  <script>
+        $(document).ready(function () {
+            $('#wizard').smartWizard();
+    
+            function onFinishCallback() {
+                $('#wizard').smartWizard('showMessage', 'Finish Clicked');
+                alert('Finish Clicked');
+            }
+        });
+  </script>
+{% endblock javascripts %}

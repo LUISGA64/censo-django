@@ -36,7 +36,7 @@ class Organizations(models.Model):
 
 
 class Sidewalks(models.Model):
-    sidewalk_name = models.CharField(blank=False, null=False, max_length=30)
+    sidewalk_name = models.CharField(blank=False, null=False, max_length=40)
     organization_id = models.ForeignKey('Organizations', blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -48,7 +48,7 @@ class CivilState(models.Model):
     state_civil = models.CharField(blank=False, unique=True, null=False, max_length=25)
 
     def __str__(self):
-        return f"{self.code_state_civil} - {self.state_civil}"
+        return f"{self.state_civil}"
 
 
 class EducationLevel(models.Model):
@@ -64,19 +64,19 @@ class Eps(models.Model):
     name_eps = models.CharField(max_length=50, blank=False, null=False)
 
     def __str__(self):
-        return f"{self.code_eps} - {self.name_eps}"
+        return f"{self.name_eps}"
 
 
 class Kinship(models.Model):
     code_kinship = models.CharField(blank=False, null=False, max_length=1)
-    description_kinship = models.CharField(max_length=15, blank=False, null=False)
+    description_kinship = models.CharField(max_length=25, blank=False, null=False)
 
     def __str__(self):
         return self.description_kinship
 
 
 class Occupancy(models.Model):
-    description_occupancy = models.CharField(blank=False, null=False, max_length=25)
+    description_occupancy = models.CharField(blank=False, null=False, max_length=35)
 
     def __str__(self):
         return self.description_occupancy
@@ -84,10 +84,10 @@ class Occupancy(models.Model):
 
 class DocumentType(models.Model):
     code_document_type = models.CharField(blank=False, null=False, unique=True, max_length=3)
-    document_type = models.CharField(blank=False, null=False, max_length=15)
+    document_type = models.CharField(blank=False, null=False, max_length=25)
 
     def __str__(self):
-        return f"{self.code_document_type} - {self.document_type}"
+        return f"{self.document_type}"
 
 
 class Gender(models.Model):
@@ -95,7 +95,7 @@ class Gender(models.Model):
     gender = models.CharField(blank=False, null=False, max_length=15)
 
     def __str__(self):
-        return f"{self.gender_code} - {self.gender_code}"
+        return f"{self.gender}"
 
 
 class SecuritySocial(models.Model):
@@ -103,40 +103,44 @@ class SecuritySocial(models.Model):
     affiliation = models.CharField(blank=False, null=False, max_length=30)
 
     def __str__(self):
-        return f"{self.code_security_social} - {self.affiliation}"
+        return f"{self.affiliation}"
 
 
 class FamilyCard(models.Model):
-    address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia")
-    sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE, help_text="Seleccione la vereda")
-    latitude = models.CharField(default=0, max_length=15, help_text="Registre la latitud")
-    longitude = models.CharField(default=0, max_length=15, help_text="Registre la longitud")
-    zone = models.CharField(choices=zone, blank=False, null=False, max_length=1, help_text="Seleccione la zona")
+    address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia",
+                                    verbose_name="Dirección Vivienda")
+    sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE, verbose_name="Vereda",
+                                      help_text="Seleccione la vereda donde vive")
+    latitude = models.CharField(default='0', max_length=15, help_text="Registre la latitud", verbose_name="Latitud")
+    longitude = models.CharField(default='0', max_length=15, help_text="Registre la longitud", verbose_name="Longitud")
+    zone = models.CharField(choices=zone, blank=False, null=False, max_length=1, help_text="Seleccione Urbana o Rural",
+                            verbose_name="Zona")
     organization_id = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
-                                        help_text="Seleccione la organización", null=False, blank=False)
+                                        verbose_name="Resguardo", help_text="Seleccione el Resguardo",
+                                        null=False, blank=False)
 
     def __str__(self):
         return str(self.id) + '-' + self.address_home + '-' + str(self.sidewalk_home)
 
 
 class Person(models.Model):
-    first_name_1 = models.CharField(blank=False, null=False, max_length=30)
-    first_name_2 = models.CharField(blank=True, null=True, max_length=30)
-    last_name_1 = models.CharField(blank=False, null=False, max_length=30)
-    last_name_2 = models.CharField(blank=True, null=True, max_length=30)
-    identification_person = models.CharField(blank=False, null=False, unique=True, max_length=15)
-    document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE),
-    cell_phone = models.CharField(blank=True, null=True, max_length=15)
-    personal_email = models.EmailField(blank=True, null=True),
-    gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE)
-    date_birth = models.DateField(blank=False, null=False)
+    first_name_1 = models.CharField(blank=False, null=False, max_length=30, verbose_name="Primer Nombre")
+    first_name_2 = models.CharField(blank=True, null=True, max_length=30, verbose_name="Segundo Nombre")
+    last_name_1 = models.CharField(blank=False, null=False, max_length=30, verbose_name="Primer Apellido")
+    last_name_2 = models.CharField(blank=True, null=True, max_length=30, verbose_name="Segundo Apellido")
+    identification_person = models.CharField(blank=False, null=False, unique=True, max_length=15,
+                                             verbose_name="Identificación")
+    document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE, verbose_name="Tipo de documento")
+    cell_phone = models.CharField(blank=True, null=True, max_length=15, verbose_name="Teléfono Móvil")
+    personal_email = models.EmailField(blank=True, null=True, max_length=50, verbose_name="Correo Personal")
+    gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE, verbose_name="Género")
+    date_birth = models.DateField(blank=False, null=False, verbose_name="Fecha de Nacimiento")
     social_insurance = models.ForeignKey('SecuritySocial', on_delete=models.CASCADE,
                                          verbose_name="Seguridad Social", max_length=50)
     kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Parentescos")
-    handicap = models.CharField(choices=handicap, default=7, max_length=50, verbose_name="Capacidades Diversas")
-    education_level = models.ForeignKey('EducationLevel', on_delete=models.CASCADE, verbose_name="Nivel Educativo",
-                                        default='', null=False, blank=False)
+    handicap = models.CharField(choices=handicap, default='Ninguna', max_length=50, verbose_name="Capacidades Diversas")
+    education_level = models.ForeignKey('EducationLevel', on_delete=models.CASCADE, verbose_name="Nivel Educativo")
     civil_state = models.ForeignKey('CivilState', blank=False, null=False, on_delete=models.CASCADE,
                                     verbose_name="Estado Civil", default='')
     occupation = models.ForeignKey('Occupancy', blank=False, null=False, on_delete=models.CASCADE,

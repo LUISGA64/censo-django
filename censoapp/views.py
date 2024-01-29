@@ -59,10 +59,18 @@ class FormWizardView(SessionWizardView):
     template_name = 'censo/censo/createFamilyCard.html'
 
     def done(self, form_list, **kwargs):
-        def done(self, form_list, **kwargs):
-            return render(self.request, 'censo/censo/createFamilyCard.html', {
-                'form_data': [form.cleaned_data for form in form_list],
-            })
+        # Imprimir request de los formularios
+        print(self.request.FILES)
+        print(self.request.POST['0-address_home', '0-sidewalk_home', '0-latitude', '0-longitude', '0-zone',
+                                '0-organization_id'])
+        print(self.request.POST['1-first_name_1', '1-first_name_2', '1-last_name_1', '1-last_name_2',
+                                '1-identification_person', '1-document_type', '1-personal_email'])
+
+        # family = form_list[0].save()
+        # person = form_list[1].save(commit=False)
+        # person.family_card = family
+        # person.save()
+        return HttpResponse("Form wizard complete!")
 
 
 def create_person(request):
