@@ -130,7 +130,8 @@ class Person(models.Model):
     last_name_2 = models.CharField(blank=True, null=True, max_length=30, verbose_name="Segundo Apellido")
     identification_person = models.CharField(blank=False, null=False, unique=True, max_length=15,
                                              verbose_name="Identificación")
-    document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE, verbose_name="Tipo de documento")
+    document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE, verbose_name="Tipo de documento",
+                                      blank=False, null=False, default='')
     cell_phone = models.CharField(blank=True, null=True, max_length=15, verbose_name="Teléfono Móvil")
     personal_email = models.EmailField(blank=True, null=True, max_length=50, verbose_name="Correo Personal")
     gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE, verbose_name="Género")
