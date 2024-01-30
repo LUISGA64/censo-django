@@ -1,4 +1,5 @@
 from django.contrib.auth.views import LoginView
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -58,20 +59,38 @@ class FormWizardView(SessionWizardView):
     form_list = [FormFamilyCard, FormPerson]
     template_name = 'censo/censo/createFamilyCard.html'
 
+    @transaction.atomic
     def done(self, form_list, **kwargs):
-        # Imprimir request de los formularios
+        family_card_data = self.get_cleaned_data_for_step('0')
+        person_data = self.get_cleaned_data_for_step('1')
 
-        data = [form.cleaned_data for form in form_list]
-        print(data)
-
-        def get_form_step_data(self, form):
-            print(form.data)
-
-        # family = form_list[0].save()
-        # person = form_list[1].save(commit=False)
-        # person.family_card = family
-        # person.save()
-        return HttpResponse("Form wizard complete!")
+        try:
+            with transaction.atomic():
+                family_card = FamilyCard.objects.create(**family_card_data)
+                persona = Person.objects.create(
+                    first_name_1=person_data['first_name_1'],
+                    first_name_2=person_data['first_name_2'],
+                    last_name_1=person_data['last_name_1'],
+                    last_name_2=person_data['last_name_2'],
+                    identification_person=person_data['identification_person'],
+                    document_type=person_data['document_type'],
+                    cell_phone=person_data['cell_phone'],
+                    personal_email=person_data['personal_email'],
+                    gender_id=person_data['gender_id'],
+                    date_birth=person_data['date_birth'],
+                    social_insurance=person_data['social_insurance'],
+                    kinship_id=person_data['kinship_id'],
+                    handicap=person_data['handicap'],
+                    education_level=person_data['education_level'],
+                    civil_state=person_data['civil_state'],
+                    occupation=person_data['occupation'],
+                    family_card=family_card
+                )
+                return redirect('dashboard')
+        except Exception as e:
+            # Maneja las excepciones según sea necesario
+            print(f"Error durante la creación: {e}")
+            return redirect('error_page')  # redirige a una página de error
 
 
 def create_person(request):
