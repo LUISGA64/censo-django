@@ -60,11 +60,12 @@ class FormWizardView(SessionWizardView):
 
     def done(self, form_list, **kwargs):
         # Imprimir request de los formularios
-        print(self.request.FILES)
-        print(self.request.POST['0-address_home', '0-sidewalk_home', '0-latitude', '0-longitude', '0-zone',
-                                '0-organization_id'])
-        print(self.request.POST['1-first_name_1', '1-first_name_2', '1-last_name_1', '1-last_name_2',
-                                '1-identification_person', '1-document_type', '1-personal_email'])
+
+        data = [form.cleaned_data for form in form_list]
+        print(data)
+
+        def get_form_step_data(self, form):
+            print(form.data)
 
         # family = form_list[0].save()
         # person = form_list[1].save(commit=False)
