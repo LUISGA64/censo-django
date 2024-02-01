@@ -1,0 +1,55 @@
+{% extends 'base_site.html' %}
+
+{% block title %}
+	Censo - Listado
+{% endblock %}
+
+
+{% block content %}
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>Listado Censal</h2>
+                            <ul class="nav navbar-right panel_toolbox">
+                                <a href="{% url 'createFamilyCard' %}" class="btn btn-primary">Nuevo</a>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                    <table id="datatable" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Dirección</th>
+                                                <th>Vereda</th>
+                                                <th>Zona</th>
+                                                <th>Latitud</th>
+                                                <th>Longitud</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for familyCard in object_list %}
+                                                <tr>
+                                                    <td>{{ familyCard.address_home }}</td>
+                                                    <td>{{ familyCard.sidewalk_home.sidewalk_name }}</td>
+                                                    <td>{{ familyCard.zone }}</td>
+                                                    <td>{{ familyCard.latitude }}</td>
+                                                    <td>{{ familyCard.longitude }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

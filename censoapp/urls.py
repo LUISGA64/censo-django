@@ -1,14 +1,14 @@
 from django.urls import path
-from .views import home, dashboard, profile, association, CreateAssociation, family_card_index, create_family_card, FormWizardView
-from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from .views import (home, dashboard, profile, association, CreateAssociation, FamilyCardIndex,
+                    FamilyCardCreate)
 
 urlpatterns = [
     path('', home, name='home'),
     path('dashboard/', dashboard, name='dashboard'),
     path('accounts/profile/', profile, name='profile'),
     path('association', association, name='association'),
-    path('createAssociation', CreateAssociation.as_view(), name='createAssociation'),
-    path('familyCard/list', family_card_index, name='familyCard_list'),
-    path('familyCard/create', create_family_card, name='createFamilyCard'),
-    path('familyCard/createWizard', FormWizardView.as_view(), name='createFamilyCardWizard'),
+    path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
+    path('familyCard/create', login_required(FamilyCardCreate.as_view()), name='createFamilyCard'),
+    path('familyCard/index', login_required(FamilyCardIndex.as_view()), name='familyCardIndex'),
 ]

@@ -1,10 +1,9 @@
-from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.views.generic import ListView
+from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from formtools.wizard.views import SessionWizardView
 from censoapp.models import Association, Person, FamilyCard
@@ -14,7 +13,7 @@ from .forms import FormFamilyCard, FormPerson
 # Create your views here.
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'censo/dashboard.html')
 
 
 @login_required
@@ -33,17 +32,6 @@ def association(request):
     return render(request, 'censo/configuracion/association.html', {'associations': associations})
 
 
-@login_required
-def family_card_index(request):
-    family_cards = FamilyCard.objects.all()
-    return render(request, 'censo/censo/censoIndex.html', {'family_cards': family_cards, 'form': FormFamilyCard()})
-
-
-def create_family_card(request):
-    form = FormFamilyCard()
-    return render(request, 'censo/censo/createFamilyCard.html', {'form': form})
-
-
 class CreateAssociation(CreateView):
     model = Association
     fields = '__all__'
@@ -55,7 +43,14 @@ class CreateAssociation(CreateView):
         return super(CreateAssociation, self).form_valid(form)
 
 
-class FormWizardView(SessionWizardView):
+class FamilyCardIndex(ListView):
+    model = FamilyCard
+    template_name = 'censo/censo/familyCardIndex.html'
+    context_object_name = 'family_cards'
+
+
+# Clase para la ficha familiar y el cabeza de familia
+class FamilyCardCreate(SessionWizardView):
     form_list = [FormFamilyCard, FormPerson]
     template_name = 'censo/censo/createFamilyCard.html'
 
@@ -63,42 +58,48 @@ class FormWizardView(SessionWizardView):
     def done(self, form_list, **kwargs):
         family_card_data = self.get_cleaned_data_for_step('0')
         person_data = self.get_cleaned_data_for_step('1')
+        family_card_count = FamilyCard.objects.count()
 
+        print(family_card_data)
         try:
             with transaction.atomic():
-                family_card = FamilyCard.objects.create(**family_card_data)
-                persona = Person.objects.create(
-                    first_name_1=person_data['first_name_1'],
-                    first_name_2=person_data['first_name_2'],
-                    last_name_1=person_data['last_name_1'],
-                    last_name_2=person_data['last_name_2'],
-                    identification_person=person_data['identification_person'],
-                    document_type=person_data['document_type'],
-                    cell_phone=person_data['cell_phone'],
-                    personal_email=person_data['personal_email'],
-                    gender_id=person_data['gender_id'],
-                    date_birth=person_data['date_birth'],
-                    social_insurance=person_data['social_insurance'],
-                    kinship_id=person_data['kinship_id'],
-                    handicap=person_data['handicap'],
-                    education_level=person_data['education_level'],
-                    civil_state=person_data['civil_state'],
-                    occupation=person_data['occupation'],
-                    family_card=family_card
-                )
-                return redirect('dashboard')
+                # filter the data to create the person
+                query = Person.objects.filter(identification_person=person_data['identification_person'])
+                if query.exists():
+                    return HttpResponse('Ya existe una persona con esa cédula')
+                else:
+                    family_card = FamilyCard.objects.create(
+                        address_home=family_card_data['address_home'],
+                        sidewalk_home=family_card_data['sidewalk_home'],
+                        latitude=family_card_data['latitude'],
+                        longitude=family_card_data['longitude'],
+                        zone=family_card_data['zone'],
+                        organization_id=family_card_data['organization_id'],
+                        family_card_number=family_card_count + 1)
+
+                    persona = Person.objects.create(
+                        first_name_1=person_data['first_name_1'],
+                        first_name_2=person_data['first_name_2'],
+                        last_name_1=person_data['last_name_1'],
+                        last_name_2=person_data['last_name_2'],
+                        identification_person=person_data['identification_person'],
+                        document_type=person_data['document_type'],
+                        cell_phone=person_data['cell_phone'],
+                        personal_email=person_data['personal_email'],
+                        gender_id=person_data['gender_id'],
+                        date_birth=person_data['date_birth'],
+                        social_insurance=person_data['social_insurance'],
+                        eps=person_data['eps'],
+                        kinship_id=person_data['kinship_id'],
+                        handicap=person_data['handicap'],
+                        education_level=person_data['education_level'],
+                        civil_state=person_data['civil_state'],
+                        occupation=person_data['occupation'],
+                        family_card=family_card,
+                        family_head=True
+                    )
+                    return redirect('dashboard')
         except Exception as e:
             # Maneja las excepciones según sea necesario
             print(f"Error durante la creación: {e}")
             return redirect('error_page')  # redirige a una página de error
-
-
-def create_person(request):
-    if request.method == 'POST':
-        form = Person(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = Person()
-    return render(request, 'censo/createPerson.html', {'form': form})

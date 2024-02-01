@@ -107,6 +107,7 @@ class SecuritySocial(models.Model):
 
 
 class FamilyCard(models.Model):
+
     address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia",
                                     verbose_name="Dirección Vivienda")
     sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE, verbose_name="Vereda",
@@ -118,6 +119,10 @@ class FamilyCard(models.Model):
     organization_id = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
                                         verbose_name="Resguardo", help_text="Seleccione el Resguardo",
                                         null=False, blank=False)
+    family_card_number = models.IntegerField(blank=False, null=False, unique=True, verbose_name="Número de Familia",
+                                             default=0)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Última Actualización")
 
     def __str__(self):
         return str(self.id) + '-' + self.address_home + '-' + str(self.sidewalk_home)
@@ -138,6 +143,7 @@ class Person(models.Model):
     date_birth = models.DateField(blank=False, null=False, verbose_name="Fecha de Nacimiento")
     social_insurance = models.ForeignKey('SecuritySocial', on_delete=models.CASCADE,
                                          verbose_name="Seguridad Social", max_length=50)
+    eps = models.ForeignKey('Eps', on_delete=models.CASCADE, verbose_name="EPS", blank=False, null=False, default='')
     kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Parentescos")
     handicap = models.CharField(choices=handicap, default='Ninguna', max_length=50, verbose_name="Capacidades Diversas")
@@ -148,6 +154,7 @@ class Person(models.Model):
                                    verbose_name="Ocupación", default='')
     family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
                                     blank=False, default='')
+    family_head = models.BooleanField(blank=False, null=False, default=False, verbose_name="Cabeza de Familia")
 
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
