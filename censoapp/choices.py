@@ -16,4 +16,4 @@ handicap = [
     ('7', 'Ninguna')
 ]
 
-zone = [('R', 'Rural'), ('U', 'Urbana')]
+zone = [('Rural', 'Rural'), ('Urbana', 'Urbana')]

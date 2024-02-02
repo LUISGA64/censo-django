@@ -43,10 +43,10 @@ class CreateAssociation(CreateView):
         return super(CreateAssociation, self).form_valid(form)
 
 
-class FamilyCardIndex(ListView):
-    model = FamilyCard
-    template_name = 'censo/censo/familyCardIndex.html'
-    context_object_name = 'family_cards'
+def family_card_index(request):
+    queryset = Person.objects.select_related('family_card')
+    print(queryset)
+    return render(request, 'censo/censo/familyCardIndex.html', {'family_cards': queryset})
 
 
 # Clase para la ficha familiar y el cabeza de familia

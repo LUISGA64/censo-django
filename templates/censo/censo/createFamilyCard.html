@@ -28,22 +28,22 @@
                                 <ul class="wizard_steps">
                                     {% for x in wizard.steps.all %}
                                         <li>
-                                        <a href="">
-                                            {% if wizard.steps.index|add:1 == x|add:1 %}
-                                                <span class="step_no count green">{{ x|add:1 }}</span>
-                                            {% elif wizard.steps.index|add:1 > x|add:1 %}
-                                                <span class="step_no count" style="background-color: #1ABB9C"><i class="fa fa-check white"></i></span>
-                                            {% else %}
-                                                <span class="step_no count danger">{{ x|add:1 }}</span>
-                                            {% endif %} 
-                                            
-                                        </a>
-                                    </li>
+                                            <a href="">
+                                                {% if wizard.steps.index|add:1 == x|add:1 %}
+                                                    <span class="step_no count green">{{ x|add:1 }}</span>
+                                                {% elif wizard.steps.index|add:1 > x|add:1 %}
+                                                    <span class="step_no count" style="background-color: #1ABB9C"><i
+                                                            class="fa fa-check white"></i></span>
+                                                {% else %}
+                                                    <span class="step_no count danger">{{ x|add:1 }}</span>
+                                                {% endif %}
+                                            </a>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
 
-                            <form action="" method="post">
+                            <form action="" method="post" class="form-horizontal">
                                 {% csrf_token %}
                                 <table>
                                     {{ wizard.management_form }}
@@ -53,7 +53,35 @@
                                             {{ form|crispy }}
                                         {% endfor %}
                                     {% else %}
-                                        {{ wizard.form|crispy }}
+                                        <div class="row">
+                                            <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12">
+                                                <div class="col-md-12 col-sm-12 col-xs-12 ">
+                                                    <div class="col-md-3 col-xs-12 col-sm-6 form-group">
+                                                        {{ form.address_home|as_crispy_field }}
+                                                    </div>
+
+                                                    <div class="col-md-3 col-xs-12 col-sm-6 form-group">
+                                                        {{ form.sidewalk_home|as_crispy_field }}
+                                                    </div>
+
+                                                    <div class="col-md-3 col-xs-12 col-sm-6 form-group">
+                                                        {{ form.zone|as_crispy_field }}
+                                                    </div>
+
+                                                    <div class="col-md-3 col-xs-12 col-sm-6 form-group">
+                                                        {{ form.organization_id|as_crispy_field }}
+                                                    </div>
+
+                                                    <div class="col-md-3 col-xs-12 col-sm-6 form-group">
+                                                        {{ form.latitude|as_crispy_field }}
+                                                    </div>
+
+                                                    <div class="col-md-3 col-xs-12 col-sm-6 form-group">
+                                                        {{ form.longitude|as_crispy_field }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     {% endif %}
                                 </table>
                                 {% if wizard.steps.prev %}
@@ -62,6 +90,7 @@
                                     <button name="wizard_goto_step" type="submit" class="btn btn-default"
                                             value="{{ wizard.steps.prev }}">{% translate "prev step" %}</button>
                                 {% endif %}
+                                <hr>
                                 <input type="submit" value="{% translate "submit" %}" class="btn btn-success"/>
                             </form>
                         </div>

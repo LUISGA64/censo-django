@@ -114,7 +114,7 @@ class FamilyCard(models.Model):
                                       help_text="Seleccione la vereda donde vive")
     latitude = models.CharField(default='0', max_length=15, help_text="Registre la latitud", verbose_name="Latitud")
     longitude = models.CharField(default='0', max_length=15, help_text="Registre la longitud", verbose_name="Longitud")
-    zone = models.CharField(choices=zone, blank=False, null=False, max_length=1, help_text="Seleccione Urbana o Rural",
+    zone = models.CharField(choices=zone, blank=False, null=False, max_length=10, help_text="Seleccione Urbana o Rural",
                             verbose_name="Zona")
     organization_id = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
                                         verbose_name="Resguardo", help_text="Seleccione el Resguardo",
