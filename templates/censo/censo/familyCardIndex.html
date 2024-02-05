@@ -92,12 +92,11 @@
         <script src="{% static 'vendors/pdfmake/build/pdfmake.min.js' %}"></script>
         <script src="{% static 'vendors/pdfmake/build/vfs_fonts.js' %}"></script>
         <script>
-            $(document).ready(function() {
-                $('#family_card').DataTable({
-                    "language": {
-                        "url": "{% static 'js/datatables/Spanish.json' %}"
-                    }
-                });
-            });
-        </script>
+        Swal.fire({
+            title: 'Error!',
+            text: 'Do you want to continue',
+            icon: 'error',
+            confirmButtonText: 'Cool'
+        })
+    </script>
 {% endblock javascripts %}
