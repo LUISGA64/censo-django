@@ -155,6 +155,7 @@ class Person(models.Model):
     family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
                                     blank=False, default='')
     family_head = models.BooleanField(blank=False, null=False, default=False, verbose_name="Cabeza de Familia")
+    state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Estado")
 
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"

@@ -30,18 +30,14 @@
             <!-- JQVMap -->
             <link href="{% static 'vendors/jqvmap/dist/jqvmap.min.css' %}" rel="stylesheet"/>
             <!-- Custom Theme Style -->
-            <link href="{% static 'build/css/custom.css' %}" rel="stylesheet">
-            <link href="{% static 'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css' %}"
-                  rel="stylesheet"/>
         {% endblock stylesheets %}
+        <link href="{% static 'build/css/custom.css' %}" rel="stylesheet">
     {% endblock head %}
 </head>
-
 <body class="{% block body_class %}nav-md {% endblock body_class %}">
 {% block body %}
     <div class="container body">
         <div class="main_container">
-
             {% block sidebar %}
                 <div class="col-md-3 left_col {% block sidebar_class %} {% endblock sidebar_class %}">
                     {% include "censo/partials/sidebar.html" %}
@@ -55,61 +51,9 @@
             {% endblock top_navigation %}
 
             {% block content %}
-                <!-- {{ content }} -->
-                <div class="right_col" role="main">
-                    <div class="">
-                        <div class="page-title">
-                            <div class="title_left">
-                                <h3>Plain Page</h3>
-                            </div>
-
-                            <div class="title_right">
-                                <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Search for...">
-                                        <span class="input-group-btn">
-                  <button class="btn btn-default" type="button">Go!</button>
-                </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="clearfix"></div>
-
-                        <div class="row">
-                            <div class="col-md-12 col-sm-12 col-xs-12">
-                                <div class="x_panel">
-                                    <div class="x_title">
-                                        <h2>Plain Page</h2>
-                                        <ul class="nav navbar-right panel_toolbox">
-                                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                            </li>
-                                            <li class="dropdown">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                                   aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                                <ul class="dropdown-menu" role="menu">
-                                                    <li><a href="#">Settings 1</a>
-                                                    </li>
-                                                    <li><a href="#">Settings 2</a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                            </li>
-                                        </ul>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                    <div class="x_content">
-                                        Add content to the page ...
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             {% endblock content %}
-
+                <!-- {{ content }} -->
             {% block footer %}
                 <footer>
                     {% include "censo/partials/footer.html" %}
@@ -145,17 +89,38 @@
         <!-- Select2 -->
         <script src="{% static 'vendors/select2/dist/js/select2.full.min.js' %}"></script>
         <!-- Parsley -->
-        <script src="{% static 'vendors/parsleyjs/dist/parsley.min.js' %}"></script>
+        {#        <script src="{% static 'vendors/parsleyjs/dist/parsley.min.js' %}"></script>#}
         <!-- Autosize -->
         <script src="{% static 'vendors/autosize/dist/autosize.min.js' %}"></script>
         <!-- jQuery autocomplete -->
         <script src="{% static 'vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js' %}"></script>
         <!-- starrr -->
         <script src="{% static 'vendors/starrr/dist/starrr.js' %}"></script>
-        <script src="{% static 'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js' %}"></script>
+        <script src="{% static 'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js' %}">
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+                crossorigin="anonymous"></script>
     {% endblock %}
-    <!-- Custom Theme Scripts -->
-    <script src="{% static 'build/js/custom.js' %}"></script>
+    <script src="/static/build/js/custom.js"></script>
+    <!-- SwetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                    <script>
+                        Swal.fire({
+                            "title": "RIPS - FISIOSALUD",
+                            "text": "{{ message }}",
+                            "icon": "success"
+                        })
+                    </script>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock body %}
 </body>
 </html>

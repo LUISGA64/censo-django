@@ -1,11 +1,11 @@
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from formtools.wizard.views import SessionWizardView
+from django.contrib import messages
 from censoapp.models import Association, Person, FamilyCard
 from .forms import FormFamilyCard, FormPerson
 
@@ -18,6 +18,7 @@ def home(request):
 
 @login_required
 def dashboard(request):
+    messages.success(request, "Procedimientos registrados")
     return render(request, 'censo/dashboard.html')
 
 
@@ -28,8 +29,13 @@ def profile(request):
 
 @login_required
 def association(request):
-    associations = Association.objects.all()
-    return render(request, 'censo/configuracion/association.html', {'associations': associations})
+    if request.method == 'GET':
+        associations = Association.objects.all()
+        messages.success(request, "Procedimientos registrados")
+        return render(request, 'censo/configuracion/association.html', {'associations': associations})
+    else:
+        messages.error(request, "No se pudo cargar la página")
+        return HttpResponse('No se pudo cargar la página')
 
 
 class CreateAssociation(CreateView):
@@ -45,7 +51,11 @@ class CreateAssociation(CreateView):
 
 def family_card_index(request):
     queryset = Person.objects.select_related('family_card')
-    print(queryset)
+    if queryset.exists():
+        messages.success(request, "Procedimientos registrados")
+    else:
+        messages.success(request, "No hay registros")
+        return render(request, 'censo/dashboard.html')
     return render(request, 'censo/censo/familyCardIndex.html', {'family_cards': queryset})
 
 
@@ -66,6 +76,7 @@ class FamilyCardCreate(SessionWizardView):
                 # filter the data to create the person
                 query = Person.objects.filter(identification_person=person_data['identification_person'])
                 if query.exists():
+                    messages.error(self.request, "Ya existe una persona con esa cédula")
                     return HttpResponse('Ya existe una persona con esa cédula')
                 else:
                     family_card = FamilyCard.objects.create(
@@ -98,8 +109,10 @@ class FamilyCardCreate(SessionWizardView):
                         family_card=family_card,
                         family_head=True
                     )
+                    messages.success(self.request, "Ficha familiar creada correctamente")
                     return redirect('dashboard')
         except Exception as e:
             # Maneja las excepciones según sea necesario
             print(f"Error durante la creación: {e}")
+            messages.error(self.request, "No se pudo crear la ficha familiar")
             return redirect('error_page')  # redirige a una página de error

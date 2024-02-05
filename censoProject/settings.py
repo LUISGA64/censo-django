@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
+
 SITE_ID = 1
 
 # Application definition
@@ -45,11 +47,9 @@ INSTALLED_APPS = [
 
     "crispy_forms",
     "crispy_bootstrap4",
-
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-
     'formtools',
 ]
 
@@ -87,6 +87,7 @@ TEMPLATES = [
             ],
         },
     },
+
 ]
 
 AUTHENTICATION_BACKENDS = [
