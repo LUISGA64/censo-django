@@ -1,0 +1,48 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block title %}
+    Censo - Listado
+{% endblock title %}
+
+{% block stylesheets %}
+	{{ block.super }}
+    <link href="{% static 'vendors/datatables.net-bs/css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css' %}" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block breadcrumb %}
+    <li><a href="{% url 'home' %}">Inicio</a></li>
+    <li class="active">Listado Censal</li>
+{% endblock %}
+
+
+{% block content %}
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>Agregar Integrantes al núcleo familiar</h2>
+                            <ul class="nav navbar-right panel_toolbox">
+                                <a href="{% url 'createFamilyCard' %}" class="btn btn-primary">Nuevo</a>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block javascripts %}
+    {{ block.super }}
+    
+{% endblock javascripts %}

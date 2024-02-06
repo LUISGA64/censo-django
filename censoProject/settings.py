@@ -163,7 +163,7 @@ if DEBUG:
 
 # Redirect Predeterminado
 ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard/')
+LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True

@@ -79,5 +79,18 @@
 {% block javascripts %}
     {{ block.super }}
     <!-- jQuery Smart Wizard -->
-    
+    <script>
+        function registrarPersonas(id) {
+            Swal.fire({
+                "title": "Registrar Personas",
+                "text": "¿Desea registrar personas para esta vivienda?",
+                "icon": "question",
+                "showCancelButton": true,
+                "confirmButtonText": "Si",
+                "cancelButtonText": "No"
+            }).then((result) => {
+                window.location.href = "{% url 'registrar_personas' %}?id=" + id;
+            });
+        }
+    </script>
 {% endblock javascripts %}

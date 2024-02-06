@@ -18,7 +18,7 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    messages.success(request, "Procedimientos registrados")
+    messages.info(request, "Mensaje de prueba")
     return render(request, 'censo/dashboard.html')
 
 
@@ -51,11 +51,7 @@ class CreateAssociation(CreateView):
 
 def family_card_index(request):
     queryset = Person.objects.select_related('family_card')
-    if queryset.exists():
-        messages.success(request, "Procedimientos registrados")
-    else:
-        messages.success(request, "No hay registros")
-        return render(request, 'censo/dashboard.html')
+    messages.success(request, "Procedimientos registrados")
     return render(request, 'censo/censo/familyCardIndex.html', {'family_cards': queryset})
 
 
@@ -116,3 +112,15 @@ class FamilyCardCreate(SessionWizardView):
             print(f"Error durante la creación: {e}")
             messages.error(self.request, "No se pudo crear la ficha familiar")
             return redirect('error_page')  # redirige a una página de error
+
+
+@login_required
+class PersonCreate(CreateView):
+    model = Person
+    form_class = FormPerson
+    template_name = 'censo/censo/createPerson.html'
+    success_url = reverse_lazy('family_card_index')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super(PersonCreate, self).form_valid(form)
