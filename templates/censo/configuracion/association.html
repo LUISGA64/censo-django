@@ -39,16 +39,16 @@
 
                             </div>
                             {% for object in associations %}
-                                <div class="col-md-3 col-sm-3 col-xs-12 profile_left">
+                                <div class="col-md-6 col-sm-6 col-xs-12 profile_left offset-3">
                                     <div class="profile_img">
                                         <div id="crop-avatar">
                                             <!-- Current avatar -->
                                             <img class="img-responsive avatar-view"
                                                  src="../media/{{ object.association_logo }}" alt="Avatar"
-                                                 title="Change the avatar">
+                                                 title="Change the avatar" width="250px" height="250px">
                                         </div>
                                     </div>
-                                    <h3>{{ object.association_name }}</h3>
+                                    <h4>{{ object.association_name }}</h4>
 
                                     <ul class="list-unstyled user_data">
                                         <li>

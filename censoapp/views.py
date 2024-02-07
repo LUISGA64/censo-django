@@ -51,7 +51,7 @@ class CreateAssociation(CreateView):
 
 def family_card_index(request):
     queryset = Person.objects.select_related('family_card')
-    messages.success(request, "Procedimientos registrados")
+    # messages.success(request, "Procedimientos registrados")
     return render(request, 'censo/censo/familyCardIndex.html', {'family_cards': queryset})
 
 
@@ -114,13 +114,4 @@ class FamilyCardCreate(SessionWizardView):
             return redirect('error_page')  # redirige a una página de error
 
 
-@login_required
-class PersonCreate(CreateView):
-    model = Person
-    form_class = FormPerson
-    template_name = 'censo/censo/createPerson.html'
-    success_url = reverse_lazy('family_card_index')
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super(PersonCreate, self).form_valid(form)

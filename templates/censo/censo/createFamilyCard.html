@@ -86,10 +86,12 @@
                 "text": "¿Desea registrar personas para esta vivienda?",
                 "icon": "question",
                 "showCancelButton": true,
-                "confirmButtonText": "Si",
-                "cancelButtonText": "No"
+                "confirmButtonText": "Si, Registrar",
+                "cancelButtonText": "Cancelar",
+                "reverseButtons": true,
+                "confirmButtonColor": "#1ABB9C"
             }).then((result) => {
-                window.location.href = "{% url 'registrar_personas' %}?id=" + id;
+                window.location.href = "{% url 'dashboard' %}";
             });
         }
     </script>

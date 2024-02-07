@@ -11,4 +11,5 @@ urlpatterns = [
     path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
     path('familyCard/create', login_required(FamilyCardCreate.as_view()), name='createFamilyCard'),
     path('familyCard/index', login_required(family_card_index), name='familyCardIndex'),
+    # path('familyCard/detail/<int:pk>', )
 ]

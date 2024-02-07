@@ -58,7 +58,7 @@
                                                     <td>{{ card.family_card.zone }}</td>
                                                     <td>
                                                         <a href="" class="btn btn-info btn-xs">Editar</a>
-                                                        <a href="" class="btn btn-danger btn-xs">Eliminar</a>
+                                                        <a href="#" onclick="registrarPersonas({{ card.id }})" class="btn btn-dark btn-xs">Registrar</a>
                                                     </td>
                                                 </tr>
                                             {% endfor %}
@@ -92,11 +92,22 @@
         <script src="{% static 'vendors/pdfmake/build/pdfmake.min.js' %}"></script>
         <script src="{% static 'vendors/pdfmake/build/vfs_fonts.js' %}"></script>
         <script>
-        Swal.fire({
-            title: 'Error!',
-            text: 'Do you want to continue',
-            icon: 'error',
-            confirmButtonText: 'Cool'
-        })
+        function registrarPersonas(id) {
+            Swal.fire({
+                "title": "Registrar Personas",
+                "text": "¿Desea registrar personas para esta vivienda?",
+                "icon": "question",
+                "showCancelButton": true,
+                "confirmButtonText": "Si, registrar",
+                "cancelButtonText": "Cancelar",
+                "reverseButtons": true,
+                "confirmButtonColor": "#1ABB9C",
+                "cancelButtonColor": "#B4B4B8"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "#";
+                }
+            });
+        }
     </script>
 {% endblock javascripts %}
