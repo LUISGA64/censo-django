@@ -114,4 +114,12 @@ class FamilyCardCreate(SessionWizardView):
             return redirect('error_page')  # redirige a una página de error
 
 
+class CreatePerson(CreateView):
+    model = Person
+    fields = '__all__'
+    template_name = 'censo/censo/createPerson.html'
+    success_url = reverse_lazy('familyCardIndex')
+
+
+
 

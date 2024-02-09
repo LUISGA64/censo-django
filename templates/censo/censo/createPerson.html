@@ -1,4 +1,10 @@
 {% extends 'base_site.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+
+
 {% load static %}
 
 {% block title %}
@@ -6,10 +12,11 @@
 {% endblock title %}
 
 {% block stylesheets %}
-	{{ block.super }}
+    {{ block.super }}
     <link href="{% static 'vendors/datatables.net-bs/css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css' %}"
+          rel="stylesheet">
     <link href="{% static 'vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css' %}" rel="stylesheet">
 {% endblock stylesheets %}
@@ -24,18 +31,52 @@
     <div class="right_col" role="main">
         <div class="">
             <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Agregar Integrantes al núcleo familiar</h2>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <a href="{% url 'createFamilyCard' %}" class="btn btn-primary">Nuevo</a>
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            
-                        </div>
+                <div class="col-md-8 col-sm-12 col-xs-12">
+
+                    <div class="x_title">
+                        <h2>Registro de Familia - Censo Web</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <p>Por favor, ingrese los datos de la familia a registrar.</p>
+                        <form class="form-inline form-label-left input_mask">
+
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
+                                       placeholder="Primer Nombre">
+                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
+                                       placeholder="Segundo Nombre">
+                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
+                                       placeholder="Primer Apellido">
+                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
+                                       placeholder="Segundo Apellido">
+                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                            </div>
+
+                            <div class="row mt-5">
+                                <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                    {{ form.identification_person|as_crispy_field }}
+                                </div>
+
+                                <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                    {{ form.document_type|as_crispy_field }}
+                                </div>
+                            </div>
+
+
+                        </form>
                     </div>
                 </div>
             </div>
@@ -44,5 +85,5 @@
 {% endblock content %}
 {% block javascripts %}
     {{ block.super }}
-    
+
 {% endblock javascripts %}
