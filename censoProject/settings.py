@@ -46,15 +46,15 @@ INSTALLED_APPS = [
     'censoapp',
 
     "crispy_forms",
-    "crispy_bootstrap4",
+    "crispy_bootstrap5",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'formtools',
 ]
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
-CRISPY_TEMPLATE_PACK = "bootstrap4"
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

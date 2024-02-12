@@ -114,19 +114,6 @@
     <script src="{% static 'build/js/custom.js' %}"></script>
     <script src="{% static 'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    {% if messages %}
-        {% for m in messages %}
-            <script>
-                Swal.fire({
-                    icon: '{{ m.tags }}',
-                    title: '{{ m.tags }}',
-                    text: '{{ m }}',
-                    showConfirmButton: false,
-                    timer: 1500
-                })
-            </script>
-        {% endfor %}
-    {% endif %}
 {% endblock body %}
 </body>
 </html>

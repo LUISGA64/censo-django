@@ -1,4 +1,4 @@
-{% extends 'base_site.html' %}
+{% extends 'index.html' %}
 {% load crispy_forms_filters %}
 {% load crispy_forms_tags %}
 {% load i18n %}
@@ -31,52 +31,53 @@
     <div class="right_col" role="main">
         <div class="">
             <div class="row">
-                <div class="col-md-8 col-sm-12 col-xs-12">
-
+                <div class="x_panel">
                     <div class="x_title">
-                        <h2>Registro de Familia - Censo Web</h2>
+                        <h2>Listado Censal <small>Personas</small></h2>
                         <div class="clearfix"></div>
                     </div>
                     <div class="x_content">
-                        <p>Por favor, ingrese los datos de la familia a registrar.</p>
-                        <form class="form-inline form-label-left input_mask">
+                        <div class="col-md-8 col-sm-12 col-xs-12">
+                            <form class="form-inline form-label-left input_mask">
+                                <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12">
+                                    <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+                                        <div class="col-md-3 col-sm-6 col-xs-12 form-group.required has-feedback">
+                                            <label class="control-label">Primer Nombre</label>
+                                            <input type="text" class="form-control" id="inputSuccess2"
+                                                   placeholder="Primer Nombre">
+                                        </div>
 
-                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
-                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
-                                       placeholder="Primer Nombre">
-                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                            </div>
+                                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                            <label class="control-label">Segundo Nombre</label>
+                                            <input type="text" class="form-control " id="inputSuccess2"
+                                                   placeholder="Segundo Nombre">
+                                        </div>
 
-                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
-                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
-                                       placeholder="Segundo Nombre">
-                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                            </div>
+                                        <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                            <label class="control-label">Primer Apellido</label>
+                                            <input type="text" class="form-control " id="inputSuccess2"
+                                                   placeholder="Primer Apellido">
+                                        </div>
 
-                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
-                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
-                                       placeholder="Primer Apellido">
-                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                            </div>
+                                        <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                            <label class="control-label">Segundo Apellido</label>
+                                            <input type="text" class="form-control " id="inputSuccess2"
+                                                   placeholder="Segundo Apellido">
+                                        </div>
 
-                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
-                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2"
-                                       placeholder="Segundo Apellido">
-                                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                            </div>
+                                        <div class="row mt-5">
+                                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                                {{ form.identification_person|as_crispy_field }}
+                                            </div>
 
-                            <div class="row mt-5">
-                                <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
-                                    {{ form.identification_person|as_crispy_field }}
+                                            <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                                                {{ form.document_type|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
-                                    {{ form.document_type|as_crispy_field }}
-                                </div>
-                            </div>
-
-
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

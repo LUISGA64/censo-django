@@ -1,4 +1,4 @@
-{% extends 'base_site.html' %}
+{% extends 'index.html' %}
 
 
 {% block title %} Projects {% endblock title %}
@@ -8,37 +8,13 @@
 {% endblock stylesheets %}
 
 {% block content %}
-    <div class="right_col" role="main">
-        <div class="">
-            <div class="page-title">
-                <div class="title_left">
-
-                </div>
-
-                <div class="title_right">
-                    <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
-                        <div class="input-group">
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Asociación de Cabildos</h2>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <a href="{% url 'createAssociation' %}" class="btn btn-primary">Nuevo</a>
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <div class="alignright">
-
-                            </div>
-                            {% for object in associations %}
+    <div class="row mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Projects</h3>
+        </div>
+        <div class="card-body">
+            {% for object in associations %}
                                 <div class="col-md-6 col-sm-6 col-xs-12 profile_left offset-3">
                                     <div class="profile_img">
                                         <div id="crop-avatar">
@@ -70,16 +46,12 @@
                                     </ul>
                                 </div>
                             {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
+    </div>
     </div>
 {% endblock content %}
 
 {% block javascripts %}
     {{ block.super }}
-    
+
 {% endblock javascripts %}
-```
