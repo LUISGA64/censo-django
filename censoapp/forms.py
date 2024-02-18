@@ -22,12 +22,17 @@ class FormFamilyCard(forms.Form):
                                            widget=forms.Select(attrs={'class': 'form-control',
                                                                       'placeholder': 'Vereda'}),
                                            label="Vereda")
-    latitude = forms.CharField(label='Latitud', required=False, max_length=15, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Latitud'}))
-    longitude = forms.CharField(label='Longitud', required=False, max_length=15, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Longitud'}))
+    latitude = forms.CharField(label='Latitud', required=False, max_length=15,
+                               widget=forms.TextInput(
+                                   attrs={'class': 'form-control', 'placeholder': 'Latitud'}))
+
+    longitude = forms.CharField(label='Longitud', required=False, max_length=15,
+                                widget=forms.TextInput(
+                                    attrs={'class': 'form-control', 'placeholder': 'Longitud'}))
+
     zone = forms.ChoiceField(choices=zone, label="Zona",
                              widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Zona'}))
+
     organization_id = forms.ModelChoiceField(queryset=Organizations.objects.all(),
                                              empty_label="Seleccione el Resguardo",
                                              widget=forms.Select(attrs={'class': 'form-control',
@@ -44,59 +49,102 @@ class FormPerson(forms.Form):
         self.helper.form_class = 'form-inline'
         self.helper.label_class = 'control-label'
 
+    # Primer Nombre
     first_name_1 = forms.CharField(label='Primer Nombre', max_length=30, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Primer Nombre'}))
+        attrs={'class': 'form-control input-group', 'placeholder': 'Primer Nombre'}))
+
+    # Segundo Nombre
     first_name_2 = forms.CharField(label='Segundo Nombre', max_length=30, required=False, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Segundo Nombre'}))
-    last_name_1 = forms.CharField(label='Primer Apellido', max_length=30, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Primer Apellido'}))
-    last_name_2 = forms.CharField(label='Segundo Apellido', max_length=30, required=False, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Segundo Apellido'}))
-    identification_person = forms.CharField(label='Identificación', max_length=15, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Identificación'}))
+
+    # Primer Apellido
+    last_name_1 = forms.CharField(label='Primer Apellido', max_length=30,
+                                  widget=forms.TextInput(
+                                      attrs={'class': 'form-control', 'placeholder': 'Primer Apellido'}))
+
+    # Segundo Apellido
+    last_name_2 = forms.CharField(label='Segundo Apellido', max_length=30, required=False,
+                                  widget=forms.TextInput(
+                                      attrs={'class': 'form-control', 'placeholder': 'Segundo Apellido'}))
+
+    # Número Teléfonico
+    cell_phone = forms.CharField(label='Teléfono Móvil', max_length=15, required=False,
+                                 widget=forms.TextInput(
+                                     attrs={'class': 'form-control', 'placeholder': 'Teléfono Móvil'}))
+
+    # Correo Personal
+    personal_email = forms.EmailField(label='Correo Personal', max_length=50, required=False,
+                                      widget=forms.EmailInput(
+                                          attrs={'class': 'form-control', 'placeholder': 'Correo Personal'}))
+
+    # Identificación de la persona
+    identification_person = forms.CharField(label='Identificación', max_length=15,
+                                            widget=forms.TextInput(
+                                                attrs={'class': 'form-control', 'placeholder': 'Identificación'}))
+
+    # Tipo de Documento
     document_type = forms.ModelChoiceField(queryset=DocumentType.objects.all(),
                                            empty_label="Seleccione el Tipo de Documento",
                                            widget=forms.Select(attrs={'class': 'form-control',
                                                                       'placeholder': 'Tipo de Documento'}),
                                            label="Tipo de Documento")
+    # Género
     gender_id = forms.ModelChoiceField(queryset=Gender.objects.all(), empty_label="Seleccione el Género",
-                                       widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Género'}),
+                                       widget=forms.Select(
+                                           attrs={'class': 'form-control', 'placeholder': 'Género'}),
                                        label="Género")
+
+    # Fecha de Nacimiento
     date_birth = forms.DateField(label='Fecha de Nacimiento',
                                  widget=forms.DateInput(format='%d-%m-%Y',
                                                         attrs={'class': 'form-control',
-                                                               'placeholder': 'Select a date',
+                                                               'placeholder': 'Fecha de Nacimiento',
                                                                'type': 'date'}))
+
+    # Tipo de Afiliación
     social_insurance = forms.ModelChoiceField(queryset=SecuritySocial.objects.all(),
                                               empty_label="Seleccione Afiliación",
                                               widget=forms.Select(attrs={'class': 'form-control',
                                                                          'placeholder': 'Tipo Afiliación'}),
                                               label="Tipo Afiliación")
-    eps = forms.ModelChoiceField(queryset=Eps.objects.all(), empty_label="Seleccione EPS",
-                                 widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'EPS'}))
+
+    # Empresa de Afiliación
+    eps = forms.ModelChoiceField(queryset=Eps.objects.all(),
+                                 empty_label="Seleccione EPS",
+                                 widget=forms.Select(
+                                     attrs={'class': 'form-control', 'placeholder': 'EPS'}),
+                                 label="EPS")
+
+    # Parentesco
     kinship_id = forms.ModelChoiceField(queryset=Kinship.objects.all(), empty_label="Seleccione Parentesco",
                                         widget=forms.Select(attrs={'class': 'form-control',
                                                                    'placeholder': 'Parentesco'}),
                                         label="Parentesco")
 
+    # Tipo de Discapacidad
     handicap = forms.ChoiceField(choices=handicap,
-                                 widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Discapacidad'}),
+                                 widget=forms.Select(
+                                     attrs={'class': 'form-control', 'placeholder': 'Discapacidad'}),
                                  label="Discapacidad")
+
+    # Nivel Educativo
     education_level = forms.ModelChoiceField(queryset=EducationLevel.objects.all(),
                                              empty_label="Seleccione Nivel de Educación",
                                              widget=forms.Select(attrs={'class': 'form-control',
                                                                         'placeholder': 'Nivel de Educación'}),
                                              label="Nivel de Educación")
-    civil_state = forms.ModelChoiceField(queryset=CivilState.objects.all(), empty_label="Seleccione Estado Civil",
-                                        widget=forms.Select(attrs={'class': 'form-control',
-                                                                   'placeholder': 'Estado Civil'}),
-                                        label="Estado Civil")
+
+    # Estado Civil
+    civil_state = forms.ModelChoiceField(queryset=CivilState.objects.all(),
+                                         empty_label="Seleccione Estado Civil",
+                                         widget=forms.Select(attrs={'class': 'form-control',
+                                                                    'placeholder': 'Estado Civil'}),
+                                         label="Estado Civil")
+
+    # Ocupación
     occupation = forms.ModelChoiceField(queryset=Occupancy.objects.all(), empty_label="Seleccione Ocupación",
                                         widget=forms.Select(attrs={'class': 'form-control',
                                                                    'placeholder': 'Ocupación'}),
                                         label="Ocupación")
-    cell_phone = forms.CharField(label='Teléfono Móvil', max_length=15, required=False, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Teléfono Móvil'}))
-    personal_email = forms.EmailField(label='Correo Personal', max_length=50, required=False, widget=forms.EmailInput(
-        attrs={'class': 'form-control', 'placeholder': 'Correo Personal'}
-    ))
+
+

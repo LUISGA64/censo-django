@@ -136,22 +136,31 @@ class Person(models.Model):
     identification_person = models.CharField(blank=False, null=False, unique=True, max_length=15,
                                              verbose_name="Identificación")
     document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE, verbose_name="Tipo de documento",
-                                      blank=False, null=False, default='')
+                                      blank=False, null=False)
+
     cell_phone = models.CharField(blank=True, null=True, max_length=15, verbose_name="Teléfono Móvil")
+
     personal_email = models.EmailField(blank=True, null=True, max_length=50, verbose_name="Correo Personal")
+
     gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE, verbose_name="Género")
+
     date_birth = models.DateField(blank=False, null=False, verbose_name="Fecha de Nacimiento")
+
     social_insurance = models.ForeignKey('SecuritySocial', on_delete=models.CASCADE,
                                          verbose_name="Seguridad Social", max_length=50)
-    eps = models.ForeignKey('Eps', on_delete=models.CASCADE, verbose_name="EPS", blank=False, null=False, default='')
+
+    eps = models.ForeignKey('Eps', on_delete=models.CASCADE, verbose_name="EPS")
+
     kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Parentescos")
-    handicap = models.CharField(choices=handicap, default='Ninguna', max_length=50, verbose_name="Capacidades Diversas")
+    handicap = models.CharField(choices=handicap, max_length=50, verbose_name="Capacidades Diversas")
+
     education_level = models.ForeignKey('EducationLevel', on_delete=models.CASCADE, verbose_name="Nivel Educativo")
-    civil_state = models.ForeignKey('CivilState', blank=False, null=False, on_delete=models.CASCADE,
-                                    verbose_name="Estado Civil", default='')
+
+    civil_state = models.ForeignKey('CivilState', on_delete=models.CASCADE, verbose_name="Estado Civil")
+
     occupation = models.ForeignKey('Occupancy', blank=False, null=False, on_delete=models.CASCADE,
-                                   verbose_name="Ocupación", default='')
+                                   verbose_name="Ocupación")
     family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
                                     blank=False, default='')
     family_head = models.BooleanField(blank=False, null=False, default=False, verbose_name="Cabeza de Familia")

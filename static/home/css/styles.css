@@ -3664,6 +3664,18 @@ textarea.form-control-lg {
     transition: none;
   }
 }
+
+.nav-link:focus {
+  :visited {
+    color: #0dcaf0;
+  }
+}
+.nav-link.active {
+      background-color: #007bff;
+      color: #ffffff;
+    }
+
+
 .nav-link:hover, .nav-link:focus {
   color: var(--bs-nav-link-hover-color);
 }
