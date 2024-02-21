@@ -55,7 +55,7 @@ class FormPerson(forms.Form):
 
     # Segundo Nombre
     first_name_2 = forms.CharField(label='Segundo Nombre', max_length=30, required=False, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Segundo Nombre'}))
+        attrs={'class': 'col-md-3', 'placeholder': 'Segundo Nombre'}))
 
     # Primer Apellido
     last_name_1 = forms.CharField(label='Primer Apellido', max_length=30,
@@ -146,5 +146,6 @@ class FormPerson(forms.Form):
                                         widget=forms.Select(attrs={'class': 'form-control',
                                                                    'placeholder': 'Ocupación'}),
                                         label="Ocupación")
+
 
 

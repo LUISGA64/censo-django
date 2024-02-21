@@ -27,67 +27,10 @@
             </div>
 
             <div class="card-body">
-                <form method="post" action="" class="row g-3">
+                <form method="POST" action="" class="form-inline">
                     {% csrf_token %}
-                    <div class="col-md-6">
-                        {{ form.first_name_1|as_crispy_field }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.first_name_2|as_crispy_field }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.last_name_1|as_crispy_field }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.last_name_2|as_crispy_field }}
-                    </div>
-                    
-                    <div class="col-md-6">
-                        {{ form.cell_phone|as_crispy_field }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.personal_email|as_crispy_field }}
-                    </div>
-                    
-                    <div class="col-md-4">
-                        {{ form.document_type|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.identification_person|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.gender_id|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        <label for="birth_date" class="form-label>">Fecha de Nacimiento</label>
-                        <input type="date" name="birth_date" class="form-control mt-2">
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.social_insurance|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.eps|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.kinship_id|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.handicap|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.education_level|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.civil_state|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.occupation|as_crispy_field }}
-                    </div>
-                    <hr>
-                    <div class="d-flex flex-row-reverse">
-                        <button type="submit" class="btn btn-primary ms-2">Guardar</button>
-                        <a href class="btn btn-secondary" onclick="history.back()">Cancelar</a>
-                    </div>
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary">Registrar</button>
                 </form>
             </div>
         </div>

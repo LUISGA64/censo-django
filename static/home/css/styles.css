@@ -93,6 +93,49 @@
 
 
 
+
+
+/* Estilos personalizados para el formulario */
+.my-crispy-form .form-group {
+    margin-bottom: 20px; /* Espaciado entre campos */
+}
+
+.my-crispy-form label {
+    font-weight: bold; /* Hacer etiquetas en negrita */
+}
+
+.my-crispy-form input[type="text"],
+.my-crispy-form input[type="date"],
+.my-crispy-form select { /* Ancho completo para campos de entrada */
+    padding: 10px; /* Espaciado interno */
+    border: 1px solid #00CC33; /* Borde */
+    border-radius: 5px; /* Bordes redondeados */
+    box-sizing: border-box; /* Box-sizing */
+}
+
+/* Establecer el ancho de los campos a col-md-3 */
+.my-crispy-form .col-md-3 {
+    width: 25%;
+}
+
+.my-crispy-form .btn-primary {
+    margin-right: 10px; /* Espaciado entre botones */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);

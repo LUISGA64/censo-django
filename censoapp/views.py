@@ -73,7 +73,7 @@ class FamilyCardCreate(SessionWizardView):
                 query = Person.objects.filter(identification_person=person_data['identification_person'])
                 if query.exists():
                     messages.error(self.request, "Ya existe una persona con esa cédula")
-                    return HttpResponse('Ya existe una persona con esa cédula')
+
                 else:
                     family_card = FamilyCard.objects.create(
                         address_home=family_card_data['address_home'],
@@ -114,12 +114,13 @@ class FamilyCardCreate(SessionWizardView):
             return redirect('error_page')  # redirige a una página de error
 
 
-class CreatePerson(CreateView):
-    model = Person
-    fields = '__all__'
-    template_name = 'censo/censo/createPerson.html'
-    success_url = reverse_lazy('familyCardIndex')
-
-
-
-
+def crear_persona(request, pk):
+    if request.method == 'POST':
+        form = FormPerson(request.POST)
+        if form.is_valid():
+            for f in form:
+                print(f)
+            return redirect('dashboard')
+    else:
+        form = FormPerson()
+    return render(request, 'censo/censo/createPerson.html', {'form': form})
