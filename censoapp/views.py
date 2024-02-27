@@ -58,7 +58,8 @@ def family_card_index(request):
     return render(request, 'censo/censo/familyCardIndex.html', {'family_cards': queryset})
 
 
-# Clase para la ficha familiar y el cabeza de familia
+# Clase para la ficha familiar y el cabeza
+
 class FamilyCardCreate(SessionWizardView):
     form_list = [FormFamilyCard, FormPerson]
     template_name = 'censo/censo/createFamilyCard.html'
@@ -116,50 +117,63 @@ class FamilyCardCreate(SessionWizardView):
             return redirect('error_page')  # redirige a una página de error
 
 
+@login_required
 def crear_persona(request, pk):
     familia = pk
+
     if request.method == 'POST':
-        first_name_1 = request.POST['first_name_1']
-        first_name_2 = request.POST['first_name_2']
-        last_name_1 = request.POST['last_name_1']
-        last_name_2 = request.POST['last_name_2']
-        identification_person = request.POST['identification_person']
-        document_type = int(request.POST['document_type'])
-        cell_phone = request.POST['cell_phone']
-        personal_email = request.POST['personal_email']
-        gender_id = request.POST['gender_id']
-        date_birth = datetime.strptime(request.POST['date_birth'], '%Y-%m-%d').date()
-        social_insurance = request.POST['social_insurance']
-        eps = request.POST['eps']
-        kinship_id = request.POST['kinship_id']
-        handicap = request.POST['handicap']
-        education_level = request.POST['education_level']
-        civil_state = request.POST['civil_state']
-        occupation = request.POST['occupation']
-        # family_card = familia
-        Person.objects.create(
-            first_name_1=first_name_1,
-            first_name_2=first_name_2,
-            last_name_1=last_name_1,
-            last_name_2=last_name_2,
-            identification_person=identification_person,
-            document_type=DocumentType.objects.get(pk=document_type),
-            cell_phone=cell_phone,
-            personal_email=personal_email,
-            gender_id=Gender.objects.get(pk=gender_id),
-            date_birth=date_birth,
-            social_insurance=SecuritySocial.objects.get(pk=social_insurance),
-            eps=Eps.objects.get(pk=eps),
-            kinship_id=Kinship.objects.get(pk=kinship_id),
-            handicap=handicap,
-            education_level=EducationLevel.objects.get(pk=education_level),
-            civil_state=CivilState.objects.get(pk=civil_state),
-            occupation=Occupancy.objects.get(pk=occupation),
-            family_card=FamilyCard.objects.get(pk=familia),
-            family_head=False)
-        messages.success(request, "Persona creada correctamente")
-        return redirect('dashboard')
+
+        query = Person.objects.filter(identification_person=request.POST['identification_person'])
+        if query.exists():
+            messages.error(request, "Ya existe una persona con esa identificación")
+            return redirect('createPerson', familia)
+        else:
+            first_name_1 = request.POST['first_name_1']
+            first_name_2 = request.POST['first_name_2']
+            last_name_1 = request.POST['last_name_1']
+            last_name_2 = request.POST['last_name_2']
+            identification_person = request.POST['identification_person']
+            document_type = int(request.POST['document_type'])
+            cell_phone = request.POST['cell_phone']
+            personal_email = request.POST['personal_email']
+            gender_id = request.POST['gender_id']
+            date_birth = datetime.strptime(request.POST['date_birth'], '%Y-%m-%d').date()
+            social_insurance = request.POST['social_insurance']
+            eps = request.POST['eps']
+            kinship_id = request.POST['kinship_id']
+            handicap = request.POST['handicap']
+            education_level = request.POST['education_level']
+            civil_state = request.POST['civil_state']
+            occupation = request.POST['occupation']
+            # family_card = familia
+            Person.objects.create(
+                first_name_1=first_name_1,
+                first_name_2=first_name_2,
+                last_name_1=last_name_1,
+                last_name_2=last_name_2,
+                identification_person=identification_person,
+                document_type=DocumentType.objects.get(pk=document_type),
+                cell_phone=cell_phone,
+                personal_email=personal_email,
+                gender_id=Gender.objects.get(pk=gender_id),
+                date_birth=date_birth,
+                social_insurance=SecuritySocial.objects.get(pk=social_insurance),
+                eps=Eps.objects.get(pk=eps),
+                kinship_id=Kinship.objects.get(pk=kinship_id),
+                handicap=handicap,
+                education_level=EducationLevel.objects.get(pk=education_level),
+                civil_state=CivilState.objects.get(pk=civil_state),
+                occupation=Occupancy.objects.get(pk=occupation),
+                family_card=FamilyCard.objects.get(pk=familia),
+                family_head=False)
+            messages.success(request, "Persona creada correctamente, Registre otra persona si lo desea.")
+            return redirect('createPerson', familia)
 
     else:
         form = FormPerson()
     return render(request, 'censo/censo/createPerson.html', {'form': form, 'familia': familia})
+
+
+def detalle_ficha(request, pk):
+    familia = Person.objects.select_related('family_card').select_related('kinship_id').filter(family_card=pk)
+    return render(request, 'censo/censo/detail_family_card.html', {'familia': familia})

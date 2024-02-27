@@ -168,3 +168,7 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
+
+    def calcular_anios(self):
+        from datetime import date
+        return date.today().year - self.date_birth.year
