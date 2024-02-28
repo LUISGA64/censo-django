@@ -54,8 +54,12 @@
                             <td>{{ card.family_card.zone }}</td>
                             <td>
                                 <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-primary btn-xs" title="Agregar Familiar"><i class="fa-solid fa-plus"></i> </a>
+                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-success btn-xs" title="Agregar Familiar"><i class="fa-solid fa-plus"></i> </a>
                                 <a href="{% url 'detailFamilyCard' card.family_card.id %}" class="btn btn-info btn-xs" title="Ver ficha Familiar"><i class="fa-solid fa-binoculars"></i> </a>
                                 <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-danger btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
+                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-dark btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
+                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-warning btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
+                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-light btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
                             </td>
                         </tr>
                     {% endfor %}
