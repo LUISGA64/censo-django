@@ -120,9 +120,7 @@ class FamilyCardCreate(SessionWizardView):
 @login_required
 def crear_persona(request, pk):
     familia = pk
-
     if request.method == 'POST':
-
         query = Person.objects.filter(identification_person=request.POST['identification_person'])
         if query.exists():
             messages.error(request, "Ya existe una persona con esa identificación")

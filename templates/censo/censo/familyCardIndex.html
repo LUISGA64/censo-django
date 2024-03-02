@@ -1,12 +1,14 @@
-{% extends 'index.html' %}
+{% extends 'layouts/base.html' %}
 {% load static %}
 
 {% block title %}
-    Censo - Listado
+    Listado
 {% endblock title %}
 
 {% block stylesheets %}
     {{ block.super }}
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
     <script>
         Swal.fire({
             title: 'Error!',
@@ -19,66 +21,63 @@
 
 {% block content %}
     <div class="row bg-white">
-    <div class="card bg-white mt-5">
-        <div class="card-header bg-white">
-            <div class="row mt-3">
-                <div class="col-auto me-auto">
-                    <h4>Listado de Fichas Familiares</h4>
+        <div class="card bg-white mt-5">
+            <div class="card-header bg-white">
+                <div class="row mt-3">
+                    <div class="col-auto me-auto">
+                        <h4>Listado de Fichas Familiares</h4>
+                    </div>
+                    <div class="col-auto" style="margin-right: 15px">
+                        <a href="{% url 'createFamilyCard' %}" class="btn btn-primary float-right">Crear Ficha
+                            Familiar</a>
+                    </div>
                 </div>
-                <div class="col-auto" style="margin-right: 15px">
-                    <a href="{% url 'createFamilyCard' %}" class="btn btn-primary float-right">Crear Ficha Familiar</a>
-                </div>
-            </div>
-        <hr/>
-            <div class="card-body bg-white">
-                <table id="family_card" class="table table-bordered mt-5">
-                    <thead>
-                    <tr>
-                        <th>N° Ficha</th>
-                        <th>Persona</th>
-                        <th>Identificación</th>
-                        <th>Vereda</th>
-                        <th>Zona</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    
-                    {% for card in family_cards %}
-
+                <hr/>
+                <div class="card-body bg-white">
+                    <table id="family_card" class="table table-bordered mt-5">
+                        <thead>
                         <tr>
-                            <td>{{ card.family_card.family_card_number }}</td>
-                            <td>{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }} {{ card.last_name_2 }}</td>
-                            <td>{{ card.identification_person }}</td>
-                            <td>{{ card.family_card.sidewalk_home }}</td>
-                            <td>{{ card.family_card.zone }}</td>
-                            <td>
-                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-primary btn-xs" title="Agregar Familiar"><i class="fa-solid fa-plus"></i> </a>
-                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-success btn-xs" title="Agregar Familiar"><i class="fa-solid fa-plus"></i> </a>
-                                <a href="{% url 'detailFamilyCard' card.family_card.id %}" class="btn btn-info btn-xs" title="Ver ficha Familiar"><i class="fa-solid fa-binoculars"></i> </a>
-                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-danger btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
-                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-dark btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
-                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-warning btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
-                                <a href="{% url 'createPerson' card.family_card.id %}" class="btn btn-light btn-xs" title="Eliminar Ficha Familiar"><i class="fa-solid fa-trash"></i> </a>
-                            </td>
+                            <th>N° Ficha</th>
+                            <th>Persona</th>
+                            <th>Identificación</th>
+                            <th>Vereda</th>
+                            <th>Zona</th>
+                            <th>Acciones</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+
+                        {% for card in family_cards %}
+
+                            <tr>
+                                <td>{{ card.family_card.family_card_number }}</td>
+                                <td>{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }} {{ card.last_name_2 }}</td>
+                                <td>{{ card.identification_person }}</td>
+                                <td>{{ card.family_card.sidewalk_home }}</td>
+                                <td>{{ card.family_card.zone }}</td>
+                                <td>
+
+                                    <a href="{% url 'detailFamilyCard' card.family_card.id %}"
+                                       class="btn btn-info btn-xs" title="Ver ficha Familiar"><i
+                                            class="fa-paw fa-binoculars"></i> </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 {% endblock content %}
 {% block javascripts %}
     {{ block.super }}
+    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}" type="application/javascript"></script>
+    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
+    
     <script>
-        const datatablesSimple = document.getElementById('family_card');
-        if (datatablesSimple) {
-            new simpleDatatables.DataTable(datatablesSimple, {
-                'language': {
-                    'url': 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
-                },
-            });
-        }
+        new DataTable('#family_card');
     </script>
 {% endblock javascripts %}

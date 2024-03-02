@@ -1,7 +1,7 @@
-{% extends 'index.html' %}
+{% extends 'layouts/base.html' %}
 
 
-{% block title %} Projects {% endblock title %}
+{% block title %} Asociación {% endblock title %}
 
 {% block stylesheets %}
     {{ block.super }}
@@ -9,45 +9,45 @@
 
 {% block content %}
     <div class="row mt-5">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Projects</h3>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Projects</h3>
+            </div>
+            <div class="card-body">
+                {% for object in associations %}
+                    <div class="col-md-6 col-sm-6 col-xs-12 profile_left offset-3">
+                        <div class="profile_img">
+                            <div id="crop-avatar">
+                                <!-- Current avatar -->
+                                <img class="img-responsive avatar-view"
+                                     src="../media/{{ object.association_logo }}" alt="Avatar"
+                                     title="Change the avatar" width="250px" height="250px">
+                            </div>
+                        </div>
+                        <h4>{{ object.association_name }}</h4>
+
+                        <ul class="list-unstyled user_data">
+                            <li>
+                                <i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_type_document }}
+                                - {{ object.association_identification }}
+                            <li>
+                                <i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_address }}
+                                - {{ object.association_departament }}
+                            </li>
+
+                            <li>
+                                <i class="fa fa-phone user-profile-icon"></i> {{ object.association_phone }}
+                                - {{ object.association_phone_mobile }}
+                            </li>
+
+                            <li class="m-top-xs">
+                                <i class="fa fa-envelope user-profile-icon"></i> {{ object.association_email }}
+                            </li>
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
-        <div class="card-body">
-            {% for object in associations %}
-                                <div class="col-md-6 col-sm-6 col-xs-12 profile_left offset-3">
-                                    <div class="profile_img">
-                                        <div id="crop-avatar">
-                                            <!-- Current avatar -->
-                                            <img class="img-responsive avatar-view"
-                                                 src="../media/{{ object.association_logo }}" alt="Avatar"
-                                                 title="Change the avatar" width="250px" height="250px">
-                                        </div>
-                                    </div>
-                                    <h4>{{ object.association_name }}</h4>
-
-                                    <ul class="list-unstyled user_data">
-                                        <li>
-                                            <i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_type_document }}
-                                            - {{ object.association_identification }}
-                                        <li>
-                                            <i class="fa fa-map-marker user-profile-icon"></i> {{ object.association_address }}
-                                            - {{ object.association_departament }}
-                                        </li>
-
-                                        <li>
-                                            <i class="fa fa-phone user-profile-icon"></i> {{ object.association_phone }}
-                                            - {{ object.association_phone_mobile }}
-                                        </li>
-
-                                        <li class="m-top-xs">
-                                            <i class="fa fa-envelope user-profile-icon"></i> {{ object.association_email }}
-                                        </li>
-                                    </ul>
-                                </div>
-                            {% endfor %}
-        </div>
-    </div>
     </div>
 {% endblock content %}
 
