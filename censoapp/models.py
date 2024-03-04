@@ -125,7 +125,7 @@ class FamilyCard(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Última Actualización")
 
     def __str__(self):
-        return str(self.id) + '-' + self.address_home + '-' + str(self.sidewalk_home)
+        return f"{self.id}"
 
 
 class Person(models.Model):

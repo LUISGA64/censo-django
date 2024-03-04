@@ -6,7 +6,7 @@ from .choices import handicap
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from censoapp.models import Association, Person, FamilyCard, DocumentType, Gender, SecuritySocial, Eps, Kinship, \
@@ -17,7 +17,7 @@ from .forms import FormFamilyCard, FormPerson
 # Create your views here.
 @login_required
 def home(request):
-    return render(request, 'censo/dashboard.html')
+    return render(request, 'censo/dashboard.html', {'segment': 'dashboard'})
 
 
 @login_required
@@ -35,8 +35,10 @@ def profile(request):
 def association(request):
     if request.method == 'GET':
         associations = Association.objects.all()
+        context = {'segment': 'association'}
         messages.success(request, "Procedimientos registrados")
-        return render(request, 'censo/configuracion/association.html', {'associations': associations})
+        return render(request, 'censo/configuracion/association.html',
+                      {'associations': associations, 'segment': 'association'})
     else:
         messages.error(request, "No se pudo cargar la página")
         return HttpResponse('No se pudo cargar la página')
@@ -55,7 +57,8 @@ class CreateAssociation(CreateView):
 
 def family_card_index(request):
     queryset = Person.objects.select_related('family_card').filter(family_head=True)
-    return render(request, 'censo/censo/familyCardIndex.html', {'family_cards': queryset})
+    return render(request, 'censo/censo/familyCardIndex.html',
+                  {'family_cards': queryset, 'segment': 'family_card'})
 
 
 # Clase para la ficha familiar y el cabeza
@@ -169,9 +172,34 @@ def crear_persona(request, pk):
 
     else:
         form = FormPerson()
-    return render(request, 'censo/censo/createPerson.html', {'form': form, 'familia': familia})
+    return render(request, 'censo/censo/createPerson.html',
+                  {'form': form, 'familia': familia, 'segment': 'family_card'})
 
 
 def detalle_ficha(request, pk):
     familia = Person.objects.select_related('family_card').select_related('kinship_id').filter(family_card=pk)
-    return render(request, 'censo/censo/detail_family_card.html', {'familia': familia})
+    return render(request, 'censo/censo/detail_family_card.html',
+                  {'familia': familia, 'segment': 'family_card'})
+
+
+# def editar_ficha(request, pk):
+#     familia = FamilyCard.objects.filter(id=pk)
+#     print(familia)
+#     return render(request, 'censo/censo/edit-family-card.html',
+#                   {'segment': 'family_card', 'familia': familia})
+
+class UpdateFamily(UpdateView):
+    model = FamilyCard
+    fields = '__all__'
+    template_name = 'censo/censo/edit-family-card.html'
+    success_url = reverse_lazy('familyCardIndex')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, "Ficha familiar actualizada correctamente")
+        return super(UpdateFamily, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.warning(self.request, "Hubo un problema con la actualización de la ficha familiar. "
+                                       "Por favor, revisa los campos nuevamente.")
+        return super(UpdateFamily, self).form_invalid(form)

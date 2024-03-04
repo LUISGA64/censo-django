@@ -1,58 +1,92 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
-{% block title %}
-    Censo - Listado
-{% endblock title %}
+{% block title %}Censo - Listado{% endblock title %}
 
-{% block stylesheets %}
-    {{ block.super }}
-{% endblock stylesheets %}
+{% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-    <div class="row bg-white">
-    <div class="card bg-light p-5 mt-5">
-        <div class="card-header bg-white">
-            <div class="row">
-                <div class="col-auto me-auto">
-                    <h4>Ficha Familiar</h4>
-                </div>
-                <div class="col-auto" style="margin-right: 15px">
-                    
-                </div>
-            </div>
-        <hr/>
-            <div class="card-body bg-white">
-                <table id="family_card" class="table table-bordered p-5">
-                    <thead>
-                    <tr>
-                        <th>Persona</th>
-                        <th>Identificación</th>
-                        <th>Parentesco</th>
-                        <th>Vereda</th>
-                        <th>Edad</th>
-                        <th>Zona</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    
-                    {% for card in familia %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6>Núcleo Familiar</h6>
+                    </div>
+                    <hr class="horizontal dark">
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table id="family_card" class="table align-items-center mb-0">
+                                <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Persona
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Identificación
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Parentesco
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Vereda
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Edad
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Zona
+                                    </th>
+                                    <th class="text-secondary opacity-7"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
 
-                        <tr>
-                            <td>{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }} {{ card.last_name_2 }}</td>
-                            <td>{{ card.identification_person }}</td>
-                            <td>{{ card.kinship_id.description_kinship }}</td>
-                            <td>{{ card.family_card.sidewalk_home }}</td>
-                            <td>{{ card.calcular_anios }}</td>
-                            <td>{{ card.family_card.zone }}</td>
-                            <td>
-                                <a href="#" class="btn btn-primary btn-xs btn-round" title="aval"><i class="fa-regular fa-file-pdf"></i> </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                                {% for card in familia %}
+
+                                    <tr class="px-3">
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
+                                                {{ card.last_name_2 }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.identification_person }}
+                                            </p>
+                                        </td>
+
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.kinship_id.description_kinship }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.sidewalk_home }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.calcular_anios }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.zone }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-info btn-xs btn-round" title="aval"><i
+                                                    class="fas fa-file-archive"></i> </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -1,83 +1,191 @@
 {% extends 'layouts/base.html' %}
-{% load static %}
 
-{% block title %}
-    Listado
-{% endblock title %}
+{% block title %} Tables {% endblock title %}
 
-{% block stylesheets %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
-    <script>
-        Swal.fire({
-            title: 'Error!',
-            text: 'Do you want to continue',
-            icon: 'error',
-            confirmButtonText: 'Cool'
-        })
-    </script>
-{% endblock stylesheets %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-    <div class="row bg-white">
-        <div class="card bg-white mt-5">
-            <div class="card-header bg-white">
-                <div class="row mt-3">
-                    <div class="col-auto me-auto">
-                        <h4>Listado de Fichas Familiares</h4>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6>Fichas Familiares</h6>
                     </div>
-                    <div class="col-auto" style="margin-right: 15px">
-                        <a href="{% url 'createFamilyCard' %}" class="btn btn-primary float-right">Crear Ficha
-                            Familiar</a>
+                    <hr class="horizontal dark">
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">N°
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 ps-2">
+                                        Cabeza de Familia
+                                    </th>
+                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Identificación
+                                    </th>
+                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Vereda
+                                    </th>
+                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                        Zona
+                                    </th>
+                                    <th></th>
+                                    <th class="text-secondary opacity-7"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for card in family_cards %}
+                                    <tr>
+
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.family_card_number }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.first_name_1 }} {{ card.first_name_2 }} 
+                                                {{ card.last_name_1 }} {{ card.last_name_2 }}
+                                            </p>
+                                        </td>
+                                        <td class="align-middle text-center text-sm">
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.identification_person }}
+                                            </p>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.sidewalk_home }}
+                                            </p>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.zone }}
+                                            </p>
+                                        </td>
+                                        <td></td>
+                                        <td class="align-middle">
+                                            <a href="{% url 'detailFamilyCard' card.family_card.id %}"
+                                               title="Detalle Ficha Familiar"
+                                               class="badge badge-sm bg-gradient-success">
+                                                <i class="fas fa-binoculars"></i> </a>
+                                            
+                                            <a href="" 
+                                               title="Editar Ficha"
+                                               class="badge badge-sm bg-gradient-dark">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            <a href="{% url 'update-family' card.family_card.id %}" 
+                                               title="Editar Ficha"
+                                               class="badge badge-sm bg-gradient-faded-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                <hr/>
-                <div class="card-body bg-white">
-                    <table id="family_card" class="table table-bordered mt-5">
-                        <thead>
-                        <tr>
-                            <th>N° Ficha</th>
-                            <th>Persona</th>
-                            <th>Identificación</th>
-                            <th>Vereda</th>
-                            <th>Zona</th>
-                            <th>Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-
-                        {% for card in family_cards %}
-
-                            <tr>
-                                <td>{{ card.family_card.family_card_number }}</td>
-                                <td>{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }} {{ card.last_name_2 }}</td>
-                                <td>{{ card.identification_person }}</td>
-                                <td>{{ card.family_card.sidewalk_home }}</td>
-                                <td>{{ card.family_card.zone }}</td>
-                                <td>
-
-                                    <a href="{% url 'detailFamilyCard' card.family_card.id %}"
-                                       class="btn btn-info btn-xs" title="Ver ficha Familiar"><i
-                                            class="fa-paw fa-binoculars"></i> </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
+
+        {% include "includes/footer-fullscreen.html" %}
+
     </div>
+
 {% endblock content %}
-{% block javascripts %}
-    {{ block.super }}
-    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}" type="application/javascript"></script>
-    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
-    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
-    
-    <script>
-        new DataTable('#family_card');
-    </script>
-{% endblock javascripts %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}
+
+
+{#{% extends 'layouts/base.html' %}#}
+{#{% load static %}#}
+{##}
+{#{% block title %}#}
+{#    Listado#}
+{#{% endblock title %}#}
+{##}
+{#{% block stylesheets %}#}
+{#    {{ block.super }}#}
+{#    #}
+{#    <script>#}
+{#        Swal.fire({#}
+{#            title: 'Error!',#}
+{#            text: 'Do you want to continue',#}
+{#            icon: 'error',#}
+{#            confirmButtonText: 'Cool'#}
+{#        })#}
+{#    </script>#}
+{#{% endblock stylesheets %}#}
+{##}
+{#{% block content %}#}
+{#    <div class="row bg-white">#}
+{#        <div class="card bg-white mt-5">#}
+{#            <div class="card-header bg-white">#}
+{#                <div class="row mt-3">#}
+{#                    <div class="col-auto me-auto">#}
+{#                        <h4>Listado de Fichas Familiares</h4>#}
+{#                    </div>#}
+{#                    <div class="col-auto" style="margin-right: 5px">#}
+{#                        <a href="{% url 'createFamilyCard' %}" class="btn btn-info float-right">Crear Ficha#}
+{#                            Familiar</a>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <hr/>#}
+{#                <div class="card-body bg-white">#}
+{#                    <table id="family_card" class="table table-striped border-gray table-borderless table-condensed mt-5">#}
+{#                        <thead>#}
+{#                        <tr>#}
+{#                            <th>N° Ficha</th>#}
+{#                            <th>Persona</th>#}
+{#                            <th>Identificación</th>#}
+{#                            <th>Vereda</th>#}
+{#                            <th>Zona</th>#}
+{#                            <th>Acciones</th>#}
+{#                        </tr>#}
+{#                        </thead>#}
+{#                        <tbody>#}
+{##}
+{#                        {% for card in family_cards %}#}
+{##}
+{#                            <tr>#}
+{#                                <td>{{ card.family_card.family_card_number }}</td>#}
+{#                                <td>{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }} {{ card.last_name_2 }}</td>#}
+{#                                <td>{{ card.identification_person }}</td>#}
+{#                                <td>{{ card.family_card.sidewalk_home }}</td>#}
+{#                                <td>{{ card.family_card.zone }}</td>#}
+{#                                <td>#}
+{##}
+{#                                    <a href="{% url 'detailFamilyCard' card.family_card.id %}"#}
+{#                                       class="btn btn-info btn-xs" title="Ver ficha Familiar"><i#}
+{#                                            class="fa-paw fa-binoculars"></i> </a>#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                        {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#{% endblock content %}#}
+{#{% block javascripts %}#}
+{#    {{ block.super }}#}
+{#    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}" type="application/javascript"></script>#}
+{#    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>#}
+{#    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>#}
+{#    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>#}
+{#    #}
+{#    <script>#}
+{#        new DataTable('#family_card');#}
+{#    </script>#}
+{#{% endblock javascripts %}#}

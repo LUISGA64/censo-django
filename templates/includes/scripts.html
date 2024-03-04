@@ -7,5 +7,17 @@
   <script src="{% static 'assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
 
   <script src="{% static 'assets/js/dark-mode-handler.js' %}"></script>
-
   
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        {% if messages %}
+            {% for message in messages %}
+                <script>
+                    Swal.fire({
+                        icon: '{{ message.tags }}',
+                        title: '{{ message }}',
+                        showConfirmButton: true,
+                        timer: 1700
+                    })
+                </script>
+            {% endfor %}
+        {% endif %}
