@@ -1,6 +1,8 @@
 from datetime import datetime
+from json import dumps
 
 from django.contrib.auth.decorators import login_required
+from django.core.serializers import serialize
 from django.db import transaction
 from .choices import handicap
 from django.http import HttpResponse, JsonResponse
@@ -59,6 +61,16 @@ def family_card_index(request):
     queryset = Person.objects.select_related('family_card').filter(family_head=True)
     return render(request, 'censo/censo/familyCardIndex.html',
                   {'family_cards': queryset, 'segment': 'family_card'})
+
+
+def get_family_cards(request):
+    queryset = Person.objects.select_related('family_card').filter(family_head=True)
+    data = serialize('json', queryset, fields=('id', 'first_name_1', 'first_name_2', 'last_name_1',
+                                               'last_name_2', 'identification_person',
+                                               'family_card__family_card_number',
+                                               'family_card__sidewalk_home', 'family_card__zone'))
+    return JsonResponse(data, safe=False)
+
 
 
 # Clase para la ficha familiar y el cabeza

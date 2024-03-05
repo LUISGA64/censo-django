@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
 from .views import (home, dashboard, profile, association, CreateAssociation, family_card_index,
-                    FamilyCardCreate, crear_persona, detalle_ficha, UpdateFamily)
+                    FamilyCardCreate, crear_persona, detalle_ficha, UpdateFamily, get_family_cards)
 
 urlpatterns = [
     path('', home, name='home'),
@@ -13,6 +13,6 @@ urlpatterns = [
     path('familyCard/index', login_required(family_card_index), name='familyCardIndex'),
     path('familyCard/create/<int:pk>', login_required(crear_persona), name='createPerson'),
     path('familyCard/detail/<int:pk>/', login_required(detalle_ficha), name='detailFamilyCard'),
-    path('update-family/<int:pk>', login_required(UpdateFamily.as_view()), name='update-family')
-    # path('familyCard/edit/<int:pk>', login_required(editar_ficha), name='editFamilyCard'),
+    path('update-family/<int:pk>', login_required(UpdateFamily.as_view()), name='update-family'),
+    path('familycards', get_family_cards, name='familycards')
 ]
