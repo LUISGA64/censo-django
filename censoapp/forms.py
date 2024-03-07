@@ -1,4 +1,7 @@
+from crispy_forms.layout import Layout
 from django import forms
+from django.forms import Field
+
 from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
     Occupancy, Sidewalks, Organizations, Eps
 from .choices import zone, handicap, ethnic_group
@@ -8,15 +11,10 @@ from django import forms
 
 
 class FormFamilyCard(forms.Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'id-FamilyCard'
-        self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
-        self.helper.label_class = 'control-label'
 
     address_home = forms.CharField(label='Dirección Vivienda', max_length=50, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Dirección Vivienda'}))
+
     sidewalk_home = forms.ModelChoiceField(queryset=Sidewalks.objects.all(),
                                            empty_label="Seleccione la vereda donde vive",
                                            widget=forms.Select(attrs={'class': 'form-control',
@@ -38,6 +36,20 @@ class FormFamilyCard(forms.Form):
                                              widget=forms.Select(attrs={'class': 'form-control',
                                                                         'placeholder': 'Resguardo'}),
                                              label="Resguardo Indígena")
+    family_card_number = forms.IntegerField(label='Número de Familia',
+                                            widget=forms.NumberInput(attrs={
+                                                'readonly': True,
+                                            }),)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-FamilyCard'
+        self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
+        self.helper.label_class = 'control-label'
+        # deshabilitar field family_card_number
+        var = self.fields['family_card_number']
+        var.disabled = True
 
 
 class FormPerson(forms.Form):

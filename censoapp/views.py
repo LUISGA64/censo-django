@@ -1,9 +1,12 @@
 from datetime import datetime
-from json import dumps
+import json
 
 from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
 from django.db import transaction
+from django.db.models import Value
+from django.db.models.functions.text import Concat
+
 from .choices import handicap
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -38,7 +41,6 @@ def association(request):
     if request.method == 'GET':
         associations = Association.objects.all()
         context = {'segment': 'association'}
-        messages.success(request, "Procedimientos registrados")
         return render(request, 'censo/configuracion/association.html',
                       {'associations': associations, 'segment': 'association'})
     else:
@@ -64,17 +66,35 @@ def family_card_index(request):
 
 
 def get_family_cards(request):
-    queryset = Person.objects.select_related('family_card').filter(family_head=True)
-    data = serialize('json', queryset, fields=('id', 'first_name_1', 'first_name_2', 'last_name_1',
-                                               'last_name_2', 'identification_person',
-                                               'family_card__family_card_number',
-                                               'family_card__sidewalk_home', 'family_card__zone'))
-    return JsonResponse(data, safe=False)
+    queryset = (Person.objects.select_related('family_card').select_related('sidewalk_home')
+                .filter(family_head=True)
+                .values('family_card__family_card_number', 'id', 'first_name_1', 'first_name_2', 'last_name_1',
+                        'last_name_2', 'identification_person',
+                        'family_card__sidewalk_home__sidewalk_name', 'family_card__zone'))
 
+    # Crear la columna full_name en la consulta
+    queryset = queryset.annotate(
+        full_name=Concat('first_name_1', Value(' '), 'first_name_2', Value(' '), 'last_name_1', Value(' '),
+                         'last_name_2')
+    )
+
+    print(queryset)
+
+    # Serializar los datos
+    data = list(queryset)
+
+    # Devolver los datos y el total de registros
+    response_data = {
+        'draw': 1,  # Incrementar esto con cada solicitud de DataTables
+        'recordsTotal': len(data),
+        'recordsFiltered': len(data),
+        'data': data
+    }
+
+    return JsonResponse(response_data)
 
 
 # Clase para la ficha familiar y el cabeza
-
 class FamilyCardCreate(SessionWizardView):
     form_list = [FormFamilyCard, FormPerson]
     template_name = 'censo/censo/createFamilyCard.html'
@@ -208,10 +228,18 @@ class UpdateFamily(UpdateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+
+        print(self.request.POST)
+        family_card_number = self.request.POST['family_card_number']
+
+
         messages.success(self.request, "Ficha familiar actualizada correctamente")
         return super(UpdateFamily, self).form_valid(form)
 
     def form_invalid(self, form):
         messages.warning(self.request, "Hubo un problema con la actualización de la ficha familiar. "
                                        "Por favor, revisa los campos nuevamente.")
+        print("*" * 20 + "Errores" + "*" * 20)
+        print(form.errors.as_data())
+        print("*" * 40)
         return super(UpdateFamily, self).form_invalid(form)

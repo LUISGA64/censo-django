@@ -2,18 +2,22 @@
 <html lang="en">
 {% load static %}
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/apple-icon.png' %}">
     <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
 
     <style>
         .swal2-popup {
-            font-size: 1.1rem !important;
+            font-size: 0.9rem !important;
         }
 
         .swal2-zindex {
             z-index: 10000 !important;
+        }
+
+        .swal2-container {
+            z-index: 20000 !important;
         }
     </style>
 
@@ -74,17 +78,17 @@
 <script src="{% static 'assets/js/soft-ui-dashboard.min.js' %}"></script>
 <div class="alert">
     {% if messages %}
-            {% for message in messages %}
-                <script>
-                    Swal.fire({
-                        icon: '{{ message.tags }}',
-                        title: '{{ message }}',
-                        showConfirmButton: false,
-                        timer: 1700
-                    })
-                </script>
-            {% endfor %}
-        {% endif %}
+        {% for message in messages %}
+            <script>
+                Swal.fire({
+                    icon: '{{ message.tags }}',
+                    title: '{{ message }}',
+                    showConfirmButton: false,
+                    timer: 1700
+                })
+            </script>
+        {% endfor %}
+    {% endif %}
 </div>
 </body>
 </html>

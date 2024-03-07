@@ -4,8 +4,9 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-    <link href="{% static 'assets/css/datatable/bootstrap.min.css' %}" />
+    <link href="{% static 'assets/css/datatable/bootstrap.min.css' %}"/>
     <link href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}" rel="stylesheet"/>
+    <link href="{% static 'assets/css/datatable/dataTables.dataTables.css' %}" rel="stylesheet"/>
 {% endblock stylesheets %}
 
 {% block content %}
@@ -20,7 +21,7 @@
                     <hr class="horizontal dark">
                     <div class="card-body px-4 pt-0 pb-2">
                         <div class="table-responsive p-0 mb-4">
-                            <table class="table align-items-center mb-0" id="familycard">
+                            <table class="table table-responsive align-items-center mb-0">
                                 <thead>
                                 <tr>
                                     <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">N°
@@ -37,18 +38,69 @@
                                     <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
                                         Zona
                                     </th>
-                                    
+                                    <th></th>
+                                    <th class="text-secondary opacity-7"></th>
                                 </tr>
                                 </thead>
+                                <tbody>
+                                {% for card in family_cards %}
+                                    <tr>
+
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.family_card_number }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.first_name_1 }} {{ card.first_name_2 }} 
+                                                {{ card.last_name_1 }} {{ card.last_name_2 }}
+                                            </p>
+                                        </td>
+                                        <td class="align-middle text-center text-sm">
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.identification_person }}
+                                            </p>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.sidewalk_home }}
+                                            </p>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                {{ card.family_card.zone }}
+                                            </p>
+                                        </td>
+                                        <td></td>
+                                        <td class="align-middle">
+                                            <a href="{% url 'detailFamilyCard' card.family_card.id %}"
+                                               title="Detalle Ficha Familiar"
+                                               class="badge badge-sm bg-gradient-success">
+                                                <i class="fas fa-binoculars"></i> </a>
+                                            
+                                            <a href="" 
+                                               title="Editar Ficha"
+                                               class="badge badge-sm bg-gradient-dark">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            <a href="{% url 'update-family' card.family_card.id %}" 
+                                               title="Editar Ficha"
+                                               class="badge badge-sm bg-gradient-faded-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         {% include "includes/footer-fullscreen.html" %}
-
     </div>
 
 {% endblock content %}
@@ -59,22 +111,18 @@
     <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
     <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-    new DataTable('#familycard', {
-        ajax: "{% url 'familycards' %}",  // Ajusta el nombre de la URL según tu configuración de URL
-        processing: true,
-        serverSide: true,
-        columns: [
-            {data: "family_card_number", name: "family_card_number"},
-            {data: "first_name_1", name: "first_name_1"},
-            {data: "identification_person", name: "identification_person"},
-            {data: "sidewalk_home", name: "sidewalk_home"},
-            {data: "zone", name: "zone"},
-        ],
-    });
-</script>
-
+        new DataTable('#familycard', {
+            ajax: "{% url 'familycards' %}",
+            serverSide: true,
+            columns: [
+                {data: "family_card__family_card_number", name: "family_card__family_card_number"},
+                {data: "full_name", name: "full_name"},
+                {data: "identification_person", name: "identification_person"},
+                {data: "family_card__sidewalk_home__sidewalk_name", name: "family_card__sidewalk_home__sidewalk_name"},
+                {data: "family_card__zone", name: "family_card__zone"},
+            ],
+        });
+    </script>
 
 {% endblock javascripts %}
