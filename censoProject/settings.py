@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'rest_framework',
     'censoapp',
-
     "crispy_forms",
     "crispy_bootstrap5",
     'allauth',

@@ -23,8 +23,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('censoapp.urls')),
+    path('api/v1.0/', include('censoapp.urls')),
     path('accounts/', include('allauth.urls')),
+
 ]
 
 if settings.DEBUG:

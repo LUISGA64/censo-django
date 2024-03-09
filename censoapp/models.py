@@ -124,6 +124,9 @@ class FamilyCard(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Última Actualización")
 
+    class Meta:
+        ordering = ['family_card_number']
+
     def __str__(self):
         return f"{self.id}"
 
