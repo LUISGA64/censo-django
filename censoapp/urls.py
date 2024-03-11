@@ -1,16 +1,23 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth.decorators import login_required
-from .views import (home, dashboard, profile, association, CreateAssociation, family_card_index,
-                    FamilyCardCreate, crear_persona, detalle_ficha, UpdateFamily, get_family_cards)
+# from .views import (home, dashboard, profile, association, CreateAssociation, family_card_index,
+#                     FamilyCardCreate, crear_persona, detalle_ficha, UpdateFamily, get_family_cards)
 
 from rest_framework import routers
-from .viewsets import SidewalksViewSet
+from rest_framework.documentation import include_docs_urls
+from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 
-
-router = routers.SimpleRouter()
-router.register(r'sidewalks', SidewalksViewSet)
+router = routers.DefaultRouter()
+router.register(r'sidewalks', SidewalksViewSet, 'sidewalks')
+router.register(r'associations', AssociationViewSet, 'associations')
+router.register(r'organizations', OrganizationViewSet, 'organizations')
 
 urlpatterns = router.urls
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('docs/', include_docs_urls(title='Sidewalks API')),
+]
 
 # urlpatterns = [
 #     path('', home, name='home'),

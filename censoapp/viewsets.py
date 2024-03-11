@@ -1,12 +1,11 @@
 from rest_framework import viewsets, permissions
-from .serializers import SidewalksSerializer
-from .models import Sidewalks
+from .serializers import SidewalksSerializer, AssociationSerializer, OrganizationSerializer
+from .models import Sidewalks, Association, Organizations
 
 
 class SidewalksViewSet(viewsets.ModelViewSet):
     queryset = Sidewalks.objects.all()
     serializer_class = SidewalksSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         queryset = Sidewalks.objects.all()
@@ -17,3 +16,14 @@ class SidewalksViewSet(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
+
+
+class AssociationViewSet(viewsets.ModelViewSet):
+    queryset = Association.objects.all()
+    serializer_class = AssociationSerializer
+
+
+class OrganizationViewSet(viewsets.ModelViewSet):
+    queryset = Organizations.objects.all()
+    serializer_class = OrganizationSerializer
+

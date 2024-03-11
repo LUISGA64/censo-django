@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'rest_framework',
+    'corsheaders',
+    'coreapi',
     'censoapp',
     "crispy_forms",
     "crispy_bootstrap5",
@@ -59,6 +61,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -182,3 +185,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Sesion
 USERSESSIONS_TRACK_ACTIVITY = True
+
+
+# CORS
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173'
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+}
