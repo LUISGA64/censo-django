@@ -3,6 +3,7 @@ import {BrowserRouter, Route, Routes, Navigate} from 'react-router-dom';
 import {SidewalksPage} from './pages/sidewalks/SidewalksPage';
 import SidewalkFormPage from "./pages/sidewalks/SidewalkFormPage.jsx";
 import {Navigation} from './components/Navigation.jsx';
+import {OrganizationsPage} from "./pages/organizations/OrganizationsPage.jsx";
 function App() {
     return (
         <BrowserRouter>
@@ -11,6 +12,7 @@ function App() {
                 <Route path="/" element={<Navigate to={'/sidewalks'} />} />
                 <Route path="/sidewalks" element={<SidewalksPage />} />
                 <Route path="/sidewalks-create" element={<SidewalkFormPage />} />
+                <Route path="/organizations" element={<OrganizationsPage />} />
             </Routes>
         </BrowserRouter>
     );

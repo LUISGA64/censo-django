@@ -1,6 +1,12 @@
 import {useForm} from 'react-hook-form'
-function SidewalkFormPage() {
+import {getAllOrganizations} from '../../api/organizations.api.js'
+import {useEffect, useState} from "react";
+import {OrganizationsList} from "../../components/organizations/OrganizationsList.jsx";
+import {SelectOrganizations} from "../../components/organizations/SelectOrganizations.jsx";
+
+export function SidewalkFormPage() {
     const {register} = useForm();
+
 
   return (
     <div>
@@ -11,7 +17,7 @@ function SidewalkFormPage() {
             </div>
             <div>
                 <label htmlFor={"sidewalk_description"}>Sidewalk Description</label>
-                <input type={"text"} id={"sidewalk_description"} name={"sidewalk_description"} />
+                <OrganizationsList/>
             </div>
             <div>
                 <button type={"submit"}>Create Sidewalk</button>
@@ -20,4 +26,5 @@ function SidewalkFormPage() {
     </div>
   );
 }
+
 export default SidewalkFormPage;

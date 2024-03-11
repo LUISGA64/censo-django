@@ -9,6 +9,9 @@ export function Navigation() {
                 <li>
                     <Link to="/sidewalks-create">Create Sidewalk</Link>
                 </li>
+                <li>
+                    <Link to="/organizations">Organizations</Link>
+                </li>
             </ul>
         </nav>
     )

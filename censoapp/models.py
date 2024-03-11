@@ -13,7 +13,7 @@ class Association(models.Model):
     association_departament = models.CharField(null=False, blank=False, max_length=15,
                                                help_text="Registre el departamento")
     association_email = models.EmailField(blank=False, null=False)
-    association_logo = models.ImageField(null=True, blank=False, upload_to="Association")
+    association_logo = models.ImageField('Logo Association', null=True, blank=False, upload_to="Association")
 
     def __str__(self):
         return f"{self.association_name} {self.association_identification}"
@@ -28,7 +28,7 @@ class Organizations(models.Model):
     organization_mobile_phone = models.CharField(max_length=15)
     organization_phone = models.CharField(max_length=15)
     organization_address = models.CharField(max_length=50, null=False, blank=False)
-    organization_logo = models.ImageField(blank=False, null=False, upload_to="Images")
+    organization_logo = models.ImageField('Logo Organization', blank=False, null=False, upload_to="Images")
     association_id = models.ForeignKey('Association', on_delete=models.CASCADE)
 
     def __str__(self):
