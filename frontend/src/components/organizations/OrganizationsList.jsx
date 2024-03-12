@@ -20,11 +20,7 @@ export function OrganizationsList() {
 
     return (
         <div>
-            <select>
-                {organizations.map((organization) => (
-                    <option key={organization.id} value={organization.id}>{organization.organization_name}</option>
-                ))}
-            </select>
+            <h1>Hola mundo</h1>
         </div>
     )
 }
