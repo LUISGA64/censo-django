@@ -1,34 +1,39 @@
 import {useEffect, useState} from "react";
 import {getAllOrganizations} from '../../api/organizations.api';
-import AsyncSelect from 'react-select/async'
 import Select from "react-select";
+import {Controller} from "react-hook-form";
 
-export function SelectOrganizations() {
+export function SelectOrganizations({control, name}) {
 
-    const [organizations, setOrganizations] = useState([])
-
+    const [organizations, setOrganizations] = useState([]);
 
     useEffect(() => {
         async function loadOrganizations() {
             await getAllOrganizations().then((response) => {
-                const datos = response.data
-                setOrganizations(datos)
-            })
+                const datos = response.data;
+                setOrganizations(datos);
+            });
         }
-
-        loadOrganizations()
+        loadOrganizations();
     }, []);
 
     // Obtener las opciones del Select
     const data = organizations.map((item) => ({
         value: item.id,
-        label: item.organization_name
-    }))
-
-    const
-
+        label: item.organization_name,
+    }));
 
     return (
-        <Select options={data}/>
-    )
+        <Controller
+            name={"organization_id"} // nombre del campo en el formulario
+            control={control}
+            render={({field}) => (
+                <Select
+                    {...field}
+                    options={data}
+                    onChange={(selectedOption) => field.onChange(selectedOption)}
+                />
+            )}
+        />
+    );
 }
