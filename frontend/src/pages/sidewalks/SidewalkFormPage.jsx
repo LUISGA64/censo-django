@@ -1,18 +1,15 @@
 import { Controller, useForm } from 'react-hook-form';
-import { getAllOrganizations } from '../../api/organizations.api.js';
 import { useEffect, useState } from 'react';
-import { OrganizationsList } from '../../components/organizations/OrganizationsList.jsx';
 import { SelectOrganizations } from '../../components/organizations/SelectOrganizations.jsx';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import { Container } from 'react-bootstrap';
+import {createSidewalk} from '../../api/sidewalks.api'
 
 export function SidewalkFormPage() {
   const { control, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data);
-    // Aquí podrías realizar acciones adicionales en caso de que no haya errores en la validación
+  const onSubmit = async (data) => {
+    await createSidewalk(data)
   };
 
   return (
@@ -37,7 +34,7 @@ export function SidewalkFormPage() {
               name="organization_id"
               control={control}
               rules={{ required: 'Selecciona una organización' }} // Mensaje de error personalizado
-              render={({ field }) => <SelectOrganizations control={control} />}
+              render={({ field:{value} }) => <SelectOrganizations control={control} />}
             />
             {errors.organization_id && <span>{errors.organization_id.message}</span>}
           </div>
