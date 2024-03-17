@@ -6,7 +6,6 @@ export function OrganizationsPage() {
         <div>
             <h1>Listado</h1>
             <OrganizationsList />
-            <SelectOrganizations/>
         </div>
     );
 }

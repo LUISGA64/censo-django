@@ -1,5 +1,3 @@
-
-
 export function SidewalkTable({sidewalk}) {
     return (
         <div>

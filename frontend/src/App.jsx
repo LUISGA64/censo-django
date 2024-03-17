@@ -12,6 +12,7 @@ function App() {
                 <Route path="/" element={<Navigate to={'/sidewalks'} />} />
                 <Route path="/sidewalks" element={<SidewalksPage />} />
                 <Route path="/sidewalks-create" element={<SidewalkFormPage />} />
+                <Route path="/sidewalks/:id" element={<SidewalkFormPage/>} />
                 <Route path="/organizations" element={<OrganizationsPage />} />
             </Routes>
         </BrowserRouter>
