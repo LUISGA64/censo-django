@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import {SelectOrganizations} from '../../components/organizations/SelectOrganizations.jsx';
 import Row from 'react-bootstrap/Row';
 import {Container} from 'react-bootstrap';
-import {createSidewalk, deleteSidewalk} from '../../api/sidewalks.api.js'
+import {createSidewalk, deleteSidewalk, getSidewalk} from '../../api/sidewalks.api.js'
 import {useNavigate, useParams} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast, { Toaster } from 'react-hot-toast';
@@ -12,10 +12,13 @@ export function SidewalkFormPage() {
     // Hooks
     const {
         control, handleSubmit,
-        formState: {errors}
+        formState: {errors},
+        setValue
     } = useForm();
     const navigate = useNavigate();
     const params = useParams();
+
+    console.log(params.id);
     const notify = () => toast('Here is your toast.');
 
     const onSubmit = handleSubmit(async (data) => {
@@ -41,6 +44,18 @@ export function SidewalkFormPage() {
             console.error('Error al enviar la solicitud: ', error);
         }
     })
+
+    useEffect(() => {
+        async function loadSidewalk() {
+            if (params.id) {
+                const response = await getSidewalk(params.id);
+                console.log(response.data);
+                setValue('sidewalk_name', response.data.sidewalk_name);
+                setValue('organization_id', response.data.organization_id);
+            }
+        }
+        loadSidewalk();
+    }, []);
 
     return (
         <Container>

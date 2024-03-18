@@ -51,7 +51,10 @@ export function SidewalkList() {
         })
     }
 
-    // Editar registros Sidewalk con un modal
+    // Editar registros Sidewalk
+    const editarSidewalk = (id) => {
+        navigate(`/sidewalks/${id}`);
+    }
 
 
     return (
@@ -75,7 +78,7 @@ export function SidewalkList() {
                         <td>{sidewalk.sidewalk_name}</td>
                         <td>{sidewalk.organization_id}</td>
                         <td>
-                            <button>Editar</button>
+                            <button onClick={() => editarSidewalk(sidewalk.id)}>Editar</button>
                             <button onClick={() => borrarSidewalk(sidewalk.id)}>Eliminar</button>
                         </td>
                     </tr>
