@@ -1,4 +1,4 @@
-import {SidewalkList} from '../../components/SidewalkList.jsx';
+import {SidewalkList} from '../../components/sidewalks/SidewalkList.jsx';
 
 export function SidewalksPage() {
   return (

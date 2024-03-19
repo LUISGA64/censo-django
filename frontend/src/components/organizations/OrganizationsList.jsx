@@ -1,6 +1,5 @@
 import {getAllOrganizations} from '../../api/organizations.api.js'
 import {useState, useEffect} from 'react';
-import {SelectOrganizations} from "./SelectOrganizations.jsx";
 
 
 export function OrganizationsList() {
@@ -20,7 +19,12 @@ export function OrganizationsList() {
 
     return (
         <div>
-            <h1>Hola mundo</h1>
+            <h1>Resguardo</h1>
+            <ul>
+                {organizations.map((organization) => {
+                    return <li key={organization.id}>{organization.organization_name}</li>;
+                })}
+            </ul>
         </div>
-    )
+    );
 }
