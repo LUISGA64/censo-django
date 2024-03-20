@@ -22,6 +22,7 @@ export function SidewalkFormPage() {
     const notify = () => toast('Here is your toast.');
 
     const onSubmit = handleSubmit(async (data) => {
+        console.log(data)
         let sidewalk_name;
         let organization_id;
         let sidewalkData;
@@ -51,7 +52,7 @@ export function SidewalkFormPage() {
                 const response = await getSidewalk(params.id);
                 console.log(response.data);
                 setValue('sidewalk_name', response.data.sidewalk_name);
-                setValue('organization_id', response.data.organization_id);
+                setValue('organization_id', {value: response.data.organization_id});
             }
         }
         loadSidewalk();
@@ -60,7 +61,7 @@ export function SidewalkFormPage() {
     return (
         <Container>
             <Row className="justify-content-md-center">
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={onSubmit}>
                     <div>
                         <label htmlFor="sidewalk_name">Vereda:</label>
                         <Controller
