@@ -4,6 +4,7 @@ import {SidewalksPage} from './pages/sidewalks/SidewalksPage';
 import SidewalkFormPage from "./pages/sidewalks/SidewalkFormPage.jsx";
 import {Navigation} from './components/Navigation.jsx';
 import {OrganizationsPage} from "./pages/organizations/OrganizationsPage.jsx";
+import {Toaster} from 'react-hot-toast';
 function App() {
     return (
         <BrowserRouter>
@@ -15,6 +16,7 @@ function App() {
                 <Route path="/sidewalks/:id" element={<SidewalkFormPage/>} />
                 <Route path="/organizations" element={<OrganizationsPage />} />
             </Routes>
+            <Toaster/>
         </BrowserRouter>
     );
 }

@@ -5,10 +5,10 @@ const sidewalkApi = axios.create({
 });
 
 export const getAllSidewalks = () => sidewalkApi.get("/");
-export const getSidewalk = (id) => sidewalkApi.get(`/${id}`);
+export const getSidewalk = (id) => sidewalkApi.get(`/${id}/`);
 
 export const createSidewalk = (sidewalks) => sidewalkApi.post("/", sidewalks);
 
 export const deleteSidewalk = (id) => sidewalkApi.delete(`/${id}`)
 
-export const updatedSidewalk = (id, sidewalk) => sidewalkApi.put(`/${id}`, sidewalk)
+export const updatedSidewalk = (id, sidewalk) => sidewalkApi.put(`/${id}/`, sidewalk)

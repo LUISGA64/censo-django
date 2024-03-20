@@ -90,5 +90,4 @@ export function SidewalkList() {
 
         </div>
     )
-
 }
