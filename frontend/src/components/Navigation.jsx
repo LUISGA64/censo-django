@@ -12,6 +12,14 @@ export function Navigation() {
                 <li>
                     <Link to="/organizations">Organizations</Link>
                 </li>
+
+                <li>
+                    <Link to="/associations">Associations</Link>
+                </li>
+
+                <li>
+                    <Link to="/associations-create">Crear Asociación</Link>
+                </li>
             </ul>
         </nav>
     )

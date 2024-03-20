@@ -1,6 +1,3 @@
-import SidewalkModal from "./SidewalkModal.jsx";
-
-;
 import {useEffect, useState} from 'react';
 import {getAllSidewalks, deleteSidewalk} from '../../api/sidewalks.api.js'
 import {useNavigate, useParams} from 'react-router-dom'
@@ -12,10 +9,6 @@ export function SidewalkList() {
 
     const [sidewalks, setSidewalks] = useState([]);
     const navigate = useNavigate();
-
-    // Estados para el modal
-    const handleShow = () => setShow(true);
-    const handleClose = () => setShow(false);
 
     useEffect(() => {
         async function loadSidewalks() {
@@ -59,35 +52,32 @@ export function SidewalkList() {
     }
 
     return (
-        <div className="table-responsive">
-            <Table striped>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>ID</th>
-                    <th>Vereda</th>
-                    <th>Resguardo</th>
-                    <th>Opciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                {sidewalks.map((sidewalk, index) => {
-                    return (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{sidewalk.id}</td>
-                            <td>{sidewalk.sidewalk_name}</td>
-                            <td>{sidewalk.organization_id}</td>
-                            <td>
-                                <button onClick={() => editarSidewalk(sidewalk.id)}>Editar</button>
-                                <button onClick={() => borrarSidewalk(sidewalk.id)}>Eliminar</button>
-                            </td>
-                        </tr>
-                    );
-                })}
-                </tbody>
-            </Table>
-
-        </div>
+        <Table striped>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>ID</th>
+                <th>Vereda</th>
+                <th>Resguardo</th>
+                <th>Opciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            {sidewalks.map((sidewalk, index) => {
+                return (
+                    <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{sidewalk.id}</td>
+                        <td>{sidewalk.sidewalk_name}</td>
+                        <td>{sidewalk.organization_id}</td>
+                        <td>
+                            <button onClick={() => editarSidewalk(sidewalk.id)}>Editar</button>
+                            <button onClick={() => borrarSidewalk(sidewalk.id)}>Eliminar</button>
+                        </td>
+                    </tr>
+                );
+            })}
+            </tbody>
+        </Table>
     )
 }
