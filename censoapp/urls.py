@@ -11,6 +11,15 @@ router = routers.DefaultRouter()
 router.register(r'sidewalks', SidewalksViewSet, 'sidewalks')
 router.register(r'associations', AssociationViewSet, 'associations')
 router.register(r'organizations', OrganizationViewSet, 'organizations')
+router.register(r'documenttypes', OrganizationViewSet, 'documenttypes')
+router.register(r'civilstates', OrganizationViewSet, 'civilstates')
+router.register(r'educationlevels', OrganizationViewSet, 'educationlevels')
+router.register(r'eps', OrganizationViewSet, 'eps')
+router.register(r'kinships', OrganizationViewSet, 'kinships')
+router.register(r'occupancies', OrganizationViewSet, 'occupancies')
+router.register(r'securitysocials', OrganizationViewSet, 'security-socials')
+router.register(r'handicaps', OrganizationViewSet, 'handicaps')
+
 
 urlpatterns = router.urls
 

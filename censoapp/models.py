@@ -98,6 +98,14 @@ class Gender(models.Model):
         return f"{self.gender}"
 
 
+class Handicap(models.Model):
+    code_handicap = models.CharField(blank=False, null=False, max_length=1)
+    handicap = models.CharField(blank=False, null=False, max_length=50)
+
+    def __str__(self):
+        return f"{self.handicap}"
+
+
 class SecuritySocial(models.Model):
     code_security_social = models.CharField(blank=False, null=False, unique=True, max_length=5)
     affiliation = models.CharField(blank=False, null=False, max_length=30)

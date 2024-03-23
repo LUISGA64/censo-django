@@ -1,6 +1,9 @@
 from rest_framework import viewsets, permissions
-from .serializers import SidewalksSerializer, AssociationSerializer, OrganizationSerializer
-from .models import Sidewalks, Association, Organizations
+from .serializers import SidewalksSerializer, AssociationSerializer, OrganizationSerializer, DocumentTypeSerializer, \
+    CivilStateSerializer, EducationLevelSerializer, EpsSerializer, KinshipSerializer, OccupancySerializer, \
+    GenderSerializer, SecuritySocialSerializer, HandicapSerializer
+from .models import Sidewalks, Association, Organizations, DocumentType, CivilState, EducationLevel, Eps, Kinship, \
+    Occupancy, Gender, SecuritySocial, Handicap
 
 
 class SidewalksViewSet(viewsets.ModelViewSet):
@@ -27,3 +30,47 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organizations.objects.all()
     serializer_class = OrganizationSerializer
 
+
+class DocumentTypeViewSet(viewsets.ModelViewSet):
+    queryset = DocumentType.objects.all()
+    serializer_class = DocumentTypeSerializer
+
+
+class CivilStateViewSet(viewsets.ModelViewSet):
+    queryset = CivilState.objects.all()
+    serializer_class = CivilStateSerializer
+
+
+class EducationLevelViewSet(viewsets.ModelViewSet):
+    queryset = EducationLevel.objects.all()
+    serializer_class = EducationLevelSerializer
+
+
+class EpsViewSet(viewsets.ModelViewSet):
+    queryset = Eps.objects.all()
+    serializer_class = EpsSerializer
+
+
+class KinshipViewSet(viewsets.ModelViewSet):
+    queryset = Kinship.objects.all()
+    serializer_class = KinshipSerializer
+
+
+class OccupancyViewSet(viewsets.ModelViewSet):
+    queryset = Occupancy.objects.all()
+    serializer_class = OccupancySerializer
+
+
+class GenderViewSet(viewsets.ModelViewSet):
+    queryset = Gender.objects.all()
+    serializer_class = GenderSerializer
+
+
+class SecurityViewSet(viewsets.ViewSet):
+    queryset = SecuritySocial.objects.all()
+    serializer_class = SecuritySocialSerializer
+
+
+class HandicapViewSet(viewsets.ViewSet):
+    queryset = Handicap.objects.all()
+    serializer_class = HandicapSerializer
