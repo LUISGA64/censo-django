@@ -14,9 +14,16 @@
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
-                <div class="card mb-4">
-                    <div class="card-header pb-0">
-                        <h6>Fichas Familiares</h6>
+                <div class="card mb-4 p-2">
+                    <div class="row">
+                        <div class="col">
+                            <h6>Fichas Familiares</h6>
+                        </div>
+                        <div class="col text-end">
+                            <a href="{% url 'createFamilyCard' %}" class="btn bg-gradient-dark mt-2">
+                                <i class="fas fa-plus"></i> Crear Ficha Familiar
+                            </a>
+                        </div>
                     </div>
                     <hr class="horizontal dark">
                     <div class="card-body px-4 pt-0 pb-2">
@@ -53,7 +60,7 @@
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0">
-                                                {{ card.first_name_1 }} {{ card.first_name_2 }} 
+                                                {{ card.first_name_1 }} {{ card.first_name_2 }}
                                                 {{ card.last_name_1 }} {{ card.last_name_2 }}
                                             </p>
                                         </td>
@@ -78,14 +85,14 @@
                                                title="Detalle Ficha Familiar"
                                                class="badge badge-sm bg-gradient-success">
                                                 <i class="fas fa-binoculars"></i> </a>
-                                            
-                                            <a href="" 
+
+                                            <a href=""
                                                title="Editar Ficha"
                                                class="badge badge-sm bg-gradient-dark">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            
-                                            <a href="{% url 'update-family' card.family_card.id %}" 
+
+                                            <a href="{% url 'update-family' card.family_card.id %}"
                                                title="Editar Ficha"
                                                class="badge badge-sm bg-gradient-faded-warning">
                                                 <i class="fas fa-edit"></i>

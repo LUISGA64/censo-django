@@ -15,7 +15,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from censoapp.models import Association, Person, FamilyCard, DocumentType, Gender, SecuritySocial, Eps, Kinship, \
-    EducationLevel, CivilState, Occupancy
+    EducationLevel, CivilState, Occupancy, Sidewalks, Organizations
 from .forms import FormFamilyCard, FormPerson
 
 
@@ -94,10 +94,25 @@ def get_family_cards(request):
     return JsonResponse(response_data)
 
 
-# Clase para la ficha familiar y el cabeza
+# Clase para la ficha familiar y la cabeza de familia
 class FamilyCardCreate(SessionWizardView):
     form_list = [FormFamilyCard, FormPerson]
     template_name = 'censo/censo/createFamilyCard.html'
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        context['sidewalks'] = Sidewalks.objects.all()
+        context['document_types'] = DocumentType.objects.all()
+        context['genders'] = Gender.objects.all()
+        context['security_socials'] = SecuritySocial.objects.all()
+        context['eps_all'] = Eps.objects.all()
+        context['kinships'] = Kinship.objects.all()
+        context['education_levels'] = EducationLevel.objects.all()
+        context['civil_states'] = CivilState.objects.all()
+        context['occupancies'] = Occupancy.objects.all()
+        context['handicaps'] = handicap
+        context['organizations'] = Organizations.objects.all()
+        return context
 
     @transaction.atomic
     def done(self, form_list, **kwargs):
