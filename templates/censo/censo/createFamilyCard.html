@@ -13,126 +13,82 @@
 
 {% block content %}
     <div class="container-fluid">
-    <div class="row mt-5">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Registrar Censo</h3>
-            </div>
+    <div class="row">
+        <div class="card p-3">
             <div class="card-body bg-light">
-                <form action="" method="post" class="form-horizontal form-group">
+                <div class="mt-3">
+                    <h4>
+                        Datos de la Vivienda
+                        <small class="text-muted"></small>
+                    </h4>
+                </div>
+                <form action="{% url 'createFamilyCard' %}" method="post" class="form-horizontal form-group">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-3">
-                            <label for="sidewalk" class="form-label">Vereda</label>
-                            <select id="sidewalk" class="form-control">
-                                <option value="" disabled selected>Seleccionar</option>
-                                {% for sidewalk in sidewalks %}
-                                    <option value="{{ sidewalk.id }}">{{ sidewalk.sidewalk_name }}</option>
-                                {% endfor %}
-                            </select>
+                            {{ form_family.sidewalk_home|as_crispy_field }}
                         </div>
 
                         <div class="col-md-3">
-                            <label for="zone" class="form-label">Zona</label>
-                            <select id="zone" class="form-control">
-                                <option value="" selected disabled>Seleccionar</option>
-                                <option value="Urbana">Urbana</option>
-                                <option value="Rural">Rural</option>
-                            </select>
+                            {{ form_family.zone|as_crispy_field }}
                         </div>
 
                         <div class="col-md-3">
-                            <label for="organization" class="form-label">Resguardo</label>
-                            <select id="organization" class="form-control">
-                                <option value="" selected disabled>Seleccionar</option>
-                                {% for organization in organizations %}
-                                    <option value="{{ organization.id }}">{{ organization.organization_name }}</option>
-                                {% endfor %}
-                            </select>
+                            {{ form_family.organization_id|as_crispy_field }}
+                        </div>
+                        <hr>
+                        <div class="mt-4">
+                            <h4>
+                                Datos del Cabeza de Familia
+                                <small class="text-muted"></small>
+                            </h4>
                         </div>
 
-
-                        <div class="row">
+                        <div class="row mt-2">
                             <div class="col-md-3">
-                                <label for="firstname" class="form-label">Primer Nombre</label>
-                                <input type="text" class="form-control" id="firstname" aria-describedby="nameHelp">
+                                {{ form_person.first_name_1|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="name" class="form-label">Segundo Nombre</label>
-                                <input type="text" class="form-control" id="firstname" aria-describedby="nameHelp">
+                                {{ form_person.first_name_2|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="name" class="form-label">Primer Apellido</label>
-                                <input type="text" class="form-control" id="last_name_2" aria-describedby="nameHelp">
+                                {{ form_person.last_name_1|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="name" class="form-label">Segundo Apellido</label>
-                                <input type="text" class="form-control" id="last_name_2" aria-describedby="nameHelp">
+                                {{ form_person.last_name_2|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="document_type" class="form-label">Tipo Documento</label>
-                                <select id="document_type" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for document_type in document_types %}
-                                        <option value="{{ document_type.id }}">{{ document_type.document_type }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.document_type|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="identification" class="form-label">Identificación</label>
-                                <input type="text" class="form-control" id="identification" aria-describedby="nameHelp">
+                                {{ form_person.identification_person|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="date_birth" class="form-label">Fecha Nacimiento</label>
-                                <input id="date_birth" class="form-control" type="date">
+                                {{ form_person.date_birth|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="gender" class="form-label">Género</label>
-                                <select id="gender" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for gender in genders %}
-                                        <option value="{{ gender.id }}">{{ gender.gender }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.gender_id|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="kinship" class="form-label">Parentesco</label>
-                                <select id="kinship" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for kinship in kinships %}
-                                        <option value="{{ kinship.id }}">{{ kinship.description_kinship }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.kinship_id|as_crispy_field }}
                             </div>
 
 
                             <div class="col-md-3">
-                                <label for="security_social" class="form-label">Seguridad Social</label>
-                                <select id="security_social" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for security_social in security_socials %}
-                                        <option value="{{ security_social.id }}">{{ security_social.affiliation }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.social_insurance|as_crispy_field }}
                             </div>
 
 
                             <div class="col-md-3">
-                                <label for="eps" class="form-label">Eps</label>
-                                <select id="eps" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for eps in eps_all %}
-                                        <option value="{{ eps.id }}">{{ eps.name_eps }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.eps|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
@@ -140,73 +96,47 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label for="education" class="form-label">Nivel Educativo</label>
-                                <select id="education" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for education_level in education_levels %}
-                                        <option value="{{ education_level.id }}">{{ education_level.education_level }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.education_level|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="civil_state" class="form-label">Estado Civil</label>
-                                <select id="civil_state" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for civil_state in civil_states %}
-                                        <option value="{{ civil_state.id }}">{{ civil_state.state_civil }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.civil_state|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="occupancy" class="form-label">Ocupación</label>
-                                <select id="occupancy" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for occupancy in occupancies %}
-                                        <option value="{{ occupancy.id }}">{{ occupancy.description_occupancy }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.occupation|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                <label for="handicap" class="form-label">Condición Discapacidad</label>
-                                <select id="handicap" class="form-control">
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    {% for value, name in handicaps %}
-                                        <option value="{{ value }}">{{ name }}</option>
-                                    {% endfor %}
-                                </select>
+                                {{ form_person.handicap|as_crispy_field }}
                             </div>
-                        
-                        
+
+
                             <div class="col-md-3">
-                                <label for="cell_phone" class="form-label">Número Celular</label>
-                                <input type="text" id="cell_phone" class="form-control">
+                                {{ form_person.cell_phone|as_crispy_field }}
                             </div>
-                        
+
                             <div class="col-md-3">
-                                <label for="personal_email" class="form-label">Correo Electrónico</label>
-                                <input type="email" id="personal_email" class="form-control">
+                                {{ form_person.personal_email|as_crispy_field }}
                             </div>
-                        
+
                             <div class="col-md-3">
                                 <label for="" class="form-label"></label>
-                                
+
                             </div>
-                        
+
                             <div class="col-md-3">
                                 <label for="" class="form-label"></label>
                             </div>
-                        
+
                             <div class="col-md-3">
                                 <label for="" class="form-label"></label>
                             </div>
 
                         </div>
-                    
 
-                        <div class="pull-right mt-5">
+
+                        <div class="pull-right mt-1">
                             <button class="btn btn-default">Cancelar</button>
                             <button class="btn btn-success">Guardar</button>
                         </div>

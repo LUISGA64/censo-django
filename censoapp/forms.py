@@ -1,5 +1,5 @@
 from crispy_forms.layout import Layout
-from django import forms
+from django.forms import ModelForm
 from django.forms import Field
 
 from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from django import forms
 
 
-class FormFamilyCard(forms.Form):
+class FormFamilyCard(ModelForm):
 
     address_home = forms.CharField(label='Dirección Vivienda', max_length=50, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Dirección Vivienda'}))
@@ -41,18 +41,18 @@ class FormFamilyCard(forms.Form):
                                                 'readonly': True,
                                             }),)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'id-FamilyCard'
-        self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
-        self.helper.label_class = 'control-label'
-        # deshabilitar field family_card_number
-        var = self.fields['family_card_number']
-        var.disabled = True
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.helper = FormHelper()
+    #     self.helper.form_id = 'id-FamilyCard'
+    #     self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
+    #     self.helper.label_class = 'control-label'
+    #     # deshabilitar field family_card_number
+    #     var = self.fields['family_card_number']
+    #     var.disabled = True
 
 
-class FormPerson(forms.Form):
+class FormPerson(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,12 +82,12 @@ class FormPerson(forms.Form):
     # Número Teléfonico
     cell_phone = forms.CharField(label='Teléfono Móvil', max_length=15, required=False,
                                  widget=forms.TextInput(
-                                     attrs={'class': 'form-control', 'placeholder': 'Teléfono Móvil'}))
+                                     attrs={'class': 'form-control', 'placeholder': '000-000-0000'}))
 
     # Correo Personal
     personal_email = forms.EmailField(label='Correo Personal', max_length=50, required=False,
                                       widget=forms.EmailInput(
-                                          attrs={'class': 'form-control', 'placeholder': 'Correo Personal'}))
+                                          attrs={'class': 'form-control', 'placeholder': 'mi_correo@censoweb.com'}))
 
     # Identificación de la persona
     identification_person = forms.CharField(label='Identificación', max_length=15,
@@ -158,6 +158,3 @@ class FormPerson(forms.Form):
                                         widget=forms.Select(attrs={'class': 'form-control',
                                                                    'placeholder': 'Ocupación'}),
                                         label="Ocupación")
-
-
-

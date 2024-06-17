@@ -1,6 +1,4 @@
 from datetime import datetime
-import json
-
 from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
 from django.db import transaction
@@ -95,12 +93,15 @@ def get_family_cards(request):
 
 
 # Clase para la ficha familiar y la cabeza de familia
-class FamilyCardCreate(SessionWizardView):
-    form_list = [FormFamilyCard, FormPerson]
+class FamilyCardCreate(CreateView):
+    model = FamilyCard
     template_name = 'censo/censo/createFamilyCard.html'
+    form_class = FormFamilyCard
+    success_url = reverse_lazy('familyCardIndex')
 
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form=form, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_person'] = FormPerson()
         context['sidewalks'] = Sidewalks.objects.all()
         context['document_types'] = DocumentType.objects.all()
         context['genders'] = Gender.objects.all()
@@ -113,6 +114,22 @@ class FamilyCardCreate(SessionWizardView):
         context['handicaps'] = handicap
         context['organizations'] = Organizations.objects.all()
         return context
+
+    def form_valid(self, form):
+        family_card = form.save(commit=False)
+        person_form = FormPerson(self.request.POST)
+        if person_form.is_valid():
+            person = person_form.save(commit=False)
+            person.family_card = family_card
+            person.family_head = True
+            family_card.save()
+            person.save()
+            messages.success(self.request, "Ficha familiar creada correctamente")
+            return redirect('familyCardIndex')
+        else:
+            messages.error(self.request, "No se pudo crear la ficha familiar")
+            return redirect('error_page')
+
 
     @transaction.atomic
     def done(self, form_list, **kwargs):
