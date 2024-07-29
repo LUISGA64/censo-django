@@ -22,19 +22,19 @@
                         <small class="text-muted"></small>
                     </h4>
                 </div>
-                <form action="{% url 'createFamilyCard' %}" method="post" class="form-horizontal form-group">
+                <form method="post" class="form-horizontal form-group">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-3">
-                            {{ form_family.sidewalk_home|as_crispy_field }}
+                            {{ form.sidewalk_home|as_crispy_field }}
                         </div>
 
                         <div class="col-md-3">
-                            {{ form_family.zone|as_crispy_field }}
+                            {{ form.zone|as_crispy_field }}
                         </div>
 
                         <div class="col-md-3">
-                            {{ form_family.organization_id|as_crispy_field }}
+                            {{ form.organization_id|as_crispy_field }}
                         </div>
                         <hr>
                         <div class="mt-4">
@@ -44,51 +44,52 @@
                             </h4>
                         </div>
 
+
                         <div class="row mt-2">
                             <div class="col-md-3">
-                                {{ form_person.first_name_1|as_crispy_field }}
+                                {{ person_form.first_name_1|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.first_name_2|as_crispy_field }}
+                                {{ person_form.first_name_2|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.last_name_1|as_crispy_field }}
+                                {{ person_form.last_name_1|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.last_name_2|as_crispy_field }}
+                                {{ person_form.last_name_2|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.document_type|as_crispy_field }}
+                                {{ person_form.document_type|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.identification_person|as_crispy_field }}
+                                {{ person_form.identification_person|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.date_birth|as_crispy_field }}
+                                {{ person_form.date_birth|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.gender_id|as_crispy_field }}
+                                {{ person_form.gender_id|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.kinship_id|as_crispy_field }}
-                            </div>
-
-
-                            <div class="col-md-3">
-                                {{ form_person.social_insurance|as_crispy_field }}
+                                {{ person_form.kinship_id|as_crispy_field }}
                             </div>
 
 
                             <div class="col-md-3">
-                                {{ form_person.eps|as_crispy_field }}
+                                {{ person_form.social_insurance|as_crispy_field }}
+                            </div>
+
+
+                            <div class="col-md-3">
+                                {{ person_form.eps|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
@@ -96,28 +97,28 @@
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.education_level|as_crispy_field }}
+                                {{ person_form.education_level|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.civil_state|as_crispy_field }}
+                                {{ person_form.civil_state|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.occupation|as_crispy_field }}
+                                {{ person_form.occupation|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.handicap|as_crispy_field }}
+                                {{ person_form.handicap|as_crispy_field }}
                             </div>
 
 
                             <div class="col-md-3">
-                                {{ form_person.cell_phone|as_crispy_field }}
+                                {{ person_form.cell_phone|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
-                                {{ form_person.personal_email|as_crispy_field }}
+                                {{ person_form.personal_email|as_crispy_field }}
                             </div>
 
                             <div class="col-md-3">
@@ -140,6 +141,7 @@
                             <button class="btn btn-default">Cancelar</button>
                             <button class="btn btn-success">Guardar</button>
                         </div>
+                    </div>
                 </form>
             </div>
         </div>

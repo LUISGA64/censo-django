@@ -93,95 +93,32 @@ def get_family_cards(request):
 
 
 # Clase para la ficha familiar y la cabeza de familia
-class FamilyCardCreate(CreateView):
+class FamilyCardPersonCreateView(CreateView):
     model = FamilyCard
-    template_name = 'censo/censo/createFamilyCard.html'
     form_class = FormFamilyCard
+    template_name = 'censo/censo/createFamilyCard.html'
     success_url = reverse_lazy('familyCardIndex')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_person'] = FormPerson()
-        context['sidewalks'] = Sidewalks.objects.all()
-        context['document_types'] = DocumentType.objects.all()
-        context['genders'] = Gender.objects.all()
-        context['security_socials'] = SecuritySocial.objects.all()
-        context['eps_all'] = Eps.objects.all()
-        context['kinships'] = Kinship.objects.all()
-        context['education_levels'] = EducationLevel.objects.all()
-        context['civil_states'] = CivilState.objects.all()
-        context['occupancies'] = Occupancy.objects.all()
-        context['handicaps'] = handicap
-        context['organizations'] = Organizations.objects.all()
+        if self.request.POST:
+            context['person_form'] = FormPerson(self.request.POST)
+        else:
+            context['person_form'] = FormPerson()
         return context
 
     def form_valid(self, form):
-        family_card = form.save(commit=False)
-        person_form = FormPerson(self.request.POST)
-        if person_form.is_valid():
+        context = self.get_context_data()
+        person_form = context['person_form']
+        if form.is_valid() and person_form.is_valid():
+            self.object = form.save()
             person = person_form.save(commit=False)
-            person.family_card = family_card
-            person.family_head = True
-            family_card.save()
+            person.family_card = self.object
             person.save()
-            messages.success(self.request, "Ficha familiar creada correctamente")
-            return redirect('familyCardIndex')
+            messages.success(self.request, "Familia y persona creadas correctamente.")
+            return super().form_valid(form)
         else:
-            messages.error(self.request, "No se pudo crear la ficha familiar")
-            return redirect('error_page')
-
-
-    @transaction.atomic
-    def done(self, form_list, **kwargs):
-        family_card_data = self.get_cleaned_data_for_step('0')
-        person_data = self.get_cleaned_data_for_step('1')
-        family_card_count = FamilyCard.objects.count()
-
-        try:
-            with transaction.atomic():
-                # filter the data to create the person
-                query = Person.objects.filter(identification_person=person_data['identification_person'])
-                if query.exists():
-                    messages.error(self.request, "Ya existe una persona con esa cédula")
-
-                else:
-                    family_card = FamilyCard.objects.create(
-                        address_home=family_card_data['address_home'],
-                        sidewalk_home=family_card_data['sidewalk_home'],
-                        latitude=family_card_data['latitude'],
-                        longitude=family_card_data['longitude'],
-                        zone=family_card_data['zone'],
-                        organization_id=family_card_data['organization_id'],
-                        family_card_number=family_card_count + 1)
-
-                    Person.objects.create(
-                        first_name_1=person_data['first_name_1'],
-                        first_name_2=person_data['first_name_2'],
-                        last_name_1=person_data['last_name_1'],
-                        last_name_2=person_data['last_name_2'],
-                        identification_person=person_data['identification_person'],
-                        document_type=person_data['document_type'],
-                        cell_phone=person_data['cell_phone'],
-                        personal_email=person_data['personal_email'],
-                        gender_id=person_data['gender_id'],
-                        date_birth=person_data['date_birth'],
-                        social_insurance=person_data['social_insurance'],
-                        eps=person_data['eps'],
-                        kinship_id=person_data['kinship_id'],
-                        handicap=person_data['handicap'],
-                        education_level=person_data['education_level'],
-                        civil_state=person_data['civil_state'],
-                        occupation=person_data['occupation'],
-                        family_card=family_card,
-                        family_head=True
-                    )
-                    messages.success(self.request, "Ficha familiar creada correctamente")
-                    return redirect('dashboard')
-        except Exception as e:
-            # Maneja las excepciones según sea necesario
-            print(f"Error durante la creación: {e}")
-            messages.error(self.request, "No se pudo crear la ficha familiar")
-            return redirect('error_page')  # redirige a una página de error
+            return self.form_invalid(form)
 
 
 @login_required
@@ -263,7 +200,6 @@ class UpdateFamily(UpdateView):
 
         print(self.request.POST)
         family_card_number = self.request.POST['family_card_number']
-
 
         messages.success(self.request, "Ficha familiar actualizada correctamente")
         return super(UpdateFamily, self).form_valid(form)
