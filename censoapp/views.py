@@ -110,6 +110,12 @@ class FamilyCardPersonCreateView(CreateView):
     def form_valid(self, form):
         context = self.get_context_data()
         person_form = context['person_form']
+
+        identification_person = self.request.POST['identification_person']
+        if Person.objects.filter(identification_person=identification_person).exists():
+            messages.error(self.request, "Ya existe una persona con esa identificación")
+            return self.form_invalid(form)
+
         if form.is_valid() and person_form.is_valid():
             self.object = form.save()
             person = person_form.save(commit=False)
@@ -119,6 +125,10 @@ class FamilyCardPersonCreateView(CreateView):
             return super().form_valid(form)
         else:
             return self.form_invalid(form)
+
+    def post(self, request, *args, **kwargs):
+        print("FamilyCard form data:", request.POST.dict())
+        return super().post(request, *args, **kwargs)
 
 
 @login_required
