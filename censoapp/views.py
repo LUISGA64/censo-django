@@ -94,6 +94,7 @@ def get_family_cards(request):
 
 # Clase para la ficha familiar y la cabeza de familia
 class FamilyCardPersonCreateView(CreateView):
+
     model = FamilyCard
     form_class = FormFamilyCard
     template_name = 'censo/censo/createFamilyCard.html'
@@ -117,6 +118,7 @@ class FamilyCardPersonCreateView(CreateView):
             return self.form_invalid(form)
 
         if form.is_valid() and person_form.is_valid():
+            print("* * * *"* 5)
             self.object = form.save()
             person = person_form.save(commit=False)
             person.family_card = self.object
