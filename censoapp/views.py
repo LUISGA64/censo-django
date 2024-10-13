@@ -113,23 +113,31 @@ class FamilyCardPersonCreateView(CreateView):
 
         identification_person = self.request.POST['identification_person']
         if Person.objects.filter(identification_person=identification_person).exists():
-            messages.error(self.request, "Ya existe una persona con esa identificación")
+            messages.error(self.request, "Ya existe una persona con esa identificación.")
             return self.form_invalid(form)
 
         if form.is_valid() and person_form.is_valid():
-            self.object = form.save()
-            person = person_form.save(commit=False)
-            person.family_card = self.object
-            person.save()
-            messages.success(self.request, "Familia y persona creadas correctamente.")
-            return super().form_valid(form)
+            try:
+                with transaction.atomic():
+                    self.object = form.save()
+                    person = person_form.save(commit=False)
+                    person.family_card = self.object
+                    print(person.family_card)
+                    person.save()
+                    messages.success(self.request, "Familia y persona creadas correctamente.")
+                    return super().form_valid(form)
+            except Exception as e:
+                messages.error(self.request, f"Ocurrió un error: {e}")
+                return self.form_invalid(form)
         else:
             return self.form_invalid(form)
 
-    def post(self, request, *args, **kwargs):
-        print("FamilyCard form data:", request.POST.dict())
-        return super().post(request, *args, **kwargs)
-
+    def form_invalid(self, form):
+        context = self.get_context_data()
+        person_form = context['person_form']
+        print(person_form.errors)
+        messages.error(self.request, "Hubo errores en el formulario. Por favor, corríjalos e intente nuevamente.")
+        return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 @login_required
 def crear_persona(request, pk):
