@@ -1,7 +1,8 @@
 from django.urls import path, include
 from django.contrib.auth.decorators import login_required
 from .views import (home, dashboard, profile, association, CreateAssociation, family_card_index,
-                    FamilyCardPersonCreateView, crear_persona, detalle_ficha, UpdateFamily, get_family_cards)
+                    crear_persona, detalle_ficha, UpdateFamily, get_family_cards,
+                    register_family_card)
 
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
@@ -34,7 +35,9 @@ urlpatterns = [
     path('accounts/profile/', profile, name='profile'),
     path('association', association, name='association'),
     path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
-    path('familyCard/create', login_required(FamilyCardPersonCreateView.as_view()), name='createFamilyCard'),
+    # path('familyCard/create', login_required(FamilyCardPersonCreateView.as_view()), name='createFamilyCard'),
+
+    path('familyCard/create', login_required(register_family_card), name='createFamilyCard'),
     path('familyCard/index', login_required(family_card_index), name='familyCardIndex'),
     path('familyCard/create/<int:pk>', login_required(crear_persona), name='createPerson'),
     path('familyCard/detail/<int:pk>/', login_required(detalle_ficha), name='detailFamilyCard'),

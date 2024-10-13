@@ -93,51 +93,59 @@ def get_family_cards(request):
 
 
 # Clase para la ficha familiar y la cabeza de familia
-class FamilyCardPersonCreateView(CreateView):
-    model = FamilyCard
-    form_class = FormFamilyCard
-    template_name = 'censo/censo/createFamilyCard.html'
-    success_url = reverse_lazy('familyCardIndex')
+def register_family_card(request):
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['person_form'] = FormPerson(self.request.POST)
-        else:
-            context['person_form'] = FormPerson()
-        return context
+    count_family_card = FamilyCard.objects.count()
 
-    def form_valid(self, form):
-        context = self.get_context_data()
-        person_form = context['person_form']
-
-        identification_person = self.request.POST['identification_person']
-        if Person.objects.filter(identification_person=identification_person).exists():
-            messages.error(self.request, "Ya existe una persona con esa identificación.")
-            return self.form_invalid(form)
-
-        if form.is_valid() and person_form.is_valid():
+    if request.method == 'POST':
+        form = FormFamilyCard(request.POST)
+        if form.is_valid():
             try:
                 with transaction.atomic():
-                    self.object = form.save()
-                    person = person_form.save(commit=False)
-                    person.family_card = self.object
-                    print(person.family_card)
-                    person.save()
-                    messages.success(self.request, "Familia y persona creadas correctamente.")
-                    return super().form_valid(form)
-            except Exception as e:
-                messages.error(self.request, f"Ocurrió un error: {e}")
-                return self.form_invalid(form)
-        else:
-            return self.form_invalid(form)
+                    family_card_number = count_family_card + 1
+                    sidewalk_home = request.POST['sidewalk_home']
+                    zone = request.POST['zone']
+                    address = request.POST['address']
+                    sidewalk_home = Sidewalks.objects.get(pk=sidewalk_home)
+                    zone = Organizations.objects.get(pk=zone)
+                    FamilyCard.objects.create(
+                        family_card_number=family_card_number,
+                        sidewalk_home=sidewalk_home,
+                        zone=zone,
+                        address=address)
 
-    def form_invalid(self, form):
-        context = self.get_context_data()
-        person_form = context['person_form']
-        print(person_form.errors)
-        messages.error(self.request, "Hubo errores en el formulario. Por favor, corríjalos e intente nuevamente.")
-        return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
+                    Person.objects.create(
+                        first_name_1=request.POST['first_name_1'],
+                        first_name_2=request.POST['first_name_2'],
+                        last_name_1=request.POST['last_name_1'],
+                        last_name_2=request.POST['last_name_2'],
+                        identification_person=request.POST['identification_person'],
+                        document_type=DocumentType.objects.get(pk=request.POST['document_type']),
+                        cell_phone=request.POST['cell_phone'],
+                        personal_email=request.POST['personal_email'],
+                        gender_id= Gender.objects.get(pk=request.POST['gender_id']),
+                        date_birth=datetime.strptime(request.POST['date_birth'], '%Y-%m-%d').date(),
+                        social_insurance=SecuritySocial.objects.get(pk=request.POST['social_insurance']),
+                        eps=Eps.objects.get(pk=request.POST['eps']),
+                        kinship_id=Kinship.objects.get(pk=request.POST['kinship_id']),
+                        handicap=request.POST['handicap'],
+                        education_level=EducationLevel.objects.get(pk=request.POST['education_level']),
+                        civil_state=CivilState.objects.get(pk=request.POST['civil_state']),
+                        occupation=Occupancy.objects.get(pk=request.POST['occupation']),
+                        family_card=FamilyCard.objects.latest('id'),
+                        family_head=True)
+
+                    messages.success(request, "Ficha familiar creada correctamente")
+                    return redirect('createPerson', pk=FamilyCard.objects.latest('id').id)
+            except Exception as e:
+                messages.error(request, "Error al crear la ficha familiar")
+                return redirect('createFamilyCard')
+        else:
+            form = FormFamilyCard()
+            messages.error(request, "Error al crear la ficha familiar")
+        return render(request, 'censo/censo/createFamilyCard.html', {'form': form, 'segment': 'family_card'})
+
+
 
 @login_required
 def crear_persona(request, pk):
