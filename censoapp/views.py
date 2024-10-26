@@ -1,9 +1,11 @@
+import logging
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Value
 from django.db.models.functions.text import Concat
+from django.views import View
 
 from .choices import handicap
 from django.http import HttpResponse, JsonResponse
@@ -15,6 +17,9 @@ from django.contrib import messages
 from censoapp.models import Association, Person, FamilyCard, DocumentType, Gender, SecuritySocial, Eps, Kinship, \
     EducationLevel, CivilState, Occupancy, Sidewalks, Organizations
 from .forms import FormFamilyCard, FormPerson
+
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -91,60 +96,54 @@ def get_family_cards(request):
 
     return JsonResponse(response_data)
 
-
-# Clase para la ficha familiar y la cabeza de familia
-def register_family_card(request):
-
-    count_family_card = FamilyCard.objects.count()
-
+def create_family_card(request):
     if request.method == 'POST':
-        form = FormFamilyCard(request.POST)
-        if form.is_valid():
+        family_card_form = FormFamilyCard(request.POST)
+        person_form = FormPerson(request.POST)
+
+        if family_card_form.is_valid() and person_form.is_valid():
+            identification_person = person_form.cleaned_data['identification_person']
+            if Person.objects.filter(identification_person=identification_person).exists():
+                messages.error(request, "Ya existe una persona con esa identificación.")
+                return render(request, 'censo/censo/createFamilyCard.html', {
+                    'family_card_form': family_card_form,
+                    'person_form': person_form,
+                    'segment': 'family_card'
+                })
+
             try:
                 with transaction.atomic():
-                    family_card_number = count_family_card + 1
-                    sidewalk_home = request.POST['sidewalk_home']
-                    zone = request.POST['zone']
-                    address = request.POST['address']
-                    sidewalk_home = Sidewalks.objects.get(pk=sidewalk_home)
-                    zone = Organizations.objects.get(pk=zone)
-                    FamilyCard.objects.create(
-                        family_card_number=family_card_number,
-                        sidewalk_home=sidewalk_home,
-                        zone=zone,
-                        address=address)
+                    # Crear instancia de FamilyCard
+                    family_card = family_card_form.save(commit=False)
+                    family_card.family_card_number = FamilyCard.objects.count() + 1
+                    family_card.save()
 
-                    Person.objects.create(
-                        first_name_1=request.POST['first_name_1'],
-                        first_name_2=request.POST['first_name_2'],
-                        last_name_1=request.POST['last_name_1'],
-                        last_name_2=request.POST['last_name_2'],
-                        identification_person=request.POST['identification_person'],
-                        document_type=DocumentType.objects.get(pk=request.POST['document_type']),
-                        cell_phone=request.POST['cell_phone'],
-                        personal_email=request.POST['personal_email'],
-                        gender_id= Gender.objects.get(pk=request.POST['gender_id']),
-                        date_birth=datetime.strptime(request.POST['date_birth'], '%Y-%m-%d').date(),
-                        social_insurance=SecuritySocial.objects.get(pk=request.POST['social_insurance']),
-                        eps=Eps.objects.get(pk=request.POST['eps']),
-                        kinship_id=Kinship.objects.get(pk=request.POST['kinship_id']),
-                        handicap=request.POST['handicap'],
-                        education_level=EducationLevel.objects.get(pk=request.POST['education_level']),
-                        civil_state=CivilState.objects.get(pk=request.POST['civil_state']),
-                        occupation=Occupancy.objects.get(pk=request.POST['occupation']),
-                        family_card=FamilyCard.objects.latest('id'),
-                        family_head=True)
+                    # Crear instancia de Person
+                    person = person_form.save(commit=False)
+                    person.family_card = family_card
+                    person.family_head = True
+                    person.save()
 
                     messages.success(request, "Ficha familiar creada correctamente")
-                    return redirect('createPerson', pk=FamilyCard.objects.latest('id').id)
+                    return redirect('familyCardIndex')
+            except IntegrityError as e:
+                logger.error(f"Error de base de datos: {e}")
+                messages.error(request, "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
             except Exception as e:
-                messages.error(request, "Error al crear la ficha familiar")
-                return redirect('createFamilyCard')
+                logger.error(f"Error inesperado: {e}")
+                messages.error(request, "Ocurrió un error inesperado. Por favor, intente nuevamente.")
         else:
-            form = FormFamilyCard()
-            messages.error(request, "Error al crear la ficha familiar")
-        return render(request, 'censo/censo/createFamilyCard.html', {'form': form, 'segment': 'family_card'})
+            messages.warning(request, "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
+            logger.warning(f"Errores del formulario: {family_card_form.errors}, {person_form.errors}")
+    else:
+        family_card_form = FormFamilyCard()
+        person_form = FormPerson()
 
+    return render(request, 'censo/censo/createFamilyCard.html', {
+        'family_card_form': family_card_form,
+        'person_form': person_form,
+        'segment': 'family_card'
+    })
 
 
 @login_required
@@ -204,7 +203,7 @@ def crear_persona(request, pk):
 
 
 def detalle_ficha(request, pk):
-    familia = Person.objects.select_related('family_card').select_related('kinship_id').filter(family_card=pk)
+    familia = Person.objects.select_related('family_card').select_related('kinship').filter(family_card=pk)
     return render(request, 'censo/censo/detail_family_card.html',
                   {'familia': familia, 'segment': 'family_card'})
 

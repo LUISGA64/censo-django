@@ -116,15 +116,15 @@ class SecuritySocial(models.Model):
 
 class FamilyCard(models.Model):
 
-    address_home = models.CharField(blank=False, null=False, max_length=50, help_text="Registre donde vive la familia",
+    address_home = models.CharField(blank=True, null=True, max_length=50, help_text="Registre donde vive la familia",
                                     verbose_name="Dirección Vivienda")
-    sidewalk_home = models.ForeignKey('Sidewalks', on_delete=models.CASCADE, verbose_name="Vereda",
+    sidewalk_home = models.ForeignKey('Sidewalks', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Vereda",
                                       help_text="Seleccione la vereda donde vive")
     latitude = models.CharField(default='0', max_length=15, help_text="Registre la latitud", verbose_name="Latitud")
     longitude = models.CharField(default='0', max_length=15, help_text="Registre la longitud", verbose_name="Longitud")
     zone = models.CharField(choices=zone, blank=False, null=False, max_length=10, help_text="Seleccione Urbana o Rural",
                             verbose_name="Zona")
-    organization_id = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
+    organization = models.ForeignKey('Organizations', on_delete=models.CASCADE, default='',
                                         verbose_name="Resguardo", help_text="Seleccione el Resguardo",
                                         null=False, blank=False)
     family_card_number = models.IntegerField(blank=False, null=False, unique=True, verbose_name="Número de Familia",
@@ -153,7 +153,7 @@ class Person(models.Model):
 
     personal_email = models.EmailField(blank=True, null=True, max_length=50, verbose_name="Correo Personal")
 
-    gender_id = models.ForeignKey('Gender', on_delete=models.CASCADE, verbose_name="Género")
+    gender = models.ForeignKey('Gender', on_delete=models.CASCADE, verbose_name="Género")
 
     date_birth = models.DateField(blank=False, null=False, verbose_name="Fecha de Nacimiento")
 
@@ -162,7 +162,7 @@ class Person(models.Model):
 
     eps = models.ForeignKey('Eps', on_delete=models.CASCADE, verbose_name="EPS")
 
-    kinship_id = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
+    kinship = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Parentescos")
     handicap = models.CharField(choices=handicap, max_length=50, verbose_name="Capacidades Diversas")
 

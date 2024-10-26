@@ -9,13 +9,12 @@ from .choices import zone, handicap, ethnic_group
 from crispy_forms.helper import FormHelper
 
 
-class FormFamilyCard(ModelForm):
+class FormFamilyCard(forms.ModelForm):
     class Meta:
         model = FamilyCard
         fields = '__all__'
-
-    address_home = forms.CharField(label='Dirección Vivienda', max_length=50, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Dirección Vivienda'}))
+    # address_home = forms.CharField(label='Dirección Vivienda',  max_length=50, widget=forms.TextInput(
+    #     attrs={'class': 'form-control', 'placeholder': 'Dirección Vivienda'}))
 
     sidewalk_home = forms.ModelChoiceField(queryset=Sidewalks.objects.all(), label_suffix=":",
                                            empty_label="Seleccione la vereda donde vive",
@@ -33,15 +32,15 @@ class FormFamilyCard(ModelForm):
     zone = forms.ChoiceField(choices=zone, label="Zona",
                              widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Zona'}))
 
-    organization_id = forms.ModelChoiceField(queryset=Organizations.objects.all(),
+    organization = forms.ModelChoiceField(queryset=Organizations.objects.all(),
                                              empty_label="Seleccione el Resguardo",
                                              widget=forms.Select(attrs={'class': 'form-control',
                                                                         'placeholder': 'Resguardo'}),
                                              label="Resguardo Indígena")
-    family_card_number = forms.IntegerField(label='Número de Familia', disabled=True,
-                                            widget=forms.NumberInput(attrs={
-                                                'readonly': True,
-                                            }),)
+    # family_card_number = forms.IntegerField(label='Número de Familia', disabled=True,
+    #                                         widget=forms.NumberInput(attrs={
+    #                                             'readonly': True,
+    #                                         }),)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,10 +53,13 @@ class FormFamilyCard(ModelForm):
         var.disabled = True
 
 
-class FormPerson(ModelForm):
+class FormPerson(forms.ModelForm):
     class Meta:
         model = Person
-        fields = '__all__'
+        fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'cell_phone',
+                  'personal_email', 'identification_person', 'document_type', 'gender',
+                  'date_birth', 'social_insurance', 'eps', 'kinship', 'handicap',
+                  'education_level', 'civil_state', 'occupation']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -106,7 +108,7 @@ class FormPerson(ModelForm):
                                                                       'placeholder': 'Tipo de Documento'}),
                                            label="Tipo de Documento")
     # Género
-    gender_id = forms.ModelChoiceField(queryset=Gender.objects.all(), empty_label="Seleccione el Género",
+    gender = forms.ModelChoiceField(queryset=Gender.objects.all(), empty_label="Seleccione el Género",
                                        widget=forms.Select(
                                            attrs={'class': 'form-control', 'placeholder': 'Género'}),
                                        label="Género")
@@ -133,7 +135,7 @@ class FormPerson(ModelForm):
                                  label="EPS")
 
     # Parentesco
-    kinship_id = forms.ModelChoiceField(queryset=Kinship.objects.all(), empty_label="Seleccione Parentesco",
+    kinship = forms.ModelChoiceField(queryset=Kinship.objects.all(), empty_label="Seleccione Parentesco",
                                         widget=forms.Select(attrs={'class': 'form-control',
                                                                    'placeholder': 'Parentesco'}),
                                         label="Parentesco")
