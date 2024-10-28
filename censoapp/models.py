@@ -180,6 +180,20 @@ class Person(models.Model):
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
 
+    def save(self, *args, **kwargs):
+        self.first_name_1 = self.first_name_1.strip().lower().capitalize()
+        self.first_name_2 = self.first_name_2.strip().lower().capitalize()
+        self.last_name_1 = self.last_name_1.strip().lower().capitalize()
+        self.last_name_2 = self.last_name_2.strip().lower().capitalize()
+        self.personal_email = self.personal_email.strip().lower() if self.personal_email else ''
+        self.cell_phone = self.cell_phone.strip() if self.cell_phone else ''
+        self.identification_person = self.identification_person.strip()
+        super(Person, self).save(*args, **kwargs)
+
     def calcular_anios(self):
         from datetime import date
-        return date.today().year - self.date_birth.year
+        today = date.today()
+        age = today.year - self.date_birth.year
+        if (today.month, today.day) < (self.date_birth.month, self.date_birth.day):
+            age -= 1
+        return age

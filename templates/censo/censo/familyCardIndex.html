@@ -10,14 +10,13 @@
 {% endblock stylesheets %}
 
 {% block content %}
-
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4 p-2">
                     <div class="row">
                         <div class="col">
-                            <h6>Fichas Familiares</h6>
+                            <h6 class="p-4">Fichas Familiares</h6>
                         </div>
                         <div class="col text-end">
                             <a href="{% url 'createFamilyCard' %}" class="btn bg-gradient-dark mt-2">
@@ -27,82 +26,25 @@
                     </div>
                     <hr class="horizontal dark">
                     <div class="card-body px-4 pt-0 pb-2">
-                        <div class="table-responsive p-0 mb-4">
-                            <table class="table table-responsive align-items-center mb-0">
+                        <table class="table align-items-center mb-0" id="familycard">
                                 <thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">N°
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder">
+                                        N°
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 ps-2">
-                                        Cabeza de Familia
-                                    </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder ">
                                         Identificación
                                     </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder">
                                         Vereda
                                     </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder">
                                         Zona
                                     </th>
-                                    <th></th>
-                                    <th class="text-secondary opacity-7"></th>
+                                    <th>Opciones</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                {% for card in family_cards %}
-                                    <tr>
-
-                                        <td>
-                                            <p class="text-sm font-weight-bold mb-0">
-                                                {{ card.family_card.family_card_number }}
-                                            </p>
-                                        </td>
-                                        <td>
-                                            <p class="text-sm font-weight-bold mb-0">
-                                                {{ card.first_name_1 }} {{ card.first_name_2 }}
-                                                {{ card.last_name_1 }} {{ card.last_name_2 }}
-                                            </p>
-                                        </td>
-                                        <td class="align-middle text-center text-sm">
-                                            <p class="text-sm font-weight-bold mb-0">
-                                                {{ card.identification_person }}
-                                            </p>
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            <p class="text-sm font-weight-bold mb-0">
-                                                {{ card.family_card.sidewalk_home }}
-                                            </p>
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            <p class="text-sm font-weight-bold mb-0">
-                                                {{ card.family_card.zone }}
-                                            </p>
-                                        </td>
-                                        <td></td>
-                                        <td class="align-middle">
-                                            <a href="{% url 'detailFamilyCard' card.family_card.id %}"
-                                               title="Detalle Ficha Familiar"
-                                               class="badge badge-sm bg-gradient-success">
-                                                <i class="fas fa-binoculars"></i> </a>
-
-                                            <a href=""
-                                               title="Editar Ficha"
-                                               class="badge badge-sm bg-gradient-dark">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-
-                                            <a href="{% url 'update-family' card.family_card.id %}"
-                                               title="Editar Ficha"
-                                               class="badge badge-sm bg-gradient-faded-warning">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -115,20 +57,56 @@
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
     <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}"></script>
-    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
     <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
     <script>
-        new DataTable('#familycard', {
-            ajax: "{% url 'familycards' %}",
-            serverSide: true,
-            columns: [
-                {data: "family_card__family_card_number", name: "family_card__family_card_number"},
-                {data: "full_name", name: "full_name"},
-                {data: "identification_person", name: "identification_person"},
-                {data: "family_card__sidewalk_home__sidewalk_name", name: "family_card__sidewalk_home__sidewalk_name"},
-                {data: "family_card__zone", name: "family_card__zone"},
-            ],
+        // Add custom CSS styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .lengthMenuWrapper .dataTables_length label {
+            display: flex;
+            align-items: center;
+        }
+
+        .lengthMenuWrapper .dataTables_length label select {
+            margin-left: 20px; /* Adjust the value as needed */
+        }
+    `;
+    document.head.appendChild(style);
+        $(document).ready(function () {
+            $('#familycard').DataTable({
+                ajax: {
+                    url: "{% url 'familycards' %}",
+                    type: "GET",
+                    dataSrc: "data"
+                },
+                serverSide: true,
+                processing: true,
+                columns: [
+                    {data: "family_card__family_card_number", name: "family_card_number"},
+                    {data: "identification_person", name: "identification_person"},
+                    {data: "full_name", name: "full_name"},
+                    {data: "family_card__sidewalk_home__sidewalk_name", name: "sidewalk_home"},
+                    {data: "family_card__zone", name: "zone"},
+                    {
+                        data: null,
+                        name: "options",
+                        render: function (data, type, row) {
+                            return `
+                        <button class="btn btn-primary" onclick="editRecord(${row.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteRecord(${row.id})">Delete</button>
+                    `;
+                        }
+                    }
+                ],
+                language: {
+                    url: "{% static 'assets/js/datatable/es-CO.json' %}"
+                },
+                responsive: true,
+                pagingType: "full_numbers",
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
+            });
         });
     </script>
 

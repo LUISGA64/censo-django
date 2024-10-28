@@ -21,6 +21,18 @@
         }
     </style>
 
+<style>
+    .lengthMenuWrapper .dataTables_length label {
+    display: flex;
+    align-items: center;
+}
+
+.lengthMenuWrapper .dataTables_length label select {
+    margin-left: 10px; /* Adjust the value as needed */
+}
+    
+</style>
+
     <title>
         Censo Web - {% block title %}{% endblock %}
     </title>
@@ -61,7 +73,12 @@
 {% include "includes/scripts.html" %}
 
 <!-- Specific JS goes HERE -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+    
+
+
+<!--  DataTables    -->
+
 
 <script>
     var win = navigator.platform.indexOf('Win') > -1;
@@ -76,6 +93,8 @@
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
 <script src="{% static 'assets/js/soft-ui-dashboard.min.js' %}"></script>
+
+{% endblock javascripts %}
 <div class="alert">
     {% if messages %}
         {% for message in messages %}
