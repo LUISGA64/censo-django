@@ -100,8 +100,8 @@
             "system": "Ha ocurrido un error del sistema ( Mas Información)"
         }
     },
-    "emptyTable": "Tabla Vacia",
-    "infoEmpty": "Sin informacion",
+    "emptyTable": "Tabla Vacía",
+    "infoEmpty": "Sin información",
     "lengthMenu": "Mostrar _MENU_ entradas",
     "loadingRecords": "Cargando...",
     "searchBuilder": {
@@ -114,7 +114,7 @@
         "logicAnd": "Y",
         "logicOr": "O",
         "value": "Valor",
-        "add": "Agragar condición",
+        "add": "Agregar condición",
         "condition": "Condición",
         "conditions": {
             "date": {
@@ -140,7 +140,7 @@
                 "notEmpty": "No vacío"
             },
             "string": {
-                "contains": "Contine",
+                "contains": "Contiene",
                 "empty": "Vacío",
                 "endsWith": "Termina en",
                 "equals": "Iguales",
@@ -171,7 +171,7 @@
     "searchPanes": {
         "clearMessage": "Borrar Filtro",
         "collapseMessage": "desplegar todo",
-        "loadMessage": "Cargando informacion",
+        "loadMessage": "Cargando información",
         "showMessage": "Mostrar todos",
         "title": "Filtros Activos - %d",
         "collapse": {
@@ -205,21 +205,21 @@
     "infoFiltered": "filtrado de _MAX_ entradas totales",
     "infoThousands": ",",
     "paginate": {
-        "first": "Primero",
-        "last": "Último",
-        "next": "Siguiente",
-        "previous": "Anterior"
+        "first": "<i class='fas fa-angle-double-left'></i>",
+        "last": "<i class='fas fa-angle-double-right'></i>",
+        "next": "<i class='fas fa-angle-right'></i>",
+        "previous": "<i class='fas fa-angle-left'></i>"
     },
     "processing": "Procesando...",
     "search": "Buscar:",
     "thousands": ",",
-    "zeroRecords": "No se encontro información",
+    "zeroRecords": "No se encontró información",
     "stateRestore": {
         "creationModal": {
             "button": "Crear",
             "columns": {
                 "search": "Búsqueda columnas",
-                "visible": "Visibilidad de columa"
+                "visible": "Visibilidad de columna"
             },
             "name": "Nombre:",
             "order": "Ordenar",
