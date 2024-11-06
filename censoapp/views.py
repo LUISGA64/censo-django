@@ -223,23 +223,26 @@ def detalle_ficha(request, pk):
 
 class UpdateFamily(UpdateView):
     model = FamilyCard
-    fields = '__all__'
+    fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization']
     template_name = 'censo/censo/edit-family-card.html'
     success_url = reverse_lazy('familyCardIndex')
 
     def form_valid(self, form):
         form.instance.user = self.request.user
 
-        print(self.request.POST)
-        family_card_number = self.request.POST['family_card_number']
-
         messages.success(self.request, "Ficha familiar actualizada correctamente")
         return super(UpdateFamily, self).form_valid(form)
 
     def form_invalid(self, form):
+        logger.warning(f"Errores del formulario: {form.errors}")
         messages.warning(self.request, "Hubo un problema con la actualización de la ficha familiar. "
                                        "Por favor, revisa los campos nuevamente.")
-        print("*" * 20 + "Errores" + "*" * 20)
-        print(form.errors.as_data())
-        print("*" * 40)
+
         return super(UpdateFamily, self).form_invalid(form)
+
+
+def listado_personas(request):
+    personas = Person.objects.select_related('document_type').filter(state=True).values(
+        'full_name', 'identification_person', 'document_type__document_type',
+        'date_birth', 'age'
+    )

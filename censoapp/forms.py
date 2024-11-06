@@ -49,8 +49,9 @@ class FormFamilyCard(forms.ModelForm):
         self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
         self.helper.label_class = 'control-label'
         # deshabilitar field family_card_number
-        var = self.fields['family_card_number']
-        var.disabled = True
+        self.fields['family_card_number'].required = False
+        self.fields['family_card_number'].widget.attrs['readonly'] = True
+
 
 
 class FormPerson(forms.ModelForm):

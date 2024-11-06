@@ -7,59 +7,59 @@
     <link href="{% static 'assets/css/datatable/bootstrap.min.css' %}"/>
     <link href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}" rel="stylesheet"/>
     <link href="{% static 'assets/css/datatable/dataTables.dataTables.css' %}" rel="stylesheet"/>
-    <link href="{% static 'assets/css/datatable/data_table.css' %}" rel="stylesheet"/> 
+    <link href="{% static 'assets/css/datatable/data_table.css' %}" rel="stylesheet"/>
 {% endblock stylesheets %}
 
 {% block content %}
     <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-2 p-4">
-                <div class="row">
-                    <div class="col">
-                        <h6 class="p-2">Fichas Familiares</h6>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-2 p-4">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="p-2">Fichas Familiares</h6>
+                        </div>
+                        <div class="col text-end">
+                            <a href="{% url 'createFamilyCard' %}" class="btn btn-dark mt-2">
+                                <i class="fas fa-plus"></i> Crear Ficha Familiar
+                            </a>
+                        </div>
                     </div>
-                    <div class="col text-end">
-                        <a href="{% url 'createFamilyCard' %}" class="btn btn-dark mt-2">
-                            <i class="fas fa-plus"></i> Crear Ficha Familiar
-                        </a>
-                    </div>
-                </div>
-                <hr class="horizontal dark">
-                <div class="card-body px-4 pt-0 pb-2">
-                    <!-- Contenedor para el desplazamiento -->
-                    <div class="table-responsive">
-                        <table class="table align-items-center mb-0" id="familycard">
-                            <thead>
+                    <hr class="horizontal dark">
+                    <div class="card-body px-4 pt-0 pb-2">
+                        <!-- Contenedor para el desplazamiento -->
+                        <div class="table-responsive">
+                            <table class="table align-items-center mb-0" id="familycard">
+                                <thead>
                                 <tr>
                                     <th class="text-uppercase text-secondary text-sm font-weight-bolder">
                                         N°
                                     </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder ">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder ">
                                         Identificación
                                     </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder">
                                         Cabeza de Familia
                                     </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder">
                                         Vereda
                                     </th>
-                                    <th class="text-center text-uppercase text-secondary text-sm font-weight-bolder">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder">
                                         Zona
                                     </th>
                                 </tr>
-                            </thead>
-                            <tbody>
+                                </thead>
+                                <tbody>
                                 <!-- Aquí irían los datos de la tabla -->
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        {% include "includes/footer.html" %}
     </div>
-    {% include "includes/footer-fullscreen.html" %}
-</div>
 {% endblock content %}
 
 {% block javascripts %}
@@ -68,12 +68,12 @@
     <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
     <script>
         // Add custom CSS styles
-    const style = document.createElement('style');
-    
-    document.head.appendChild(style);
+        const style = document.createElement('style');
+
+        document.head.appendChild(style);
         $(document).ready(function () {
             $('#familycard').DataTable({
-                
+
                 ajax: {
                     url: "{% url 'familycards' %}",
                     type: "GET",
@@ -82,10 +82,20 @@
                 serverSide: true,
                 processing: true,
                 columns: [
-                    {data: "family_card__family_card_number", name: "family_card_number", orderable: false, searchable: false},
+                    {
+                        data: "family_card__family_card_number",
+                        name: "family_card_number",
+                        orderable: false,
+                        searchable: false
+                    },
                     {data: "identification_person", name: "identification_person", orderable: false},
                     {data: "full_name", name: "full_name", orderable: false},
-                    {data: "family_card__sidewalk_home__sidewalk_name", name: "sidewalk_home", orderable: false, searchable: false},
+                    {
+                        data: "family_card__sidewalk_home__sidewalk_name",
+                        name: "sidewalk_home",
+                        orderable: false,
+                        searchable: false
+                    },
                     {data: "family_card__zone", name: "zone", orderable: false, searchable: false},
                     {
                         data: null,
@@ -124,7 +134,7 @@
             detailCard = (id) => {
                 window.location.href = "{% url 'detailFamilyCard' 0 %}".replace('0', id);
             }
-            
+
             editRecord = (id) => {
                 window.location.href = "{% url 'update-family' 0 %}".replace('0', id);
             }

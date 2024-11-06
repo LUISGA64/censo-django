@@ -190,6 +190,9 @@ class Person(models.Model):
         self.identification_person = self.identification_person.strip()
         super(Person, self).save(*args, **kwargs)
 
+    def full_name(self):
+        return f"{self.first_name_1} {self.first_name_2} {self.last_name_1} {self.last_name_2}"
+
     def calcular_anios(self):
         from datetime import date
         today = date.today()
