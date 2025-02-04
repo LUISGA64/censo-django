@@ -1,13 +1,181 @@
-{% extends 'base_site.html' %}
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+
 
 {% block title %}
-	Registrar Persona
-{% endblock %}
+    Registrar Familia
+{% endblock title %}
 
 {% block stylesheets %}
-	{{ block.super }}
+    {{ block.super }}
+{% endblock stylesheets %}
+
+{% block breadcrumb %}
+    <li><a href="{% url 'home' %}">Inicio</a></li>
+    <li class="active">Listado Censal</li>
 {% endblock %}
 
+
 {% block content %}
-	<h1>Registrar Censo</h1>
-{% endblock %}
+    <div class="container-fluid">
+        <div class="row">
+        <div class="card p-2">
+            <div class="card-body">
+                <div class="mt-1">
+                    <h4>
+                        Ficha Familiar: {{ familia }}
+                        <small class="text-muted"></small>
+                    </h4>
+                </div>
+                <hr class="horizontal dark">
+                <form method="POST" action="{% url 'createPerson' familia %}" class="row g-3 mt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="family_card" value="{{ familia }}">
+                    <div class="col-md-3">
+                                {{ person_form.first_name_1|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.first_name_2|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.last_name_1|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.last_name_2|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.document_type|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.identification_person|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.date_birth|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.gender|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.kinship|as_crispy_field }}
+                            </div>
+
+
+                            <div class="col-md-3">
+                                {{ person_form.social_insurance|as_crispy_field }}
+                            </div>
+
+
+                            <div class="col-md-3">
+                                {{ person_form.eps|as_crispy_field }}
+                            </div>
+                            
+                    <div class="col-md-3">
+                                <label for="" class="form-label"></label>
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.education_level|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.civil_state|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.occupation|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.handicap|as_crispy_field }}
+                            </div>
+
+
+                            <div class="col-md-3">
+                                {{ person_form.cell_phone|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ person_form.personal_email|as_crispy_field }}
+                            </div>
+                    <hr>
+                    <div class="d-flex flex-row-reverse">
+                        <button type="submit" class="btn btn-slack ms-2">Guardar</button>
+                        <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock content %}
+{% block javascripts %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tu lógica de evento para el formulario de creación de persona
+
+            // Suponiendo que tienes un formulario con el id "createPersonForm"
+            document.getElementById('createPersonForm').addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevenir el envío del formulario por defecto
+
+                // Enviar una petición POST al servidor para crear la persona
+                fetch('{% url 'createPerson' familia %}', {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mostrar el diálogo de SweetAlert con botones "Sí" y "No"
+                            swal({
+                                title: "¿Desea crear otra persona?",
+                                text: "Presione 'Sí' para continuar o 'No' para volver atrás",
+                                icon: "info",
+                                buttons: {
+                                    si: {
+                                        text: "Sí",
+                                        value: true,
+                                        className: "btn-primary"
+                                    },
+                                    no: {
+                                        text: "No",
+                                        value: false,
+                                        className: "btn-secondary"
+                                    },
+                                },
+                            })
+                                .then((willCreate) => {
+                                    if (willCreate) {
+                                        // Si el usuario elige "Sí", redirige al formulario de creación de persona
+                                        window.location.href = "{% url 'createPerson' familia %}";
+                                    } else {
+                                        // Si el usuario elige "No", haz lo que desees, como redirigir a otra página
+                                        window.location.href = "{% url 'familyCardIndex' %}";
+                                    }
+                                });
+                        } else {
+                            // Manejar cualquier error que puedas recibir del servidor
+                            swal("Error", "Hubo un problema al crear la persona", "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    </script>
+{% endblock javascripts %}

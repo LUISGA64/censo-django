@@ -1,11 +1,11 @@
 from django.urls import path, include
-from django.contrib.auth.decorators import login_required
-from .views import (home, dashboard, profile, association, CreateAssociation, family_card_index,
-                    crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card)
-
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
+from django.contrib.auth.decorators import login_required
 from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
+from .views import (home, dashboard, profile, association, CreateAssociation, family_card_index,
+                    crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
+                    listar_personas, view_persons, UpdatePerson)
 
 router = routers.DefaultRouter()
 router.register(r'sidewalks', SidewalksViewSet, 'sidewalks')
@@ -34,12 +34,14 @@ urlpatterns = [
     path('accounts/profile/', profile, name='profile'),
     path('association', association, name='association'),
     path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
-    # path('familyCard/create', login_required(FamilyCardPersonCreateView.as_view()), name='createFamilyCard'),
-
     path('familyCard/create', login_required(create_family_card), name='createFamilyCard'),
     path('familyCard/index', login_required(family_card_index), name='familyCardIndex'),
     path('familyCard/create/<int:pk>', login_required(crear_persona), name='createPerson'),
     path('familyCard/detail/<int:pk>/', login_required(detalle_ficha), name='detailFamilyCard'),
     path('update-family/<int:pk>', login_required(UpdateFamily.as_view()), name='update-family'),
-    path('familycards', get_family_cards, name='familycards'),
+    path('json_familycards', login_required(get_family_cards), name='familycards'),
+    path('json_personas/', login_required(listar_personas), name='json_personas'),
+    path('personas', login_required(view_persons), name='personas'),
+    path('edit-person/<int:pk>', login_required(UpdatePerson.as_view()), name='updated-person'),
+
 ]

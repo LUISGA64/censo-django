@@ -1,10 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %} Comuneros {% endblock title %}
 
-</body>
-</html>
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-2 p-4">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="p-2">Listado de Personas</h6>
+                        </div>
+                    </div>
+                    <hr class="horizontal dark">
+                    <div class="card-body px-4 pt-0 pb-2">
+                        <table class="table table-sm table-hover align-items-center mb-0 display compact w-100" id="person">
+                            <thead>
+                            <tr>
+                                <th class="text-uppercase text-start text-secondary text-xs font-weight-bolder">
+                                    Identificación
+                                </th>
+                                <th class="text-uppercase text-start text-secondary text-xs font-weight-bolder ">
+                                    Persona
+                                </th>
+                                <th class="text-uppercase text-start text-secondary text-xs font-weight-bolder">
+                                    Fecha Nacimiento
+                                </th>
+                                <th class="text-uppercase text-start text-secondary text-xs font-weight-bolder">
+                                    Edad
+                                </th>
+                                <th class="text-uppercase text-start text-secondary text-xs font-weight-bolder">
+                                    Género
+                                </th>
+                                <th class="text-uppercase text-start text-secondary text-xs font-weight-bolder">
+                                    Acciones
+                                </th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "includes/footer.html" %}
+    </div>
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#person').DataTable({
+                ajax:{
+                    url: "{% url 'json_personas' %}",
+                    type: "GET",
+                    dataSrc: "data"
+                },
+                serverSide: true,
+                processing: true,
+                columns: [
+                    {data: 'identification_person', name: "identification_person"},
+                    {data: null, name: "first_name_1", render: function (data, type, row) {
+                            return `${row.first_name_1} ${row.first_name_2} ${row.last_name_1} ${row.last_name_2}`;
+                        }
+                    },
+                    {data: "date_birth", name: "date_birth", orderable: false, searchable: false, render: function (data, type, row) {
+                        if (data) {
+                            const date = new Date(data);
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const year = date.getFullYear();
+                            return `${day}/${month}/${year}`;
+                        }
+                        return '';
+                    }},
+                    {data: "age", name: "age", searchable: false, orderable: false},
+                    {data: "gender", name: "gender", searchable: false, orderable: false},
+                    {data: null,
+                        name: "options",
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `
+                            <div class="btn-container">
+                                <button class="btn btn-icon btn-dark" type="button" onclick="editRecord(${row.id})" title="Editar">
+                                    <span class="btn-inner--icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                                </button>
+                            </div>
+                            `;
+                        }
+                    }
+                ],
+                columnDefs: [
+                    {
+                        targets: [0, 1, 2, 3, 4],
+                        width: "20%",
+                        target: 5,
+                    }
+                ],
+                "language": {
+                    "url": "{% static 'assets/js/datatable/es-CO.json' %}"
+                },
+                responsive: true,
+                pagingType: "full_numbers",
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass('text-sm');
+                    $('td', row).addClass('text-start');
+                }
+            });
+            editRecord = (id) => {
+                window.location.href = "{% url 'updated-person' 0 %}".replace('0', id);
+            }
+        });
+    </script>
+{% endblock %}

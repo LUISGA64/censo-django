@@ -1,0 +1,115 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% crispy form form.helper %}
+{% load i18n %}
+
+{% block title %} Comuneros {% endblock title %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="card p-3">
+                <h5 class="mt-4 ms-4">Editar Datos Personales</h5>
+                <hr class="horizontal dark">
+                <div class="card-body" style="margin-top: -5px">
+                    <form method="POST" action="" class="row g-1">
+                        {% csrf_token %}
+                        <div class="col-md-3 form-group">
+                            {{ form.first_name_1|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.first_name_2|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.last_name_1|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.last_name_2|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.document_type|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.identification_person|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.date_birth|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.gender|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.kinship|as_crispy_field }}
+                        </div>
+
+
+                        <div class="col-md-3 form-group">
+                            {{ form.social_insurance|as_crispy_field }}
+                        </div>
+
+
+                        <div class="col-md-3 form-group">
+                            {{ form.eps|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            <label for="" class="form-label"></label>
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.education_level|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.civil_state|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.occupation|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.handicap|as_crispy_field }}
+                        </div>
+
+
+                        <div class="col-md-3 form-group">
+                            {{ form.cell_phone|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            {{ form.personal_email|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            <label for="state" class="form-label">Estado Actual</label>
+                            {{ form.state|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-3 form-group">
+                            <label for="family_head" class="form-label">Cabeza de Hogar</label>
+                            {{ form.family_head|as_crispy_field }}
+                        </div>
+                        <hr>
+                        <div class="d-flex flex-row-reverse">
+                            <button type="submit" class="btn btn-slack ms-2">Guardar</button>
+                            <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

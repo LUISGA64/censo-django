@@ -102,7 +102,7 @@
     },
     "emptyTable": "Tabla Vacía",
     "infoEmpty": "Sin información",
-    "lengthMenu": "Mostrar _MENU_ entradas",
+    "lengthMenu": " _MENU_ registros por página",
     "loadingRecords": "Cargando...",
     "searchBuilder": {
         "button": {
@@ -182,7 +182,7 @@
         "countFiltered": "Cuenta Filtro",
         "emptyPanes": "No hay información"
     },
-    "searchPlaceholder": "Busqueda en tabla",
+    "searchPlaceholder": "",
     "select": {
         "cells": {
             "_": "%d celdas seleccionadas",

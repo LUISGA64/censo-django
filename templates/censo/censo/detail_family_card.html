@@ -1,84 +1,102 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
-{% block title %}Censo - Listado{% endblock title %}
+{% block title %}Detalle Ficha{% endblock title %}
 
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+{% endblock stylesheets %}
 
 {% block content %}
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4 p-4">
-                    <div class="card-header pb-0">
-                        <h6>Núcleo Familiar</h6>
-                    </div>
+                    <h6>Ficha Familiar</h6>
                     <hr class="horizontal dark">
                     <div class="card-body px-0 pt-0 pb-2">
-                        <div class="table-responsive p-0">
-                            <table id="family_card" class="table align-items-center mb-0">
+                        <div class="table-responsive">
+                            <table id="familyCardDetail"
+                                   class="table table-sm table-hover align-items-center mb-0 display compact w-100">
                                 <thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7
+                                    text-start" style="width: 20%">
                                         Persona
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
-                                        Identificación
+                                    <th class="text-uppercase text-start text-secondary text-sm font-weight-bolder opacity-7" style="width: 10%">
+                                        Identificacion
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
                                         Parentesco
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
                                         Vereda
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
                                         Edad
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start" style="width: 7%">
                                         Zona
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                        Cabeza de Familia
                                     </th>
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
-
                                 {% for card in familia %}
-
-                                    <tr class="px-3">
+                                    <tr>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">
+                                            <p class="text-sm text-start mb-0">
                                                 {{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
                                                 {{ card.last_name_2 }}</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">
+                                            <p class="text-sm text-start mb-0">
                                                 {{ card.identification_person }}
                                             </p>
                                         </td>
 
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">
+                                            <p class="text-sm text-start mb-0">
                                                 {{ card.kinship.description_kinship }}
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">
+                                            <p class="text-sm text-start mb-0">
                                                 {{ card.family_card.sidewalk_home }}
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">
+                                            <p class="text-sm text-center mb-0">
                                                 {{ card.calcular_anios }}
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">
+                                            <p class="text-sm text-center mb-0">
                                                 {{ card.family_card.zone }}
                                             </p>
                                         </td>
                                         <td>
-                                            <a href="#" class="btn btn-info btn-xs btn-round" title="aval"><i
-                                                    class="fas fa-file-archive"></i> </a>
+                                            <p class="text-sm text-center mb-0">
+                                                {% if card.family_head %}
+                                                    <span class="badge text-bg-success">
+                                                        <i class="fa-solid fa-user-check"></i>
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge text-bg-secondary">
+                                                        <i class="fa-solid fa-user-check"></i>
+                                                    </span>
+                                                {% endif %}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-pinterest btn-xs btn-round" title="aval">
+                                                <i class="fa-regular fa-file-pdf"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -89,18 +107,40 @@
                 </div>
             </div>
         </div>
+        {% include "includes/footer.html" %}
     </div>
 {% endblock content %}
 {% block javascripts %}
-    {{ block.super }}
+    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
     <script>
-        const datatablesSimple = document.getElementById('family_card');
-        if (datatablesSimple) {
-            new simpleDatatables.DataTable(datatablesSimple, {
+        $(document).ready(function () {
+            $('#familyCardDetail').DataTable({
                 'language': {
-                    'url': 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
+                    'url': '{% static 'assets/js/datatable/es-CO.json' %}'
                 },
+                order: [[1, 'asc']],
+                columns: [
+                    {data: 'persona', searchable: false, orderable: false},
+                    {data: 'identificacion', searchable: false, orderable: false},
+                    {data: 'parentesco', searchable: false, orderable: false},
+                    {data: 'vereda', searchable: false, orderable: false},
+                    {data: 'edad', searchable: false, orderable: false},
+                    {data: 'zona', searchable: false, orderable: false},
+                    {data: 'cabeza_familia', searchable: false, orderable: false},
+                    {data: 'acciones', searchable: false, orderable: false}
+                ],
+                responsive: true,
+                pagingType: "full_numbers",
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
+                createdRow: function (row) {
+                    $(row).addClass('text-sm');
+                    $('td', row).addClass('text-start');
+                }
             });
-        }
+        });
     </script>
 {% endblock javascripts %}

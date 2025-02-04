@@ -9,14 +9,15 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-    <div class="container-fluid py-4">
+    <div class="container-fluid">
         <div class="row">
             <div class="card p-3">
                 <div class="card-header pb-0">
                     <h6>Editar Ficha Familiar</h6>
+                    <hr class="horizontal dark">
                 </div>
 
-                <div class="card-body px-0 pt-0 pb-2">
+                <div class="card-body">
                     <form method="post" action="" class="form-horizontal form-group">
                         {% csrf_token %}
                         <div class="row">
@@ -40,7 +41,7 @@
                             </div>
                             <hr class="horizontal dark">
                             <div class="d-flex flex-row-reverse gap-2">
-                                <button type="submit" class="btn btn-success me-4">Guardar</button>
+                                <button type="submit" class="btn btn-slack me-4">Guardar</button>
                                 <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary ms-2">Cancelar</a>
                             </div>
                         </div>

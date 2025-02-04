@@ -57,10 +57,9 @@ class FormFamilyCard(forms.ModelForm):
 class FormPerson(forms.ModelForm):
     class Meta:
         model = Person
-        fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'cell_phone',
-                  'personal_email', 'identification_person', 'document_type', 'gender',
-                  'date_birth', 'social_insurance', 'eps', 'kinship', 'handicap',
-                  'education_level', 'civil_state', 'occupation']
+        fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type', 'identification_person',
+                  'gender', 'date_birth', 'kinship', 'social_insurance', 'eps', 'handicap',
+                  'education_level', 'civil_state', 'occupation', 'cell_phone', 'personal_email', ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

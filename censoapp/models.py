@@ -118,7 +118,7 @@ class FamilyCard(models.Model):
 
     address_home = models.CharField(blank=True, null=True, max_length=50, help_text="Registre donde vive la familia",
                                     verbose_name="Dirección Vivienda")
-    sidewalk_home = models.ForeignKey('Sidewalks', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Vereda",
+    sidewalk_home = models.ForeignKey('Sidewalks', null=False, blank=False, on_delete=models.CASCADE, verbose_name="Vereda",
                                       help_text="Seleccione la vereda donde vive")
     latitude = models.CharField(default='0', max_length=15, help_text="Registre la latitud", verbose_name="Latitud")
     longitude = models.CharField(default='0', max_length=15, help_text="Registre la longitud", verbose_name="Longitud")
@@ -175,7 +175,7 @@ class Person(models.Model):
     family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
                                     blank=False, default='')
     family_head = models.BooleanField(blank=False, null=False, default=False, verbose_name="Cabeza de Familia")
-    state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Estado")
+    state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Vivo")
 
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
@@ -190,9 +190,11 @@ class Person(models.Model):
         self.identification_person = self.identification_person.strip()
         super(Person, self).save(*args, **kwargs)
 
+    @property
     def full_name(self):
         return f"{self.first_name_1} {self.first_name_2} {self.last_name_1} {self.last_name_2}"
 
+    @property
     def calcular_anios(self):
         from datetime import date
         today = date.today()

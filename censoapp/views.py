@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.core.serializers import serialize
 from django.db import transaction, IntegrityError
-from django.db.models import Value, Q
+from django.db.models import Value, Q, F, ExpressionWrapper, fields
 from django.db.models.functions.text import Concat
+from django.utils.timezone import now
 from django.views import View
-
 from .choices import handicap
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -19,9 +19,7 @@ from censoapp.models import Association, Person, FamilyCard, DocumentType, Gende
     EducationLevel, CivilState, Occupancy, Sidewalks, Organizations
 from .forms import FormFamilyCard, FormPerson
 
-
 logger = logging.getLogger(__name__)
-
 
 # Create your views here.
 @login_required
@@ -69,6 +67,7 @@ def family_card_index(request):
                   {'family_cards': queryset, 'segment': 'family_card'})
 
 
+# Función para obtener las fichas familiares en formato JSON para DataTables
 def get_family_cards(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -77,7 +76,7 @@ def get_family_cards(request):
 
     queryset = (Person.objects.select_related('family_card', 'sidewalk_home')
                 .filter(family_head=True)
-                .values('family_card__family_card_number', 'id', 'first_name_1', 'first_name_2', 'last_name_1',
+                .values('family_card__family_card_number', 'family_card_id', 'first_name_1', 'first_name_2', 'last_name_1',
                         'last_name_2', 'identification_person',
                         'family_card__sidewalk_home__sidewalk_name', 'family_card__zone'))
 
@@ -112,9 +111,10 @@ def get_family_cards(request):
         'recordsFiltered': paginator.count,
         'data': data
     }
-
     return JsonResponse(response_data)
 
+# Función para crear una ficha familiar y una persona en la misma vista (Wizard)
+@login_required
 def create_family_card(request):
     if request.method == 'POST':
         family_card_form = FormFamilyCard(request.POST)
@@ -176,7 +176,7 @@ def crear_persona(request, pk):
         if person_form.is_valid():
             if query.exists():
                 messages.error(request, "Ya existe una persona con esa identificación")
-                return render(request, 'censo/censo/createPerson.html', {
+                return render(request, 'censo/censo/../templates/censo/persona/createPerson.html', {
                     'form': person_form,
                     'familia': familia,
                     'segment': 'family_card'
@@ -196,7 +196,6 @@ def crear_persona(request, pk):
                     else:
                         return redirect('familyCardIndex')
             except IntegrityError as e:
-                logger.error(f"Error de base de datos: {e}")
                 messages.error(request, "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
 
             else:
@@ -205,7 +204,7 @@ def crear_persona(request, pk):
     else:
         person_form = FormPerson()
 
-    return render(request, 'censo/censo/createPerson.html', {
+    return render(request, 'censo/persona/createPerson.html', {
         'person_form': person_form,
         'familia': familia,
         'segment': 'family_card'
@@ -213,12 +212,17 @@ def crear_persona(request, pk):
 
 # Muestra el detalle de la ficha familiar
 def detalle_ficha(request, pk):
+
+    print(pk)
+
     familia = (Person.objects.
-               select_related('family_card')
-               .select_related('kinship')
-               .filter(family_card=pk))
+               select_related('family_card', 'kinship')
+               .filter(family_card_id=pk))
+
+    print(familia)
+
     return render(request, 'censo/censo/detail_family_card.html',
-                  {'familia': familia, 'segment': 'family_card'})
+                  {'familia': familia, 'segment': 'family_card', })
 
 
 class UpdateFamily(UpdateView):
@@ -240,9 +244,82 @@ class UpdateFamily(UpdateView):
 
         return super(UpdateFamily, self).form_invalid(form)
 
+def listar_personas(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column = request.GET.get('order[0][column]', '0')
+    order_dir = request.GET.get('order[0][dir]', 'asc')
 
-def listado_personas(request):
-    personas = Person.objects.select_related('document_type').filter(state=True).values(
-        'full_name', 'identification_person', 'document_type__document_type',
-        'date_birth', 'age'
-    )
+    order_columns = [
+        'first_name_1',
+        'identification_person',
+        'document_type__document_type',
+        'date_birth',
+        'date_birth',
+        'gender__gender'
+    ]
+
+    order_by = order_columns[int(order_column)]
+    if order_dir == 'desc':
+        order_by = f'-{order_by}'
+
+    personas = (Person.objects
+                .select_related('document_type', 'gender')
+                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                        'identification_person', 'document_type__document_type', 'date_birth')
+                .annotate(gender=F('gender__gender_code'),
+                          age=ExpressionWrapper(now().year -F('date_birth__year'), output_field=fields.IntegerField()))
+                .filter(state=True))
+
+    if search_value:
+        personas = personas.filter(
+            Q(first_name_1__icontains=search_value) |
+            Q(first_name_2__icontains=search_value) |
+            Q(last_name_1__icontains=search_value) |
+            Q(last_name_2__icontains=search_value) |
+            Q(identification_person__icontains=search_value)
+        )
+
+    personas = personas.order_by(order_by)
+
+    paginator = Paginator(personas, length)
+    page = paginator.get_page(start // length + 1)
+
+    data = list(page.object_list)
+
+    response_data = {
+        'draw': draw,
+        'recordsTotal': paginator.count,
+        'recordsFiltered': paginator.count,
+        'data': data
+    }
+
+    return JsonResponse(response_data)
+
+
+def view_persons(request):
+    return render(request, 'censo/persona/listado_personas.html', {'segment': 'personas'})
+
+
+class UpdatePerson(UpdateView):
+    model = Person
+    fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type', 'identification_person',
+              'date_birth', 'cell_phone', 'personal_email', 'gender', 'kinship', 'education_level', 'civil_state',
+              'occupation', 'social_insurance', 'eps', 'handicap', 'state', 'family_head']
+    template_name = 'censo/persona/edit_person.html'
+    success_url = reverse_lazy('personas')
+
+    def form_valid(self, person_form):
+        person_form.instance.user = self.request.user
+
+        messages.success(self.request, "Persona actualizada correctamente")
+        return super(UpdatePerson, self).form_valid(person_form)
+
+    def form_invalid(self, form):
+        logger.warning(f"Errores del formulario: {form.errors}")
+        messages.warning(self.request, "Hubo un problema con la actualización de la persona. "
+                                       "Por favor, revisa los campos nuevamente.")
+
+        return super(UpdatePerson, self).form_invalid(form)
