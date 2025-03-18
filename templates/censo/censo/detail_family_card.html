@@ -13,31 +13,32 @@
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4 p-4">
-                    <h6>Ficha Familiar</h6>
-                    <hr class="horizontal dark">
+                    <h6 class="mb-4">Ficha Familiar</h6>
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive">
                             <table id="familyCardDetail"
-                                   class="table table-sm table-hover align-items-center mb-0 display compact w-100">
+                                   class="table align-items-center mb-0">
                                 <thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7
-                                    text-start" style="width: 20%">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                        style="width: 25%">
                                         Persona
                                     </th>
-                                    <th class="text-uppercase text-start text-secondary text-sm font-weight-bolder opacity-7" style="width: 10%">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                        style="width: 10%">
                                         Identificacion
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
                                         Parentesco
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
                                         Vereda
                                     </th>
                                     <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
                                         Edad
                                     </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start" style="width: 7%">
+                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start"
+                                        style="width: 7%">
                                         Zona
                                     </th>
                                     <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
@@ -50,53 +51,75 @@
                                 {% for card in familia %}
                                     <tr>
                                         <td>
-                                            <p class="text-sm text-start mb-0">
-                                                {{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
-                                                {{ card.last_name_2 }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-sm text-start mb-0">
-                                                {{ card.identification_person }}
-                                            </p>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
+                                                        {{ card.last_name_2 }}</h6>
+                                                    <p class="text-sm text-secondary mb-0"></p>
+                                                </div>
+                                            </div>
                                         </td>
 
                                         <td>
-                                            <p class="text-sm text-start mb-0">
-                                                {{ card.kinship.description_kinship }}
-                                            </p>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ card.identification_person }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    {{ card.kinship.description_kinship }}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <p class="text-sm text-start mb-0">
-                                                {{ card.family_card.sidewalk_home }}
-                                            </p>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    {{ card.family_card.sidewalk_home }}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <p class="text-sm text-center mb-0">
-                                                {{ card.calcular_anios }}
-                                            </p>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    {{ card.calcular_anios }}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <p class="text-sm text-center mb-0">
-                                                {{ card.family_card.zone }}
-                                            </p>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    {{ card.family_card.zone }}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <p class="text-sm text-center mb-0">
-                                                {% if card.family_head %}
-                                                    <span class="badge text-bg-success">
-                                                        <i class="fa-solid fa-user-check"></i>
+                                            <div class="d-flex px-2">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    {% if card.family_head %}
+                                                        <span class="badge my-auto">
+                                                            <i class="fa-solid fa-user-check fa-2x text-success"></i>
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge my-auto">
+                                                        <i class="fa-solid text-secondary fa-user-check fa-2x"></i>
                                                     </span>
-                                                {% else %}
-                                                    <span class="badge text-bg-secondary">
-                                                        <i class="fa-solid fa-user-check"></i>
-                                                    </span>
-                                                {% endif %}
-                                            </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <a href="#" class="btn btn-pinterest btn-xs btn-round" title="aval">
-                                                <i class="fa-regular fa-file-pdf"></i>
-                                            </a>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <a href="#" class="btn btn-pinterest btn-xs my-auto"
+                                                       title="Generar Aval">
+                                                        <i class="fa-regular fa-file-pdf"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -123,8 +146,8 @@
                 },
                 order: [[1, 'asc']],
                 columns: [
-                    {data: 'persona', searchable: false, orderable: false},
-                    {data: 'identificacion', searchable: false, orderable: false},
+                    {data: 'persona', searchable: true, orderable: false},
+                    {data: 'identificacion', searchable: true, orderable: false},
                     {data: 'parentesco', searchable: false, orderable: false},
                     {data: 'vereda', searchable: false, orderable: false},
                     {data: 'edad', searchable: false, orderable: false},
@@ -137,7 +160,7 @@
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 10,
                 createdRow: function (row) {
-                    $(row).addClass('text-sm');
+                    $(row).addClass('text-xs');
                     $('td', row).addClass('text-start');
                 }
             });

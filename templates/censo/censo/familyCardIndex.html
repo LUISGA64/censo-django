@@ -82,6 +82,7 @@
                         name: "family_card_number",
                         orderable: false,
                         searchable: false,
+
                     },
                     {data: "identification_person", name: "identification_person", orderable: false},
                     {data: "full_name", name: "full_name", orderable: false},
@@ -99,15 +100,16 @@
                         searchable: false,
                         render: function (data, type, row) {
                             return `
-                        <div class="btn-container">
-                            <button class="btn btn-icon btn-dark" onclick="editRecord(${row.family_card_id})" title="Editar">
-                            <span class="btn-inner--icon"><i class="fa-solid fa-pen-to-square"></i></span>
-                        </button>
-                        <button class="btn btn-icon btn-linkedin" onclick="detailCard(${row.family_card_id})" title="Detalle">
-                            <span class="btn-inner--icon"><i class="fa-solid fa-binoculars"></i></span>
-                        </button>
-                        <button class="btn btn-icon btn-slack" title="Agregar" onclick="agregarPersona(${row.family_card_id})">
-                            <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+                        <div class="btn-container" style="display: flex; justify-content: center; gap: 5px;">
+                            <button class="btn btn-icon btn-dark my-auto" onclick="editRecord(${row.family_card_id})" title="Editar">
+                                <span class="btn-inner--icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                            </button>
+                            <button class="btn btn-icon btn-linkedin my-auto" onclick="detailCard(${row.family_card_id})" title="Detalle">
+                                <span class="btn-inner--icon"><i class="fa-solid fa-binoculars"></i></span>
+                            </button>
+                            <button class="btn btn-2 btn-icon btn-slack my-auto" title="Agregar" onclick="agregarPersona(${row.family_card_id})">
+                                <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+                            </button>
                         </div>
                     `;
                         }
