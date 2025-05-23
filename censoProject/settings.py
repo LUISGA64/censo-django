@@ -181,7 +181,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Sesion
-USERSESSIONS_TRACK_ACTIVITY = True
+USERSESSIONS_TRACK_ACTIVITY = False
 
 
 # CORS

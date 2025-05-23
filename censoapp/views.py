@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.core.serializers import serialize
 from django.db import transaction, IntegrityError
-from django.db.models import Value, Q, F, ExpressionWrapper, fields
+from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count
 from django.db.models.functions.text import Concat
 from django.utils.timezone import now
-from django.views import View
+from django.views.generic import DetailView, TemplateView
 from .choices import handicap
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -18,19 +18,21 @@ from django.contrib import messages
 from censoapp.models import Association, Person, FamilyCard, DocumentType, Gender, SecuritySocial, Eps, Kinship, \
     EducationLevel, CivilState, Occupancy, Sidewalks, Organizations
 from .forms import FormFamilyCard, FormPerson
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 # Create your views here.
 @login_required
 def home(request):
-    return render(request, 'censo/dashboard.html', {'segment': 'dashboard'})
+    cantidad = Person.objects.values_list('gender__gender').annotate(cantidad=Count('id'))
+    # Crear un diccionario a partir de los resultados de la consulta
+    cantidad_dict = {}
+    for item in cantidad:
+        cantidad_dict[item[0]] = item[1]
 
-
-@login_required
-def dashboard(request):
-    messages.info(request, "Mensaje de prueba")
-    return render(request, 'censo/dashboard.html')
+    context = {'segment': 'dashboard', 'cantidad_genero': cantidad_dict}
+    return render(request, 'censo/dashboard.html', context)
 
 
 @login_required
@@ -200,7 +202,7 @@ def crear_persona(request, pk):
 
             else:
                 messages.warning(request, "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
-                logger.warning(f"Errores del formulario: {person_form.errors}")
+                # logger.warning(f"Errores del formulario: {person_form.errors}")
     else:
         person_form = FormPerson()
 
@@ -213,13 +215,9 @@ def crear_persona(request, pk):
 # Muestra el detalle de la ficha familiar
 def detalle_ficha(request, pk):
 
-    print(pk)
-
     familia = (Person.objects.
                select_related('family_card', 'kinship')
                .filter(family_card_id=pk))
-
-    print(familia)
 
     return render(request, 'censo/censo/detail_family_card.html',
                   {'familia': familia, 'segment': 'family_card', })
@@ -244,6 +242,8 @@ class UpdateFamily(UpdateView):
 
         return super(UpdateFamily, self).form_invalid(form)
 
+
+# Lista las personas en formato JSON para DataTables
 def listar_personas(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -257,8 +257,8 @@ def listar_personas(request):
         'identification_person',
         'document_type__document_type',
         'date_birth',
-        'date_birth',
-        'gender__gender'
+        'gender__gender',
+        'document_type__code_document_type'
     ]
 
     order_by = order_columns[int(order_column)]
@@ -268,7 +268,7 @@ def listar_personas(request):
     personas = (Person.objects
                 .select_related('document_type', 'gender')
                 .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
-                        'identification_person', 'document_type__document_type', 'date_birth')
+                        'identification_person', 'document_type__document_type', 'date_birth', 'document_type__code_document_type')
                 .annotate(gender=F('gender__gender_code'),
                           age=ExpressionWrapper(now().year -F('date_birth__year'), output_field=fields.IntegerField()))
                 .filter(state=True))
@@ -299,10 +299,13 @@ def listar_personas(request):
     return JsonResponse(response_data)
 
 
+# Vista para mostrar la lista de personas en la plantilla HTML.
 def view_persons(request):
     return render(request, 'censo/persona/listado_personas.html', {'segment': 'personas'})
 
 
+
+# Vista para editar una persona
 class UpdatePerson(UpdateView):
     model = Person
     fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type', 'identification_person',
@@ -323,3 +326,11 @@ class UpdatePerson(UpdateView):
                                        "Por favor, revisa los campos nuevamente.")
 
         return super(UpdatePerson, self).form_invalid(form)
+
+
+def person_by_gender(request):
+    # Contar las personas por género
+    cantidad = Person.objects.values('gender__gender')
+
+    return JsonResponse({'cantidad': cantidad})
+

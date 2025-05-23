@@ -198,7 +198,17 @@ class Person(models.Model):
     def calcular_anios(self):
         from datetime import date
         today = date.today()
-        age = today.year - self.date_birth.year
-        if (today.month, today.day) < (self.date_birth.month, self.date_birth.day):
-            age -= 1
-        return age
+        years = today.year - self.date_birth.year
+        months = today.month - self.date_birth.month
+        days = today.day - self.date_birth.day
+
+        if days < 0:
+            months -= 1
+        if months < 0:
+            years -= 1
+            months += 12
+
+        if years > 0:
+            return f"{years} años"
+        else:
+            return f"{months} meses"

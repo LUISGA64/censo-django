@@ -12,7 +12,29 @@
                     </div>
 
                     <div class="card-body pt-2">
-                        
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <canvas id="myChart" width="200" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <canvas id="chart2" width="200" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <canvas id="chart3" width="200" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -21,5 +43,33 @@
 {% endblock content %}
 {% block javascripts %}
     <script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('myChart');
+        const data = {{ cantidad_genero|safe }};
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Personas por Género',
+                    data: values,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
 {% endblock javascripts %}
 
