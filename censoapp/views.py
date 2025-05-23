@@ -13,7 +13,6 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
-from formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from censoapp.models import Association, Person, FamilyCard, DocumentType, Gender, SecuritySocial, Eps, Kinship, \
     EducationLevel, CivilState, Occupancy, Sidewalks, Organizations
@@ -258,7 +257,10 @@ def listar_personas(request):
         'document_type__document_type',
         'date_birth',
         'gender__gender',
-        'document_type__code_document_type'
+        'document_type__code_document_type',
+        'family_head',
+        'family_card__family_card_number',
+        'family_card'
     ]
 
     order_by = order_columns[int(order_column)]
@@ -268,7 +270,8 @@ def listar_personas(request):
     personas = (Person.objects
                 .select_related('document_type', 'gender')
                 .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
-                        'identification_person', 'document_type__document_type', 'date_birth', 'document_type__code_document_type')
+                        'identification_person', 'document_type__document_type', 'date_birth', 'family_card',
+                        'document_type__code_document_type', 'family_head', 'family_card__family_card_number')
                 .annotate(gender=F('gender__gender_code'),
                           age=ExpressionWrapper(now().year -F('date_birth__year'), output_field=fields.IntegerField()))
                 .filter(state=True))

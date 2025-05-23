@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (Association, Organizations, Sidewalks, DocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
-                     EducationLevel, SecuritySocial)
+                     EducationLevel, SecuritySocial, Handicap)
 
 # Register your models here.
 admin.site.register(Association)
@@ -14,3 +14,4 @@ admin.site.register(Occupancy)
 admin.site.register(CivilState)
 admin.site.register(EducationLevel)
 admin.site.register(SecuritySocial)
+admin.site.register(Handicap)
