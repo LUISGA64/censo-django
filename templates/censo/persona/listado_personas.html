@@ -13,7 +13,7 @@
 {% block content %}
     <div class="container-fluid py-4">
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 col-md-6 col-lg-12">
             <div class="card mb-2 p-4">
                 <div class="row align-items-center">
                     <div class="col">
@@ -28,19 +28,20 @@
                 <hr class="horizontal dark">
                 <div class="card-body px-4 pt-0 pb-2">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover align-items-center mb-0 display compact w-100" id="person">
+                        <table class="table table-sm table-hover align-items-center align-middle mb-0 display compact w-100" id="person">
                             <thead class="table-light mt-5">
                                 <tr>
                                     <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7" style="width: 30%">Nombres y Apellidos</th>
-                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7">Fecha Nacimiento</th>
-                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7">Edad</th>
-                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7">Género</th>
-                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7">Ficha Familiar</th>
+                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7" style="width: 10%">Fecha Nacimiento</th>
+                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7" style="width: 10%">Edad</th>
+                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7" style="width: 10%">Género</th>
+                                    <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7" style="width: 15%">Ficha Familiar</th>
                                     <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder opacity-7">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
+                        <hr class="my-4 horizontal dark">
                     </div>
                 </div>
             </div>
@@ -55,104 +56,10 @@
     <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
     <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
     <script>
-        $(document).ready(function () {
-            $('#person').DataTable({
-                ajax:{
-                    url: "{% url 'json_personas' %}",
-                    type: "GET",
-                    dataSrc: "data"
-                },
-                serverSide: true,
-                processing: true,
-                columns: [
-                    {
-                        data: null,
-                        name: "first_name_1",
-                        render: function (data, type, row) {
-                            const fullName = `${row.first_name_1} ${row.first_name_2} ${row.last_name_1} ${row.last_name_2}`.replace(/\s+/g, ' ').trim();
-                            const badge = row.family_head
-                                ? `<span class="badge bg-gradient-success ms-2" title="Family Head" aria-label="Family Head">Jefe de Familia</span>`
-                                : '';
-                            return `
-                                <div>
-                                    <span class="text-muted text-secondary-emphasis">${fullName}</span>
-
-                                    <div class="text-xs text-secondary mb-0 mt-1">
-                                        ${row.document_type__code_document_type} - ${row.identification_person}
-                                        ${badge}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    },
-                    {data: "date_birth", name: "date_birth", orderable: false, searchable: false, render: function (data, type, row) {
-                        if (data) {
-                            const date = new Date(data);
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const year = date.getFullYear();
-                            return `<span class="text-secondary text-center d-block">
-                                <i class="fa-solid fa-calendar-days"></i>
-                                ${day}/${month}/${year}
-                            </span>`;
-                        }
-                        return '<span class="text-secondary text-center d-block"></span>';
-                    }},
-                    {data: "age", name: "age", searchable: false, orderable: false, render:function (data, type, row){
-                        if (data) {
-                            return `<span class="text-secondary text-center d-block">${data} años</span>`;
-                        }
-                        return '<span class="text-secondary text-center d-block"></span>';
-                        }},
-                    {data: "gender", name: "gender", searchable: false, orderable: false, render:function(data, type, row){
-                        if (data) {
-                            return `<span class="text-secondary text-center d-block">${data}</span>`;
-                        }
-                        return '<span class="text-secondary text-center d-block"></span>';
-                        }},
-                    {data: "family_card__family_card_number", name: "family_card__family_card_number", searchable: false, orderable: false, render:function(data, type, row){
-                        if (data) {
-                            return `<span class="text-secondary text-center d-block">${data}</span>`;
-                        }
-                        return '<span class="text-secondary text-center d-block"></span>';
-                        }},
-                    {data: null,
-                        name: "options",
-                        orderable: false,
-                        searchable: false,
-                        render: function (data, type, row) {
-                            return `
-                            <div class="btn-container">
-                                <button class="btn btn-icon btn-facebook" type="button" onclick="editRecord(${row.id})" title="Editar">
-                                    <span class="btn-inner--icon"><i class="fa-solid fa-pen-to-square"></i></span>
-                                </button>
-                            </div>
-                            `;
-                        }
-                    }
-                ],
-                columnDefs: [
-                    {
-                        targets: [0, 1, 2, 3, 4],
-                        width: "20%",
-                        target: "_all",
-                    }
-                ],
-                "language": {
-                    "url": "{% static 'assets/js/datatable/es-CO.json' %}"
-                },
-                responsive: true,
-                pagingType: "full_numbers",
-                lengthMenu: [5, 10, 25, 50],
-                pageLength: 10,
-                createdRow: function (row, data, dataIndex) {
-                    $(row).addClass('text-sm');
-                    $('td', row).addClass('text-start');
-                }
-            });
-            editRecord = (id) => {
-                window.location.href = "{% url 'updated-person' 0 %}".replace('0', id);
-            }
-        });
+        const PERSONAS_JSON_URL = "{% url 'json_personas' %}";
+        const DATATABLE_LANG_URL = "{% static 'assets/js/datatable/es-CO.json' %}"
+        const UPDATED_PERSON_URL = "{% url 'updated-person' 0 %}";
     </script>
+    <script src="{% static 'assets/js/censo/persons/datatable-person.js' %}"></script>
+
 {% endblock javascripts%}

@@ -63,9 +63,8 @@ class CreateAssociation(CreateView):
 
 
 def family_card_index(request):
-    queryset = Person.objects.select_related('family_card').filter(family_head=True)
     return render(request, 'censo/censo/familyCardIndex.html',
-                  {'family_cards': queryset, 'segment': 'family_card'})
+                  {'segment': 'family_card'})
 
 
 # Función para obtener las fichas familiares en formato JSON para DataTables
@@ -78,14 +77,18 @@ def get_family_cards(request):
     queryset = (Person.objects.select_related('family_card', 'sidewalk_home')
                 .filter(family_head=True)
                 .values('family_card__family_card_number', 'family_card_id', 'first_name_1', 'first_name_2', 'last_name_1',
-                        'last_name_2', 'identification_person',
-                        'family_card__sidewalk_home__sidewalk_name', 'family_card__zone'))
+                        'last_name_2', 'identification_person', 'document_type__code_document_type',
+                        'family_card__sidewalk_home__sidewalk_name', 'family_card__zone')).order_by('id')
 
     # Crear la columna full_name en la consulta
     queryset = queryset.annotate(
         full_name=Concat('first_name_1', Value(' '), 'first_name_2', Value(' '), 'last_name_1', Value(' '),
-                         'last_name_2')
+                         'last_name_2'),
+        person_count=Count('family_card__person'),
+        persona_count_gender=Count('family_card__person__gender'),
     )
+
+
 
     # Filtrar por el valor de búsqueda
     if search_value:
@@ -95,12 +98,11 @@ def get_family_cards(request):
             Q(family_card__family_card_number__icontains=search_value) |
             Q(family_card__sidewalk_home__sidewalk_name__icontains=search_value) |
             Q(family_card__zone__icontains=search_value)
-        )
+        ).order_by('id')
 
     # Paginación
     paginator = Paginator(queryset, length)
     page = paginator.get_page(start // length + 1)
-
 
     # Serializar los datos
     data = list(page.object_list)
@@ -215,8 +217,13 @@ def crear_persona(request, pk):
 def detalle_ficha(request, pk):
 
     familia = (Person.objects.
-               select_related('family_card', 'kinship')
+               select_related('family_card', 'kinship', 'document_type')
+               .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'date_birth',
+                       'identification_person', 'document_type__code_document_type', 'kinship__description_kinship',
+                       'family_card__family_card_number')
                .filter(family_card_id=pk))
+
+    print(familia)
 
     return render(request, 'censo/censo/detail_family_card.html',
                   {'familia': familia, 'segment': 'family_card', })
@@ -246,7 +253,7 @@ class UpdateFamily(UpdateView):
 def listar_personas(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 10))
+    length = int(request.GET.get('length', 7))
     search_value = request.GET.get('search[value]', '')
     order_column = request.GET.get('order[0][column]', '0')
     order_dir = request.GET.get('order[0][dir]', 'asc')
@@ -272,7 +279,7 @@ def listar_personas(request):
                 .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
                         'identification_person', 'document_type__document_type', 'date_birth', 'family_card',
                         'document_type__code_document_type', 'family_head', 'family_card__family_card_number')
-                .annotate(gender=F('gender__gender_code'),
+                .annotate(gender=F('gender__gender'),
                           age=ExpressionWrapper(now().year -F('date_birth__year'), output_field=fields.IntegerField()))
                 .filter(state=True))
 
@@ -286,7 +293,6 @@ def listar_personas(request):
         )
 
     personas = personas.order_by(order_by)
-
     paginator = Paginator(personas, length)
     page = paginator.get_page(start // length + 1)
 

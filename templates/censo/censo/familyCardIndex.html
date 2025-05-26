@@ -13,13 +13,14 @@
         <div class="row">
             <div class="col-12">
                 <div class="card mb-2 p-4">
-                    <div class="row">
-                        <div class="col">
-                            <h6 class="p-2">Fichas Familiares</h6>
+                    <div class="d-inline-flex">
+                        <div class="ms-2 mt-2">
+                            <h3 class="text-muted text-opacity-75 text-bold">Listado de Familias</h3>
+                            <p class="text-muted text-sm">Gestiona las fichas familiares del censo.</p>
                         </div>
-                        <div class="col text-end">
-                            <a href="{% url 'createFamilyCard' %}" class="btn btn-linkedin mt-2">
-                                <i class="fas fa-plus"></i> Ficha Familiar
+                        <div class="col text-end mt-3 me-2">
+                            <a href="{% url 'createFamilyCard' %}" class="btn btn-primary btn-sm mb-0 me-2">
+                                <i class="fa-solid fa-users"></i> Nueva Familia
                             </a>
                         </div>
                     </div>
@@ -27,24 +28,23 @@
                     <div class="card-body px-4 pt-0 pb-2">
                         <!-- Contenedor para el desplazamiento -->
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover align-items-center mb-0 display compact w-100"
-                                   id="familycard">
-                                <thead>
+                            <table class="table table-sm table-hover align-middle align-items-center mb-0 display compact w-100"
+                                   id="familycard"><thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-start text-sm font-weight-bolder">
-                                        N°
+                                    <th class="text-uppercase text-secondary text-start text-sm text-muted"
+                                    style="width: 10%">FICHA N°
                                     </th>
-                                    <th class="text-uppercase text-secondary text-start text-sm font-weight-bolder ">
-                                        Identificación
+                                    <th class="text-uppercase text-secondary text-start text-sm text-muted"
+                                    style="width: 30%">Cabeza de Familia
                                     </th>
-                                    <th class="text-uppercase text-secondary text-start text-sm font-weight-bolder">
-                                        Cabeza de Familia
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-start text-sm font-weight-bolder">
+                                    <th class="text-uppercase text-secondary text-center text-sm text-muted">
                                         Vereda
                                     </th>
-                                    <th class="text-uppercase text-secondary text-start text-sm font-weight-bolder">
-                                        Zona
+                                    <th class="text-uppercase text-secondary text-center text-sm text-muted">
+                                        Miembros
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-center text-sm text-muted">
+                                        Acciones
                                     </th>
                                 </tr>
                                 </thead>
@@ -67,84 +67,10 @@
     <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
     <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
     <script>
-        $(document).ready(function () {
-            $('#familycard').DataTable({
-
-                ajax: {
-                    url: "{% url 'familycards' %}",
-                    type: "GET",
-                    dataSrc: "data"
-                },
-                serverSide: true,
-                processing: true,
-                columns: [
-                    {
-                        data: "family_card__family_card_number",
-                        name: "family_card_number",
-                        orderable: false,
-                        searchable: false,
-
-                    },
-                    {data: "identification_person", name: "identification_person", orderable: false},
-                    {data: "full_name", name: "full_name", orderable: false},
-                    {
-                        data: "family_card__sidewalk_home__sidewalk_name",
-                        name: "sidewalk_home",
-                        orderable: false,
-                        searchable: false
-                    },
-                    {data: "family_card__zone", name: "zone", orderable: false, searchable: false},
-                    {
-                        data: null,
-                        name: "options",
-                        orderable: false,
-                        searchable: false,
-                        render: function (data, type, row) {
-                            return `
-                        <div class="btn-container" style="display: flex; justify-content: center; gap: 5px;">
-                            <button class="btn btn-icon btn-dark my-auto" onclick="editRecord(${row.family_card_id})" title="Editar">
-                                <span class="btn-inner--icon"><i class="fa-solid fa-pen-to-square"></i></span>
-                            </button>
-                            <button class="btn btn-icon btn-linkedin my-auto" onclick="detailCard(${row.family_card_id})" title="Detalle">
-                                <span class="btn-inner--icon"><i class="fa-solid fa-binoculars"></i></span>
-                            </button>
-                            <button class="btn btn-2 btn-icon btn-slack my-auto" title="Agregar" onclick="agregarPersona(${row.family_card_id})">
-                                <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
-                            </button><div class="btn-group dropstart" role="group">
-                        </div>
-                    `;
-                        }
-                    }
-                ],
-                columnDefs: [
-                    {
-                        targets: [0, 1, 2, 3, 4],
-                        width: "20%",
-                        target: 5,
-                    }
-                ],
-                language: {
-                    url: "{% static 'assets/js/datatable/es-CO.json' %}"
-                },
-                responsive: true,
-                pagingType: "full_numbers",
-                lengthMenu: [5, 10, 25, 50],
-                pageLength: 10,
-                createdRow: function (row, data, dataIndex) {
-                    $(row).addClass('text-sm');
-                    $('td', row).addClass('text-start'); // Add this line to align text to the right
-                }
-            });
-            detailCard = (id) => {
-                window.location.href = "{% url 'detailFamilyCard' 0 %}".replace('0', id);
-            }
-
-            editRecord = (id) => {
-                window.location.href = "{% url 'update-family' 0 %}".replace('0', id);
-            }
-            agregarPersona = (id) => {
-                window.location.href = "{% url 'createPerson' 0 %}".replace('0', id);
-            }
-        });
+        const FAMILYCARD_JSON_URL = "{% url 'familycards' %}"
+        const DATATABLE_LANG_URL = "{% static 'assets/js/datatable/es-CO.json' %}"
+        const EDIT_FAMILY_CARD_URL = "{% url 'update-family' 0 %}"
+        const VIEW_FAMILY_CARD_URL = "{% url 'detailFamilyCard' 0 %}"
     </script>
+    <script src="{% static 'assets/js/censo/family-card/datatable-family-card.js' %}"></script>
 {% endblock javascripts %}
