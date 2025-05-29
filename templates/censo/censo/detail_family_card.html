@@ -47,7 +47,8 @@
                 </div>
                 <div class="card-body px-0 pt-0 pb-2 mt-4">
                     <div class="nav-wrapper position-relative ms-4 me-4 end-0">
-                        <ul class="nav nav-pills nav-fill p-2 nav-pills-family" role="tablist" style="background-color: #f5f5f5">
+                        <ul class="nav nav-pills nav-fill p-2 nav-pills-family" role="tablist"
+                            style="background-color: #f5f5f5">
                             <li class="nav-item">
                                 <a class="nav-link active" data-bs-toggle="tab" href="#profile-tabs-icons"
                                    role="tab">
@@ -79,12 +80,12 @@
                                             <div class="col text-start align-content-start">
                                                 <span class="text-muted text-sm" style="margin-bottom: 2px;">
                                                     <i class="fa-solid fa-house-flag"></i> Dirección</span>
-                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__address_home|default:"Sin Información" }}</p>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__address_home|default:"Sin Información" }}</p>
                                             </div>
                                             <div class="col text-start align-content-start">
                                                 <span class="text-muted text-sm" style="margin-bottom: 2px;">
                                                     <i class="fa-solid fa-location-dot"></i> Vereda</span>
-                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__sidewalk_home__sidewalk_name }}</p>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__sidewalk_home__sidewalk_name }}</p>
                                             </div>
                                         </div>
                                         <!-- Segunda fila de información -->
@@ -92,17 +93,17 @@
                                             <div class="col text-start align-content-start">
                                                 <span class="text-muted text-sm" style="margin-bottom: 2px;">
                                                     <i class="fa-solid fa-location-dot"></i> Latitud</span>
-                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__latitude|default:"No especificada" }}</p>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__latitude|default:"No especificada" }}</p>
                                             </div>
                                             <div class="col text-start align-content-start">
                                                 <span class="text-muted text-sm" style="margin-bottom: 2px;">
                                                     <i class="fa-solid fa-location-dot"></i> Longitud</span>
-                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__longitude|default:"No especificada" }}</p>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__longitude|default:"No especificada" }}</p>
                                             </div>
                                             <div class="col text-start align-content-start">
                                                 <span class="text-muted text-sm" style="margin-bottom: 2px;">
                                                     <i class="fa-solid fa-location-dot"></i> Zona</span>
-                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__zone }}</p>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__zone }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -111,116 +112,129 @@
                         </div>
                         <div class="tab-pane fade" id="dashboard-tabs-icons" role="tabpanel">
                             <!-- Contenido de Dashboard -->
-                            <div class="table-responsive">
-                                <table id="familyCardDetail"
-                                       class="table align-items-center mb-0">
-                                    <thead>
-                                    <tr>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
-                                            style="width: 25%">
-                                            Persona
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
-                                            style="width: 10%">
-                                            Identificacion
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
-                                            Parentesco
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
-                                            Vereda
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
-                                            Edad
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start"
-                                            style="width: 7%">
-                                            Zona
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
-                                            Cabeza de Familia
-                                        </th>
-                                        <th class="text-secondary opacity-7"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for card in familia %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
-                                                            {{ card.last_name_2 }}</h6>
-                                                        <p class="text-sm text-secondary mb-0"></p>
-                                                    </div>
-                                                </div>
-                                            </td>
+                            <div class="card border-0 shadow-sm py-2 ms-4 me-4">
+                                <div class="card-header border-0" style="background-color: #e3efff">
+                                    <h5 class="mb-0 text-bolder">Miembros de la Familia</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive p-2">
+                                        <table id="familyCardDetail"
+                                               class="table table-condensed table-striped align-items-center mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                                    style="width: 25%">
+                                                    Persona
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                                    style="width: 10%">
+                                                    Identificacion
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                                    Parentesco
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                                    Vereda
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                                    Edad
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start"
+                                                    style="width: 7%">
+                                                    Zona
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                                    Cabeza de Familia
+                                                </th>
+                                                <th class="text-secondary opacity-7"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for card in familia %}
+                                                {{ card }}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
+                                                                    {{ card.last_name_2 }}</h6>
+                                                                <p class="text-sm text-secondary mb-0"></p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
 
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ card.identification_person }}</h6>
-                                                    </div>
-                                                </div>
-                                            </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">{{ card.document_type__code_document_type }} - {{ card.identification_person }}</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
 
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        {{ card.kinship.description_kinship }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        {{ card.family_card.sidewalk_home }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        {{ card.calcular_anios }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        {{ card.family_card.zone }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        {% if card.family_head %}
-                                                            <span class="badge my-auto">
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.kinship__description_kinship }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.family_card__sidewalk_home__sidewalk_name }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.age|default:"No especificada" }}
+                                                                {% if card.age %}
+                                                                    <span class="text-secondary text-xs">años</span>
+                                                                {% else %}
+                                                                    <span class="text-secondary text-xs">Sin Información</span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.family_card__zone }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {% if card.family_head %}
+                                                                    <span class="badge my-auto">
                                                             <i class="fa-solid fa-user-check fa-2x text-success"></i>
                                                         </span>
-                                                        {% else %}
-                                                            <span class="badge my-auto">
+                                                                {% else %}
+                                                                    <span class="badge my-auto">
                                                         <i class="fa-solid text-secondary fa-user-check fa-2x"></i>
                                                     </span>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <a href="#" class="btn btn-pinterest btn-xs my-auto"
-                                                           title="Generar Aval">
-                                                            <i class="fa-regular fa-file-pdf"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <a href="#" class="btn btn-pinterest btn-xs my-auto"
+                                                                   title="Generar Aval">
+                                                                    <i class="fa-regular fa-file-pdf"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

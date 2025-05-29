@@ -221,8 +221,9 @@ def detalle_ficha(request, pk):
                .filter(family_card_id=pk)
                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'date_birth',
                        'identification_person', 'document_type__code_document_type', 'kinship__description_kinship',
-                       'family_card__family_card_number', 'family_card__sidewalk_home__sidewalk_name', 'family_card__zone'
-                       )
+                       'family_card__family_card_number', 'family_card__sidewalk_home__sidewalk_name', 'family_head',
+                       'family_card__zone')
+               .annotate(age=ExpressionWrapper(now().year - F('date_birth__year'), output_field=fields.IntegerField()))
                )
 
     return render(request, 'censo/censo/detail_family_card.html',
