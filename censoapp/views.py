@@ -217,13 +217,13 @@ def crear_persona(request, pk):
 def detalle_ficha(request, pk):
 
     familia = (Person.objects.
-               select_related('family_card', 'kinship', 'document_type')
+               select_related('family_card', 'kinship', 'document_type', 'sidewalk')
+               .filter(family_card_id=pk)
                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'date_birth',
                        'identification_person', 'document_type__code_document_type', 'kinship__description_kinship',
-                       'family_card__family_card_number')
-               .filter(family_card_id=pk))
-
-    print(familia)
+                       'family_card__family_card_number', 'family_card__sidewalk_home__sidewalk_name', 'family_card__zone'
+                       )
+               )
 
     return render(request, 'censo/censo/detail_family_card.html',
                   {'familia': familia, 'segment': 'family_card', })

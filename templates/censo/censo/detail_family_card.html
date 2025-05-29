@@ -6,125 +6,222 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+    <style>
+        .btn-container {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .nav-pills-family .nav-link.active {
+            background-color: #FFFFFF !important; /* Cambia por el color que desees */
+            color: #1a2035 !important;
+        }
+    </style>
 {% endblock stylesheets %}
 
 {% block content %}
     <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card mb-4 p-4">
-                    <h6 class="mb-4">Ficha Familiar # {{ familia.family_card_number }}</h6>
-                    <div class="card-body px-0 pt-0 pb-2">
-                        <div class="table-responsive">
-                            <table id="familyCardDetail"
-                                   class="table align-items-center mb-0">
-                                <thead>
-                                <tr>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
-                                        style="width: 25%">
-                                        Persona
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
-                                        style="width: 10%">
-                                        Identificacion
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
-                                        Parentesco
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
-                                        Vereda
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
-                                        Edad
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start"
-                                        style="width: 7%">
-                                        Zona
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
-                                        Cabeza de Familia
-                                    </th>
-                                    <th class="text-secondary opacity-7"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for card in familia %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-md mb-4 p-2">
+                <div class="card-header bg-white" style="border: none">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0" style="margin-bottom: 0px;">
+                                <a href="{% url 'familyCardIndex' %}" class="btn btn-icon-only me-2">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                </a>
+                                Ficha Familiar #{{ familia.0.family_card__family_card_number }}
+                            </h3>
+                            <p class="text-muted text-sm" style="margin-top: -8px;">Detalles de la familia y sus
+                                miembros</p>
+                        </div>
+                        <div class="col text-end">
+                            <a href="" class="btn btn-primary mt-2 text-sm text-capitalize">
+                                <i class="fa-solid fa-user-plus"></i> Agregar Persona
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body px-0 pt-0 pb-2 mt-4">
+                    <div class="nav-wrapper position-relative ms-4 me-4 end-0">
+                        <ul class="nav nav-pills nav-fill p-2 nav-pills-family" role="tablist" style="background-color: #f5f5f5">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#profile-tabs-icons"
+                                   role="tab">
+                                    <i class="fa-solid fa-house"></i> Información de la Vivienda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#dashboard-tabs-icons" role="tab">
+                                    <i class="fa-solid fa-people-roof"></i> Miembros de la Familia</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content mt-4">
+                        <div class="tab-pane fade show active ms-4 me-4" id="profile-tabs-icons" role="tabpanel">
+                            <!-- Contenido de My Profile -->
+                            <div class="card border-0 shadow-sm py-2">
+                                <div class="card-header border-0" style="background-color: #e3efff">
+                                    <h5 class="mb-0 text-bolder">Información de la Vivienda</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="container text-start">
+                                        <!-- Primera fila de información -->
+                                        <div class="row">
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-regular fa-file-lines text-muted"></i> Número de Ficha</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__family_card_number }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-house-flag"></i> Dirección</span>
+                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__address_home|default:"Sin Información" }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Vereda</span>
+                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__sidewalk_home__sidewalk_name }}</p>
+                                            </div>
+                                        </div>
+                                        <!-- Segunda fila de información -->
+                                        <div class="row mt-2">
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Latitud</span>
+                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__latitude|default:"No especificada" }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Longitud</span>
+                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__longitude|default:"No especificada" }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Zona</span>
+                                                        <p style="margin-top: 2px;">{{ familia.0.family_card__zone }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="dashboard-tabs-icons" role="tabpanel">
+                            <!-- Contenido de Dashboard -->
+                            <div class="table-responsive">
+                                <table id="familyCardDetail"
+                                       class="table align-items-center mb-0">
+                                    <thead>
                                     <tr>
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
-                                                        {{ card.last_name_2 }}</h6>
-                                                    <p class="text-sm text-secondary mb-0"></p>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                            style="width: 25%">
+                                            Persona
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                            style="width: 10%">
+                                            Identificacion
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                            Parentesco
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                            Vereda
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                            Edad
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start"
+                                            style="width: 7%">
+                                            Zona
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                            Cabeza de Familia
+                                        </th>
+                                        <th class="text-secondary opacity-7"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for card in familia %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
+                                                            {{ card.last_name_2 }}</h6>
+                                                        <p class="text-sm text-secondary mb-0"></p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
+                                            </td>
 
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    <h6 class="mb-0 text-sm">{{ card.identification_person }}</h6>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">{{ card.identification_person }}</h6>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
+                                            </td>
 
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    {{ card.kinship.description_kinship }}
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        {{ card.kinship.description_kinship }}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    {{ card.family_card.sidewalk_home }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        {{ card.family_card.sidewalk_home }}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    {{ card.calcular_anios }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        {{ card.calcular_anios }}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    {{ card.family_card.zone }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        {{ card.family_card.zone }}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex px-2">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    {% if card.family_head %}
-                                                        <span class="badge my-auto">
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        {% if card.family_head %}
+                                                            <span class="badge my-auto">
                                                             <i class="fa-solid fa-user-check fa-2x text-success"></i>
                                                         </span>
-                                                    {% else %}
-                                                        <span class="badge my-auto">
+                                                        {% else %}
+                                                            <span class="badge my-auto">
                                                         <i class="fa-solid text-secondary fa-user-check fa-2x"></i>
                                                     </span>
-                                                    {% endif %}
+                                                        {% endif %}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex px-2 py-1">
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    <a href="#" class="btn btn-pinterest btn-xs my-auto"
-                                                       title="Generar Aval">
-                                                        <i class="fa-regular fa-file-pdf"></i>
-                                                    </a>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <a href="#" class="btn btn-pinterest btn-xs my-auto"
+                                                           title="Generar Aval">
+                                                            <i class="fa-regular fa-file-pdf"></i>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
