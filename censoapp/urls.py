@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
-                    listar_personas, view_persons, UpdatePerson, person_by_gender)
+                    listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona)
 
 # router = routers.DefaultRouter()
 # router.register(r'sidewalks', SidewalksViewSet, 'sidewalks')
@@ -34,13 +34,18 @@ urlpatterns = [
     path('accounts/profile/', profile, name='profile'),
     path('association', association, name='association'),
     path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
+
+    # ----- FICHAS FAMILIARES -----
     path('familyCard/create', login_required(create_family_card), name='createFamilyCard'),
     path('familyCard/index', login_required(family_card_index), name='familyCardIndex'),
-    path('familyCard/create/<int:pk>', login_required(crear_persona), name='createPerson'),
     path('familyCard/detail/<int:pk>/', login_required(detalle_ficha), name='detailFamilyCard'),
     path('update-family/<int:pk>', login_required(UpdateFamily.as_view()), name='update-family'),
+
+    # ----- PERSONAS -----
     path('personas', login_required(view_persons), name='personas'),
+    path('person/create/<int:pk>', login_required(crear_persona), name='createPerson'),
     path('edit-person/<int:pk>', login_required(UpdatePerson.as_view()), name='updated-person'),
+    path('personas/detail/<int:pk>', login_required(DetailPersona.as_view()), name='detail-person'),
 
     # ----- JSON API  ----
     path('json_familycards', login_required(get_family_cards), name='familycards'),

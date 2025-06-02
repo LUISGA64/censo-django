@@ -139,6 +139,10 @@ class FamilyCard(models.Model):
         return f"{self.id}"
 
 
+    def save(self, *args, **kwargs):
+        self.address_home = self.address_home.strip().lower().capitalize() if self.address_home else ''
+
+
 class Person(models.Model):
     first_name_1 = models.CharField(blank=False, null=False, max_length=30, verbose_name="Primer Nombre")
     first_name_2 = models.CharField(blank=True, null=True, max_length=30, verbose_name="Segundo Nombre")
@@ -164,7 +168,7 @@ class Person(models.Model):
 
     kinship = models.ForeignKey('Kinship', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Parentescos")
-    handicap = models.CharField(choices=handicap, max_length=50, verbose_name="Capacidades Diversas")
+    handicap = models.ForeignKey(Handicap, max_length=50, on_delete=models.CASCADE, verbose_name="Capacidades Diversas")
 
     education_level = models.ForeignKey('EducationLevel', on_delete=models.CASCADE, verbose_name="Nivel Educativo")
 
@@ -179,6 +183,7 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
+
 
     def save(self, *args, **kwargs):
         self.first_name_1 = self.first_name_1.strip().lower().capitalize()

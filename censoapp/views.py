@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.core.serializers import serialize
 from django.db import transaction, IntegrityError
@@ -169,7 +170,6 @@ def create_family_card(request):
         'segment': 'family_card'
     })
 
-
 @login_required
 def crear_persona(request, pk):
     familia = FamilyCard.objects.get(pk=pk)
@@ -214,6 +214,7 @@ def crear_persona(request, pk):
     })
 
 # Muestra el detalle de la ficha familiar
+@login_required
 def detalle_ficha(request, pk):
 
     familia = (Person.objects.
@@ -222,7 +223,7 @@ def detalle_ficha(request, pk):
                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'date_birth',
                        'identification_person', 'document_type__code_document_type', 'kinship__description_kinship',
                        'family_card__family_card_number', 'family_card__sidewalk_home__sidewalk_name', 'family_head',
-                       'family_card__zone')
+                       'family_card__zone', 'family_card__address_home')
                .annotate(age=ExpressionWrapper(now().year - F('date_birth__year'), output_field=fields.IntegerField()))
                )
 
@@ -230,7 +231,7 @@ def detalle_ficha(request, pk):
                   {'familia': familia, 'segment': 'family_card', })
 
 
-class UpdateFamily(UpdateView):
+class UpdateFamily(LoginRequiredMixin, UpdateView):
     model = FamilyCard
     fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization']
     template_name = 'censo/censo/edit-family-card.html'
@@ -250,7 +251,27 @@ class UpdateFamily(UpdateView):
         return super(UpdateFamily, self).form_invalid(form)
 
 
+class DetailPersona(DetailView):
+    model = Person
+    template_name = 'censo/persona/detail_person.html'
+    context_object_name = 'persona'
+
+    def get_queryset(self):
+        return (Person.objects
+                .select_related('document_type', 'gender','education_level', 'civil_state', 'occupation',
+                                'security_social', 'eps', 'kinship', 'family_card', 'handicap')
+                .filter(id=self.kwargs['pk'], state=True)
+                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                        'identification_person', 'document_type__document_type', 'date_birth', 'gender__gender',
+                        'document_type__code_document_type', 'cell_phone', 'personal_email', 'handicap__handicap',
+                        'education_level__education_level', 'civil_state__state_civil', 'kinship__description_kinship',
+                        'occupation__description_occupancy', 'eps__name_eps', 'social_insurance__affiliation',
+                        'family_card__sidewalk_home__sidewalk_name', 'family_head', 'family_card__zone', 'family_card__address_home'))
+
+
 # Lista las personas en formato JSON para DataTables
+
+@login_required
 def listar_personas(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -312,7 +333,6 @@ def listar_personas(request):
 # Vista para mostrar la lista de personas en la plantilla HTML.
 def view_persons(request):
     return render(request, 'censo/persona/listado_personas.html', {'segment': 'personas'})
-
 
 
 # Vista para editar una persona

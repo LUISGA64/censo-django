@@ -38,7 +38,7 @@
                                 miembros</p>
                         </div>
                         <div class="col text-end">
-                            <a href="" class="btn btn-primary mt-2 text-sm text-capitalize">
+                            <a href="{% url 'createPerson' familia.0.id %}" class="btn btn-primary mt-2 text-sm text-capitalize">
                                 <i class="fa-solid fa-user-plus"></i> Agregar Persona
                             </a>
                         </div>
@@ -143,22 +143,18 @@
                                                     style="width: 7%">
                                                     Zona
                                                 </th>
-                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
-                                                    Cabeza de Familia
-                                                </th>
                                                 <th class="text-secondary opacity-7"></th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for card in familia %}
-                                                {{ card }}
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex px-2 py-1">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
                                                                     {{ card.last_name_2 }}</h6>
-                                                                <p class="text-sm text-secondary mb-0"></p>
+                                                                <p class="text-sm text-secondary mb-0">{{ card.document_type__code_document_type }} - {{ card.identification_person }}</p>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -166,7 +162,11 @@
                                                     <td>
                                                         <div class="d-flex px-2 py-1">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-sm">{{ card.document_type__code_document_type }} - {{ card.identification_person }}</h6>
+                                                                <h6 class="mb-0 text-sm">{% if card.family_head %}
+                                                                    <span class="badge bg-gradient-success" title="Family Head" aria-label="Family Head">Cabeza de Familia</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-gradient-info text-white text-xs">Miembro</span>
+                                                                {% endif %}</h6>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -188,11 +188,10 @@
                                                     <td>
                                                         <div class="d-flex px-2 py-1">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                {{ card.age|default:"No especificada" }}
                                                                 {% if card.age %}
-                                                                    <span class="text-secondary text-xs">años</span>
+                                                                    {{ card.age }} años
                                                                 {% else %}
-                                                                    <span class="text-secondary text-xs">Sin Información</span>
+                                                                    <span class="text-muted text-xs">No especificada</span>
                                                                 {% endif %}
                                                             </div>
                                                         </div>
@@ -204,21 +203,7 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <div class="d-flex px-2">
-                                                            <div class="d-flex flex-column justify-content-center">
-                                                                {% if card.family_head %}
-                                                                    <span class="badge my-auto">
-                                                            <i class="fa-solid fa-user-check fa-2x text-success"></i>
-                                                        </span>
-                                                                {% else %}
-                                                                    <span class="badge my-auto">
-                                                        <i class="fa-solid text-secondary fa-user-check fa-2x"></i>
-                                                    </span>
-                                                                {% endif %}
-                                                            </div>
-                                                        </div>
-                                                    </td>
+
                                                     <td>
                                                         <div class="d-flex px-2 py-1">
                                                             <div class="d-flex flex-column justify-content-center">
@@ -263,7 +248,6 @@
                     {data: 'vereda', searchable: false, orderable: false},
                     {data: 'edad', searchable: false, orderable: false},
                     {data: 'zona', searchable: false, orderable: false},
-                    {data: 'cabeza_familia', searchable: false, orderable: false},
                     {data: 'acciones', searchable: false, orderable: false}
                 ],
                 responsive: true,
@@ -278,3 +262,4 @@
         });
     </script>
 {% endblock javascripts %}
+</div>

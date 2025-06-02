@@ -18,8 +18,8 @@
                             <h3 class="text-muted text-opacity-75 text-bold">Listado de Familias</h3>
                             <p class="text-muted text-sm">Gestiona las fichas familiares del censo.</p>
                         </div>
-                        <div class="col text-end mt-3 me-2">
-                            <a href="{% url 'createFamilyCard' %}" class="btn btn-primary btn-sm mb-0 me-2">
+                        <div class="col text-end text-capitalize mt-3 me-2">
+                            <a href="{% url 'createFamilyCard' %}" class="btn btn-primary btn-sm">
                                 <i class="fa-solid fa-users"></i> Nueva Familia
                             </a>
                         </div>
@@ -71,6 +71,7 @@
         const DATATABLE_LANG_URL = "{% static 'assets/js/datatable/es-CO.json' %}"
         const EDIT_FAMILY_CARD_URL = "{% url 'update-family' 0 %}"
         const VIEW_FAMILY_CARD_URL = "{% url 'detailFamilyCard' 0 %}"
+        const NEW_PERSON_FAMILY = "{% url 'createPerson' 0 %}"
     </script>
     <script src="{% static 'assets/js/censo/family-card/datatable-family-card.js' %}"></script>
 {% endblock javascripts %}

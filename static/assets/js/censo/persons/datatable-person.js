@@ -90,10 +90,12 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    const editUrl = UPDATED_PERSON_URL.replace('0', row.id); // Define esta variable en tu HTML
+                    const editUrl = UPDATED_PERSON_URL.replace('0', row.id);
+                    const detailPerson = DETAIL_PERSON_URL.replace('0', row.id);
                     return `
                         <div class="action-icons d-flex justify-content-center align-items-center">
                             <a href="${editUrl}" title="Editar" class="text-secondary"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <a href="${detailPerson}" title="Detalles" class="text-secondary ms-3"><i class="fa-solid fa-binoculars"></i></a>
                         </div>`;
                 }
             }

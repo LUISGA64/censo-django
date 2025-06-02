@@ -4,7 +4,7 @@ from django.forms import Field
 from django import forms
 
 from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
-    Occupancy, Sidewalks, Organizations, Eps
+    Occupancy, Sidewalks, Organizations, Eps, Handicap
 from .choices import zone, handicap, ethnic_group
 from crispy_forms.helper import FormHelper
 
@@ -141,10 +141,15 @@ class FormPerson(forms.ModelForm):
                                         label="Parentesco")
 
     # Tipo de Discapacidad
-    handicap = forms.ChoiceField(choices=handicap,
-                                 widget=forms.Select(
-                                     attrs={'class': 'form-control', 'placeholder': 'Discapacidad'}),
-                                 label="Discapacidad")
+    # handicap = forms.ChoiceField(choices=handicap,
+    #                              widget=forms.Select(
+    #                                  attrs={'class': 'form-control', 'placeholder': 'Discapacidad'}),
+    #                              label="Discapacidad")
+    handicap = forms.ModelChoiceField(queryset=Handicap.objects.all(), empty_label="Seleccione Discapacidad",
+                                      widget=forms.Select(attrs={'class': 'form-control',
+                                                          'placeholder': 'Discapacidad'},
+                                                          ),
+                                        label="Discapacidad")
 
     # Nivel Educativo
     education_level = forms.ModelChoiceField(queryset=EducationLevel.objects.all(),

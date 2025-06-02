@@ -3665,6 +3665,10 @@ textarea.form-control-lg {
       color: #ffffff;
     }
 
+.nav-sidebar.active {
+    background-color: #0b5d6f;
+    color: #ffffff;
+}
 
 .nav-link:hover, .nav-link:focus {
   color: var(--bs-nav-link-hover-color);
