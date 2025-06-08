@@ -65,38 +65,8 @@
     {% include "includes/navigation.html" %}
 
     {% block content %}{% endblock content %}
-</main>
-
-<!-- APP Configurator -->
-{% include "includes/fixed-plugin.html" %}
-
-<!-- Core JS Files -->
-{% include "includes/scripts.html" %}
-
-<!-- Specific JS goes HERE -->
-{% block javascripts %}
-    
-
-
-<!--  DataTables    -->
-
-
-<script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-        var options = {
-            damping: '0.5'
-        }
-        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-</script>
-<!-- Github buttons -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-<!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-<script src="{% static 'assets/js/soft-ui-dashboard.min.js' %}"></script>
-
-{% endblock javascripts %}
-<div class="alert">
+    {% include "includes/footer.html" %}
+    <div class="alert">
     {% if messages %}
         {% for message in messages %}
             <script>
@@ -110,5 +80,13 @@
         {% endfor %}
     {% endif %}
 </div>
+</main>
+
+
+<!-- Core JS Files -->
+{% include "includes/scripts.html" %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}
 </body>
 </html>

@@ -35,7 +35,7 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return `<div class="text-center"><span class="badge bg-secondary text-xs">${data}</span></div>`
+                    return `<div class="text-center"><span class="badge bg-gradient-success text-xs">${data}</span></div>`
                 }
             },
             {

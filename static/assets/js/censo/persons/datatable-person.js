@@ -77,7 +77,7 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (data && row.family_card) {
                         return `<div class="d-flex justify-content-center">
-                                    <a href="/familyCard/detail/${row.family_card}/" class="badge bg-info text-white text-center" style="color: #0d6efd">
+                                    <a href="/familyCard/detail/${row.family_card}/" class="badge bg-gradient-info text-white text-center">
                                     <span class="letter-spacing-1"> Ficha # </span> ${data}</a>
                                 </div>`;
                     }

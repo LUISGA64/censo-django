@@ -10,45 +10,60 @@
 
 {% block stylesheets %}
     {{ block.super }}
+    <style>
+        .asteriskField {
+            color: #dc3545 !important; /* Rojo Bootstrap */
+            font-weight: bold;
+            margin-left: 0.2rem; /* Espacio entre el campo y el asterisco */
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
     <div class="container-fluid">
         <div class="row">
             <div class="card">
-                <h5 class="mt-4 ms-4">Datos de la Vivienda</h5>
-                <hr class="horizontal dark">
-            <div class="card-body" style="margin-top: -5px">
-                <form method="post" class="form-horizontal" class="row g-1">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            {{ family_card_form.sidewalk_home|as_crispy_field }}
-                        </div>
-                        <div class="col-md-4 form-group">
-                            {{ family_card_form.zone|as_crispy_field }}
-                        </div>
-                        <div class="col-md-4 form-group">
-                            {{ family_card_form.organization|as_crispy_field }}
-                        </div>
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fa-solid fa-users-rectangle"></i> Nueva Ficha Familiar
+                    </h5>
+                    <div class="text-dark ms-4">
+                        <p class="text-muted mb-0 text-xs">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <strong>Nota:</strong> Los campos marcados con <span class="text-danger">*</span> son
+                            obligatorios.
                     </div>
-                    <h4>Datos del Cabeza de Familia</h4>
-                    <div class="row">
-                        {% for field in person_form %}
-                            <div class="col-md-3 form-group">
-                                {{ field|as_crispy_field }}
+                </div>
+                <div class="card-body ms-4 me-4" style="margin-top: -5px">
+                    <form method="post" class="form-horizontal" class="row">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                {{ family_card_form.sidewalk_home|as_crispy_field }}
                             </div>
-                        {% endfor %}
-                    </div>
-                    <div class="d-flex flex-row-reverse gap-2 me-4">
-                        <button type="submit" class="btn btn-slack">Guardar</button>
-                        <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary">Cancelar</a>
-                    </div>
-                </form>
+                            <div class="col-md-4 form-group">
+                                {{ family_card_form.zone|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 form-group">
+                                {{ family_card_form.organization|as_crispy_field }}
+                            </div>
+                        </div>
+                        <h5>Datos del Cabeza de Familia</h5>
+                        <div class="row">
+                            {% for field in person_form %}
+                                <div class="col-md-3 form-group">
+                                    {{ field|as_crispy_field }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex flex-row-reverse gap-2 me-4">
+                            <button type="submit" class="btn btn-slack">Guardar</button>
+                            <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-        </div>
-        {% include "includes/footer.html" %}
     </div>
 {% endblock content %}
 
