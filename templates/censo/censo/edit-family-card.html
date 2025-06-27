@@ -9,52 +9,73 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
     <style>
-    .nav-item-custom-1 {
-        background-color: #405270; /* Color azul profesional */
-        color: white;
-        margin-right: 10px;
-        border-radius: 5px;
-    }
-    .nav-item-custom-2 {
-        background-color: #158787; /* Color verde profesional */
-        color: white;
-        margin-right: 10px;
-        border-radius: 5px;
-    }
-    .nav-item-custom-3 {
-        background-color: #707387; /* Color cian profesional */
-        color: white;
-        margin-right: 10px;
-        border-radius: 5px;
-    }
-    .nav-item-custom-1 .nav-link,
-    .nav-item-custom-2 .nav-link,
-    .nav-item-custom-3 .nav-link {
-        color: white;
-    }
-    .nav-item-custom-1 .nav-link.active,
-    .nav-item-custom-2 .nav-link.active,
-    .nav-item-custom-3 .nav-link.active {
-        background-color: #303650; /* Color azul oscuro para la pestaña activa */
-        color: white;
-    }
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    .btn {
-        border-radius: 5px;
-    }
-    .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .card-header {
-        {#background-color: #f8f9fc;#}
-        {#border-bottom: 1px solid #e3e6f0;#}
-    }
-    .card-body {
-        background-color: #ffffff;
-    }
+        .nav-item-custom-1 {
+            background-color: #405270; /* Color azul profesional */
+            color: white;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+
+        .nav-item-custom-2 {
+            background-color: #158787; /* Color verde profesional */
+            color: white;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+
+        .nav-item-custom-3 {
+            background-color: #707387; /* Color cian profesional */
+            color: white;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+
+        .nav-item-custom-1 .nav-link,
+        .nav-item-custom-2 .nav-link,
+        .nav-item-custom-3 .nav-link {
+            color: white;
+        }
+
+        .nav-item-custom-1 .nav-link.active,
+        .nav-item-custom-2 .nav-link.active,
+        .nav-item-custom-3 .nav-link.active {
+            background-color: #303650; /* Color azul oscuro para la pestaña activa */
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            border-radius: 5px;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+        {#background-color: #f8f9fc;#}{#border-bottom: 1px solid #e3e6f0;#}
+        }
+
+        .card-body {
+            background-color: #ffffff;
+        }
+
+        .help-block, .invalid-feedback, .form-text {
+            color: #68748e;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .asteriskField {
+            color: #dc3545 !important; /* Rojo Bootstrap */
+            font-weight: bold;
+            margin-left: 0.2rem; /* Espacio entre el campo y el asterisco */
+        }
+
     </style>
 {% endblock stylesheets %}
 
@@ -64,81 +85,88 @@
             <div class="card p-3">
                 <div class="card-header pb-0">
                     <h6>Información del Grupo Familiar</h6>
-
                 </div>
-
                 <div class="card-body">
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item nav-item-custom-1" role="presentation">
-                            <button class="nav-link active " id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Datos Principales</button>
-                        </li>
-                        <li class="nav-item nav-item-custom-2" role="presentation">
-                            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Información Vivienda</button>
-                        </li>
-                        <li class="nav-item nav-item-custom-3" role="presentation">
-                            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Actividad Económica</button>
-                        </li>
-                    </ul>
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                            <form id="form-general" method="post" action="" class="form-horizontal form-group p-5">
-                                {% csrf_token %}
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        {{ form.address_home|as_crispy_field }}
+                    <div class="nav-wrapper position-relative end-0">
+                        <ul class="nav nav-pills nav-fill p-1" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab"
+                                   href="#profile-tabs-icons" role="tab" aria-controls="preview" aria-selected="true">
+                                    <i class="ni ni-badge text-sm me-2"></i> Datos Vivienda
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#dashboard-tabs-icons"
+                                   role="tab" aria-controls="code" aria-selected="false">
+                                    <i class="ni ni-laptop text-sm me-2"></i> Integrantes del Grupo Familiar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content mt-4">
+                        <!-- Tab 1: Datos Vivienda -->
+                        <div class="tab-pane fade show active" id="profile-tabs-icons" role="tabpanel">
+                            <div class="row border-0 py2 px-3">
+                                <form id="form-general" method="post" action="" class="form-horizontal form-group p-5">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            {{ form.address_home|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            {{ form.sidewalk_home|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            {{ form.latitude|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            {{ form.longitude|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            {{ form.zone|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            {{ form.organization|as_crispy_field }}
+                                        </div>
+                                        <hr class="horizontal dark">
+                                        <div class="d-flex flex-row-reverse gap-2">
+                                            <button type="submit" class="btn btn-slack btn-sm me-4">Guardar</button>
+                                            <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary btn-sm ms-2">Cancelar</a>
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        {{ form.sidewalk_home|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3">
-                                        {{ form.latitude|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3">
-                                        {{ form.longitude|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3">
-                                        {{ form.zone|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3">
-                                        {{ form.organization|as_crispy_field }}
-                                    </div>
-                                    <hr class="horizontal dark">
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Tab 2: Integrantes del Grupo Familiar -->
+                        <div class="tab-pane fade" id="dashboard-tabs-icons" role="tabpanel">
+                            <div class="row border-0 py2 px-3">
+                                <form id="form-personas" method="post" action="" class="form-horizontal form-group p-5">
+                                    {% csrf_token %}
+                                    {{ person_formset.management_form }}
+                                    {% for form in person_formset %}
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    {% for field in form.visible_fields %}
+                                                        <div class="col-md-3">
+                                                            {{ field|as_crispy_field }}
+                                                        </div>
+                                                    {% endfor %}
+                                                    {% if form.can_delete %}
+                                                        <div class="col-md-1 d-flex align-items-end">
+                                                            {{ form.DELETE|as_crispy_field }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
                                     <div class="d-flex flex-row-reverse gap-2">
-                                        <button type="submit" class="btn btn-slack me-4">Guardar</button>
-                                        <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary ms-2">Cancelar</a>
+                                        <button type="submit" class="btn btn-slack btn-sm me-4">Guardar Integrantes
+                                        </button>
                                     </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                            <form id="form-vivienda" method="post" action="" class="form-horizontal form-group">
-                                {% csrf_token %}
-                                <!-- Campos del formulario de Información Vivienda -->
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre:</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                </div>
-                                <!-- Agrega más campos según sea necesario -->
-                                <div class="d-flex flex-row-reverse gap-2">
-                                    <button type="submit" class="btn btn-slack me-4">Guardar</button>
-                                    <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary ms-2">Cancelar</a>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                            <form id="form-economica" method="post" action="" class="form-horizontal form-group">
-                                {% csrf_token %}
-                                <!-- Campos del formulario de Actividad Económica -->
-                                <div class="mb-3">
-                                    <label for="actividad" class="form-label">Actividad:</label>
-                                    <input type="text" class="form-control" id="actividad" name="actividad" required>
-                                </div>
-                                <!-- Agrega más campos según sea necesario -->
-                                <div class="d-flex flex-row-reverse gap-2">
-                                    <button type="submit" class="btn btn-slack me-4">Guardar</button>
-                                    <a href="{% url 'familyCardIndex' %}" class="btn btn-secondary ms-2">Cancelar</a>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

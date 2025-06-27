@@ -72,7 +72,7 @@
         {% for message in messages %}
             <script>
                 Swal.fire({
-                    {#icon: '{{ message.tags }}',#}
+                    icon: '{% if "error" in message.tags %}error{% elif "warning" in message.tags %}warning{% elif "success" in message.tags %}success{% elif "info" in message.tags %}info{% else %}info{% endif %}',
                     title: '{{ message }}',
                     showConfirmButton: false,
                     timer: 1700
