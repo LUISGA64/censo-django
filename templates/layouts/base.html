@@ -66,12 +66,13 @@
 
     {% block content %}{% endblock content %}
     {% include "includes/footer.html" %}
+    <script src="{% static 'assets/js/sweetalert/sweetalert2@11.js' %}"></script>
     <div class="alert">
     {% if messages %}
         {% for message in messages %}
             <script>
                 Swal.fire({
-                    icon: '{{ message.tags }}',
+                    {#icon: '{{ message.tags }}',#}
                     title: '{{ message }}',
                     showConfirmButton: false,
                     timer: 1700
@@ -79,6 +80,7 @@
             </script>
         {% endfor %}
     {% endif %}
+
 </div>
 </main>
 

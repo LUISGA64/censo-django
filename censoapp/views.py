@@ -156,7 +156,8 @@ def create_family_card(request):
                 messages.error(request, "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
             except Exception as e:
                 logger.error(f"Error inesperado: {e}")
-                messages.error(request, "Ocurrió un error inesperado. Por favor, intente nuevamente.")
+                messages.error(request, f"Hubo un problema al crear la ficha familiar: {str(e)}")
+                print(f"Error inesperado: {e}")
         else:
             messages.warning(request, "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
             logger.warning(f"Errores del formulario: {family_card_form.errors}, {person_form.errors}")
