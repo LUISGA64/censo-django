@@ -40,9 +40,7 @@ $(document).ready(function () {
             },
             {
                 data: "person_count",
-                name: "zone",
-                orderable: false,
-                searchable: false,
+                name: "person_count",
                 render: function (data, type, row) {
                     return `<div class="text-center"><span class="badge bg-info text-sm">${data}</span></div>`
                 }

@@ -1,24 +1,21 @@
 import logging
-from datetime import datetime
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.core.serializers import serialize
 from django.db import transaction, IntegrityError
 from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count
 from django.db.models.functions.text import Concat
-from django.utils.timezone import now
-from django.views.generic import DetailView, TemplateView
-from .choices import handicap
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.utils.timezone import now
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
-from django.contrib import messages
-from censoapp.models import Association, Person, FamilyCard, DocumentType, Gender, SecuritySocial, Eps, Kinship, \
-    EducationLevel, CivilState, Occupancy, Sidewalks, Organizations
+from django.forms import inlineformset_factory
+from censoapp.models import Association, Person, FamilyCard
 from .forms import FormFamilyCard, FormPerson
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +23,9 @@ logger = logging.getLogger(__name__)
 @login_required
 def home(request):
     cantidad = Person.objects.values_list('gender__gender').annotate(cantidad=Count('id'))
+
+    print("Cantidad de personas por género:", cantidad)
+
     # Crear un diccionario a partir de los resultados de la consulta
     cantidad_dict = {}
     for item in cantidad:
@@ -124,17 +124,19 @@ def create_family_card(request):
         family_card_form = FormFamilyCard(request.POST)
         person_form = FormPerson(request.POST)
 
-        if family_card_form.is_valid() and person_form.is_valid():
-            identification_person = person_form.cleaned_data['identification_person']
-
+        # Verificar si el número de identificación ya existe
+        if 'identification_person' in request.POST:
+            identification_person = request.POST['identification_person']
             if Person.objects.filter(identification_person=identification_person).exists():
                 messages.error(request, "Ya existe una persona con esa identificación.")
-                return render(request, 'censo/censo/createFamilyCard.html', {
-                    'family_card_form': family_card_form,
-                    'person_form': person_form,
-                    'segment': 'family_card'
-                })
 
+            family_card_form_is_valid = family_card_form.is_valid()
+            print(f"Family Card Form Valid: {family_card_form_is_valid}")
+            person_form_is_valid = person_form.is_valid()
+            print(f"Person Form Valid: {person_form_is_valid}")
+
+
+        if family_card_form.is_valid() and person_form.is_valid():
             try:
                 with transaction.atomic():
 
@@ -237,18 +239,28 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
     template_name = 'censo/censo/edit-family-card.html'
     success_url = reverse_lazy('familyCardIndex')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        PersonFormSet = inlineformset_factory(
+            FamilyCard, Person, form=FormPerson, extra=0, can_delete=True
+        )
+        if self.request.POST:
+            context['person_formset'] = PersonFormSet(self.request.POST, instance=self.object)
+        else:
+            context['person_formset'] = PersonFormSet(instance=self.object)
+        return context
+
     def form_valid(self, form):
-        form.instance.user = self.request.user
-
-        messages.success(self.request, "Ficha familiar actualizada correctamente")
-        return super(UpdateFamily, self).form_valid(form)
-
-    def form_invalid(self, form):
-        logger.warning(f"Errores del formulario: {form.errors}")
-        messages.warning(self.request, "Hubo un problema con la actualización de la ficha familiar. "
-                                       "Por favor, revisa los campos nuevamente.")
-
-        return super(UpdateFamily, self).form_invalid(form)
+        context = self.get_context_data()
+        person_formset = context['person_formset']
+        if person_formset.is_valid():
+            self.object = form.save()
+            person_formset.instance = self.object
+            person_formset.save()
+            messages.success(self.request, "Ficha familiar y personas actualizadas correctamente")
+            return redirect(self.success_url)
+        else:
+            return self.form_invalid(form)
 
 
 class DetailPersona(DetailView):

@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from .choices import handicap, zone
 
@@ -116,7 +117,7 @@ class SecuritySocial(models.Model):
 
 class FamilyCard(models.Model):
 
-    address_home = models.CharField(blank=True, null=True, max_length=50, help_text="Registre donde vive la familia",
+    address_home = models.CharField(blank=True, null=True, max_length=50, help_text="Registre Información Adicional",
                                     verbose_name="Dirección Vivienda")
     sidewalk_home = models.ForeignKey('Sidewalks', null=False, blank=False, on_delete=models.CASCADE, verbose_name="Vereda",
                                       help_text="Seleccione la vereda donde vive")
@@ -141,6 +142,7 @@ class FamilyCard(models.Model):
 
     def save(self, *args, **kwargs):
         self.address_home = self.address_home.strip().lower().capitalize() if self.address_home else ''
+        super().save(*args, **kwargs)
 
 
 class Person(models.Model):
@@ -176,16 +178,29 @@ class Person(models.Model):
 
     occupation = models.ForeignKey('Occupancy', blank=False, null=False, on_delete=models.CASCADE,
                                    verbose_name="Ocupación")
-    family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Familia", null=False,
-                                    blank=False, default='')
+
+    family_card = models.ForeignKey('FamilyCard', on_delete=models.CASCADE, verbose_name="Ficha Familiar")
+
     family_head = models.BooleanField(blank=False, null=False, default=False, verbose_name="Cabeza de Familia")
     state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Vivo")
 
     def __str__(self):
         return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
 
+    def clean(self):
+        super().clean()
+        if self.family_head:
+            qs = Person.objects.filter(family_card=self.family_card, family_head=True)
+
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+
+            if qs.exists():
+                raise ValidationError("Ya existe una persona registrada como cabeza de familia en esta ficha.")
+
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         self.first_name_1 = self.first_name_1.strip().lower().capitalize()
         self.first_name_2 = self.first_name_2.strip().lower().capitalize()
         self.last_name_1 = self.last_name_1.strip().lower().capitalize()
@@ -193,7 +208,9 @@ class Person(models.Model):
         self.personal_email = self.personal_email.strip().lower() if self.personal_email else ''
         self.cell_phone = self.cell_phone.strip() if self.cell_phone else ''
         self.identification_person = self.identification_person.strip()
-        super(Person, self).save(*args, **kwargs)
+        # super(Person, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
 
     @property
     def full_name(self):
@@ -217,3 +234,25 @@ class Person(models.Model):
             return f"{years} años"
         else:
             return f"{months} meses"
+
+
+class SystemParameters(models.Model):
+    key = models.CharField(blank=False, null=False, unique=True, max_length=100)
+    value = models.CharField(max_length=250)
+
+    def __str__(self):
+        return f"{self.key}: {self.value}"
+
+
+
+class Charge(models.Model):
+    charge_name = models.CharField(max_length=150, blank=False, null=False, unique=True)
+    authorized_sign = models.BooleanField(default=False,
+                                          help_text="¿Esta persona está autorizada para firmar documentos?")
+
+    def __str__(self):
+        return f"{self.charge_name} - {'Autorizado' if self.authorized_sign else 'No Autorizado'}"
+
+    class Meta:
+        verbose_name = "Cargo"
+        verbose_name_plural = "Cargos"
