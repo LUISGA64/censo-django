@@ -66,7 +66,22 @@
 
     {% block content %}{% endblock content %}
     {% include "includes/footer.html" %}
+    <script src="{% static 'assets/js/sweetalert/sweetalert2@11.js' %}"></script>
+    <div class="alert">
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                Swal.fire({
+                    icon: '{% if "error" in message.tags %}error{% elif "warning" in message.tags %}warning{% elif "success" in message.tags %}success{% elif "info" in message.tags %}info{% else %}info{% endif %}',
+                    title: '{{ message }}',
+                    showConfirmButton: false,
+                    timer: 1700
+                })
+            </script>
+        {% endfor %}
+    {% endif %}
 
+</div>
 </main>
 
 
@@ -75,20 +90,5 @@
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}{% endblock javascripts %}
-
-    <div class="alert">
-        {% if messages %}
-            {% for message in messages %}
-                <script>
-                    Swal.fire({
-                        icon: '{{ message.tags }}',
-                        title: '{{ message }}',
-                        showConfirmButton: false,
-                        timer: 1700
-                    })
-                </script>
-            {% endfor %}
-        {% endif %}
-    </div>
 </body>
 </html>
