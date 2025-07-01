@@ -5,28 +5,9 @@ from django.contrib.auth.decorators import login_required
 from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
-                    listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona)
+                    listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
+                    delete_person_familyCard)
 
-# router = routers.DefaultRouter()
-# router.register(r'sidewalks', SidewalksViewSet, 'sidewalks')
-# router.register(r'associations', AssociationViewSet, 'associations')
-# router.register(r'organizations', OrganizationViewSet, 'organizations')
-# router.register(r'documenttypes', OrganizationViewSet, 'documenttypes')
-# router.register(r'civilstates', OrganizationViewSet, 'civilstates')
-# router.register(r'educationlevels', OrganizationViewSet, 'educationlevels')
-# router.register(r'eps', OrganizationViewSet, 'eps')
-# router.register(r'kinships', OrganizationViewSet, 'kinships')
-# router.register(r'occupancies', OrganizationViewSet, 'occupancies')
-# router.register(r'securitysocials', OrganizationViewSet, 'security-socials')
-# router.register(r'handicaps', OrganizationViewSet, 'handicaps')
-
-
-# urlpatterns = router.urls
-
-# urlpatterns = [
-#     path('', include(router.urls)),
-#     path('docs/', include_docs_urls(title='Sidewalks API')),
-# ]
 
 urlpatterns = [
     path('', login_required(home), name='home'),
@@ -46,6 +27,11 @@ urlpatterns = [
     path('person/create/<int:pk>', login_required(crear_persona), name='createPerson'),
     path('edit-person/<int:pk>', login_required(UpdatePerson.as_view()), name='updated-person'),
     path('personas/detail/<int:pk>', login_required(DetailPersona.as_view()), name='detail-person'),
+
+
+    # Editar el cabeza de familia
+    path('personas/edit-head/<int:family>/<int:person>', login_required(update_family_head), name='edit-head-person'),
+    path('persona/delete/<int:person>/', login_required(delete_person_familyCard), name='unlink-person-family'),
 
     # ----- JSON API  ----
     path('json_familycards', login_required(get_family_cards), name='familycards'),

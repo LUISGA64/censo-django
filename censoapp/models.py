@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from .choices import handicap, zone
+from django.db.models import Max
 
 
 class Association(models.Model):
@@ -130,6 +131,9 @@ class FamilyCard(models.Model):
                                         null=False, blank=False)
     family_card_number = models.IntegerField(blank=False, null=False, unique=True, verbose_name="Número de Familia",
                                              default=0)
+    state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Estado de la Ficha",
+                                help_text="¿La ficha familiar está activa?")
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Última Actualización")
 
@@ -143,6 +147,16 @@ class FamilyCard(models.Model):
     def save(self, *args, **kwargs):
         self.address_home = self.address_home.strip().lower().capitalize() if self.address_home else ''
         super().save(*args, **kwargs)
+
+    @classmethod
+    def get_next_family_card_number(cls):
+        max_num = cls.objects.aggregate(Max('family_card_number'))['family_card_number__max'] or 0
+        return max_num + 1
+
+    @classmethod
+    def get_count_members(cls, family_card_id):
+        return Person.objects.filter(family_card_id=family_card_id, state=True).count()
+
 
 
 class Person(models.Model):
@@ -185,7 +199,8 @@ class Person(models.Model):
     state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Vivo")
 
     def __str__(self):
-        return f"{self.first_name_1} {self.last_name_1} {self.identification_person}"
+        return (f"{self.first_name_1} {self.first_name_2} {self.last_name_1} {self.last_name_2} - "
+                f"{self.identification_person}" )
 
     def clean(self):
         super().clean()

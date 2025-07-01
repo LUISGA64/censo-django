@@ -7,6 +7,7 @@ $(document).ready(function () {
         },
         serverSide: true,
         processing: true,
+        order: [[0, "asc"]],
         columns: [
             {
                 data: "family_card__family_card_number",

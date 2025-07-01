@@ -38,7 +38,8 @@
                                 miembros</p>
                         </div>
                         <div class="col text-end">
-                            <a href="{% url 'createPerson' familia.0.id %}" class="btn btn-primary mt-2 text-sm text-capitalize">
+                            <a href="{% url 'createPerson' familia.0.id %}"
+                               class="btn btn-primary mt-2 text-sm text-capitalize">
                                 <i class="fa-solid fa-user-plus"></i> Agregar Persona
                             </a>
                         </div>
@@ -154,7 +155,8 @@
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
                                                                     {{ card.last_name_2 }}</h6>
-                                                                <p class="text-sm text-secondary mb-0">{{ card.document_type__code_document_type }} - {{ card.identification_person }}</p>
+                                                                <p class="text-sm text-secondary mb-0">{{ card.document_type__code_document_type }}
+                                                                    - {{ card.identification_person }}</p>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -163,7 +165,8 @@
                                                         <div class="d-flex px-2 py-1">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-sm">{% if card.family_head %}
-                                                                    <span class="badge bg-gradient-success" title="Family Head" aria-label="Family Head">Cabeza de Familia</span>
+                                                                    <span class="badge bg-gradient-success"
+                                                                          title="Family Head" aria-label="Family Head">Cabeza de Familia</span>
                                                                 {% else %}
                                                                     <span class="badge bg-gradient-info text-white text-xs">Miembro</span>
                                                                 {% endif %}</h6>
@@ -206,10 +209,28 @@
 
                                                     <td>
                                                         <div class="d-flex px-2 py-1">
+                                                            <!-- Cambiar el cabeza de familia de la ficha familiar -->
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <a href="#" class="btn btn-pinterest btn-xs my-auto"
-                                                                   title="Generar Aval">
-                                                                    <i class="fa-regular fa-file-pdf"></i>
+                                                                <a href="#"
+                                                                   class="text-danger text-sm font-weight-bold"
+                                                                   title="Cabeza de Familia"
+                                                                   data-family-id="{{ card.family_card__id }}"
+                                                                   data-person-id="{{ card.id }}"
+                                                                   onclick="return showConfirmSwal(this.getAttribute('data-family-id'), this.getAttribute('data-person-id'));"
+                                                                >
+                                                                    <i class="fa-solid fa-people-roof"></i>
+                                                                </a>
+                                                            </div>
+                                                            <!-- Eliminar Usuario de la ficha familiar -->
+                                                            <div class="d-flex flex-column justify-content-center ms-2">
+                                                                <a href="#"
+                                                                   class="text-danger text-sm font-weight-bold"
+                                                                   title="Eliminar de la ficha familiar"
+                                                                   data-family-id="{{ card.family_card__id }}"
+                                                                   data-person-id="{{ card.id }}"
+                                                                   onclick="return showDeletePersonSwal(this.getAttribute('data-person-id'), this);"
+                                                                >
+                                                                    <i class="fa-regular fa-trash-can"></i>
                                                                 </a>
                                                             </div>
                                                         </div>
@@ -218,6 +239,10 @@
                                             {% endfor %}
                                             </tbody>
                                         </table>
+                                        <div id="loader"
+                                             style="display:none;position:fixed;top:50%;left:50%;z-index:9999;">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -260,6 +285,127 @@
                 }
             });
         });
+    </script>
+    <script>
+
+        const url = "{% url 'edit-head-person' 0 0 %}";
+
+        async function showConfirmSwal(familyId, personId) {
+            event.preventDefault();
+            const result = await Swal.fire({
+                title: '¿Está seguro?',
+                text: '¿Desea marcar a esta persona como cabeza de familia?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check-circle"></i> Sí, continuar',
+                cancelButtonText: '<i class="fa-solid fa-times-circle"></i> Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-outline-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: true
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(url.replace('0', familyId).replace('0', personId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    await Swal.fire({
+                        title: data.title,
+                        text: data.message,
+                        icon: data.status
+                    });
+                    if (data.status === 'success') {
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    await Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al procesar la solicitud.',
+                        icon: 'error'
+                    });
+                }
+            }
+            return false;
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+    <script>
+        const deleteUrl = "{% url 'unlink-person-family' 0 %}";
+
+        async function showDeletePersonSwal(personId, btn) {
+            event.preventDefault();
+            const result = await Swal.fire({
+                title: '¿Está seguro?',
+                text: 'Esta acción eliminará a la persona del grupo familiar.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-trash"></i> Eliminar',
+                cancelButtonText: '<i class="fa-solid fa-times-circle"></i> Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            });
+
+            if (result.isConfirmed) {
+                document.getElementById('loader').style.display = 'block';
+                if (btn) btn.disabled = true;
+                try {
+                    const response = await fetch(deleteUrl.replace('0', personId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    await Swal.fire({
+                        title: data.title,
+                        text: data.message,
+                        icon: data.status
+                    });
+                    if (data.status === 'success') {
+                        // Elimina la fila de la tabla sin recargar
+                        const row = btn.closest('tr');
+                        if (row) row.remove();
+                    }
+                } catch (error) {
+                    await Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al eliminar la persona.',
+                        icon: 'error'
+                    });
+                } finally {
+                    document.getElementById('loader').style.display = 'none';
+                    if (btn) btn.disabled = false;
+                }
+            }
+            return false;
+        }
     </script>
 {% endblock javascripts %}
 </div>
