@@ -107,35 +107,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- Segundo bloque de estadísticas -->
         <div class="row mt-4">
-            <div class="col-lg-8 mb-4">
-                <div class="card">
+            <!-- Gráfico de Línea Generacional -->
+            <div class="col-lg-9 mb-4">
+                <div class="card z-index-2">
                     <canvas id="lineChartGeneracional" class="chart-canvas" height="300"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card z-index-2">
+                    <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Vereda</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Personas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vereda, total in veredas_totales.items %}
+                                    <tr>
+
+                                        <td>
+                                            <p class="ms-2 text-xs font-weight-bold mb-0">{{ vereda }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="ms-4 text-xs font-weight-bold mb-0">{{ total }}</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 {% endblock content %}
 {% block javascripts %}
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+    <script>
+    let ctx2 = document.getElementById("lineChartGeneracional").getContext("2d");
 
-<script>
-
-    var ctx2 = document.getElementById("lineChartGeneracional").getContext("2d");
-
-    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+    let gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
     gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
     gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
     gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
 
-    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+    let gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
     gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
     gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
     gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
 
-    var gradientStroke3 = ctx2.createLinearGradient(0, 230, 0, 50);
+    let gradientStroke3 = ctx2.createLinearGradient(0, 230, 0, 50);
     gradientStroke3.addColorStop(1, 'rgba(13,202,240,0.2)'); // Color #0dcaf0 con 20% de opacidad
     gradientStroke3.addColorStop(0.2, 'rgba(13,202,240,0.0)'); // Color #0dcaf0 con 0% de opacidad
     gradientStroke3.addColorStop(0, 'rgba(13,202,240,0)'); // Color #0dcaf0 con 0% de opacidad

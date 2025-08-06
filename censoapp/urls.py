@@ -6,7 +6,7 @@ from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
-                    delete_person_familyCard)
+                    delete_person_familyCard, get_system_parameters)
 
 
 urlpatterns = [
@@ -37,5 +37,8 @@ urlpatterns = [
     path('json_familycards', login_required(get_family_cards), name='familycards'),
     path('json_personas/', login_required(listar_personas), name='json_personas'),
     path('json_person_gender/', login_required(person_by_gender), name='persons-gender'),
+
+    # Parámetros del aplicativo
+    path('api-params/', login_required(get_system_parameters), name='system-parameters'),
 
 ]

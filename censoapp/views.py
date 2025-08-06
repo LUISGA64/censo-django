@@ -14,25 +14,46 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.forms import inlineformset_factory
-from censoapp.models import Association, Person, FamilyCard, Sidewalks
+from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters
 from .forms import FormFamilyCard, FormPerson
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
 @login_required
 def home(request):
-    cantidad = Person.objects.values_list('gender__gender').annotate(cantidad=Count('id'))
+    personas = Person.objects.values(
+        'gender__gender',
+        'date_birth',
+        'family_card_id',
+        'family_card__sidewalk_home__sidewalk_name'
+    ).annotate(
+        total=Count('id')
+    )
+
+    # Obtener la cantidad de personas por vereda
+    personas_veredas = Person.objects.values('family_card__sidewalk_home__sidewalk_name').annotate(
+        total_personas=Count('id')
+    ).order_by('family_card__sidewalk_home__sidewalk_name')
+
+    # Crear un diccionario para almacenar los totales por vereda
+    veredas_totales = {}
+    for vereda in personas_veredas:
+        vereda_nombre = vereda['family_card__sidewalk_home__sidewalk_name']
+        veredas_totales[vereda_nombre] = vereda['total_personas']
+
+    veredas_totales = dict(sorted(veredas_totales.items(), key=lambda item: item[0],  reverse=True))
+
 
     total_personas = Person.objects.count()
     total_fichas = FamilyCard.objects.count()
     total_veredas = Sidewalks.objects.count()
 
-    # Obtener el total de personas por genero y por año de nacimiento
+    # Obtener el total de personas por género y por año de nacimiento
     personas_por_genero = Person.objects.values('gender__gender', 'date_birth').annotate(personas=Count('id'))
 
     mujeres = {}
@@ -60,6 +81,7 @@ def home(request):
         'hombres_list': hombres_list,
         'mujeres_list': mujeres_list,
         'anios': anios,
+        'veredas_totales': veredas_totales,
     }
     return render(request, 'censo/dashboard.html', context)
 
@@ -287,6 +309,20 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
 
         return super(UpdateFamily, self).form_invalid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        params_qs = SystemParameters.objects.all()
+        context['segment'] = 'family_card'
+        try:
+            datos_vivienda = SystemParameters.objects.get(key='Datos de Vivienda').value
+        except SystemParameters.DoesNotExist:
+            logger.error("No se encontraron parámetros del sistema para 'Datos de Vivienda'")
+            datos_vivienda = {}
+
+        context['datos_vivienda'] = datos_vivienda
+
+        return context
+
 
 class DetailPersona(DetailView):
     model = Person
@@ -307,8 +343,8 @@ class DetailPersona(DetailView):
                         'family_card__address_home'))
 
 
-# Lista las personas en formato JSON para DataTables
 
+# Lista las personas en formato JSON para DataTables
 @login_required
 def listar_personas(request):
     draw = int(request.GET.get('draw', 1))
@@ -413,31 +449,6 @@ def person_by_gender(request):
     return JsonResponse({'cantidad': cantidad})
 
 
-# def update_family_head(request, family, person):
-#     person = Person.objects.filter(family_card_id=family, id=person).first()
-#
-#     family = FamilyCard.objects.filter(id=family).first()
-#
-#     if not person or not family:
-#         messages.error(request, "No se encontró la persona o la ficha familiar.")
-#         return redirect('familyCardIndex')
-#
-#     # Verificar si la persona ya es cabeza de familia
-#     if person.family_head:
-#         messages.info(request, "La persona ya es el cabeza de familia.")
-#         return redirect('detail-person', pk=person.id)
-#
-#     # Actualizar el campo de familia cabeza de todos los miembros de la familia a False
-#     Person.objects.filter(family_card=family).update(family_head=False)
-#
-#     # Actualizar el campo de familia cabeza de la persona seleccionada a True
-#     person.family_head = True
-#     person.save()
-#     messages.success(request, "Cabeza de familia actualizado correctamente.")
-#
-#
-#     return HttpResponse('Esta es la vista para editar el cabeza de familia')
-
 @require_POST
 @csrf_protect
 def update_family_head(request, family, person):
@@ -480,3 +491,16 @@ def delete_person_familyCard(request, person):
 
         return JsonResponse(
             {'status': 'success', 'title': 'Éxito', 'message': 'Persona desvinculada correctamente.'})
+
+
+
+# Consultar los parámetros y retornar un json
+@login_required
+def get_system_parameters(request):
+    try:
+        params = SystemParameters.objects.all().values('key', 'value')
+        data = {param['key']: param['value'] for param in params}
+        return JsonResponse(data)
+    except Exception as e:
+        logger.error(f"Error al obtener los parámetros del sistema: {e}")
+        return JsonResponse({'error': 'Error al obtener los parámetros del sistema'}, status=500)

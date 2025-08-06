@@ -1,11 +1,11 @@
-from crispy_forms.layout import Layout
-from django.forms import ModelForm
-from django.forms import Field
+#from django.forms import ModelForm
+#from django.forms import Field
 from django import forms
 
 from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
-    Occupancy, Sidewalks, Organizations, Eps, Handicap
-from .choices import zone, handicap, ethnic_group
+    Occupancy, Sidewalks, Organizations, Eps, Handicap, MaterialConstruction, MaterialConstructionFamilyCard, \
+    HomeOwnership, CookingFuel
+from .choices import zone
 from crispy_forms.helper import FormHelper
 
 
@@ -170,3 +170,78 @@ class FormPerson(forms.ModelForm):
                                         widget=forms.Select(attrs={'class': 'form-control',
                                                                    'placeholder': 'Ocupación'}),
                                         label="Ocupación")
+
+
+
+
+class MaterialConstructionFamilyForm(forms.ModelForm):
+    class Meta:
+        model = MaterialConstructionFamilyCard
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-MaterialConstruction'
+        self.helper.form_class = 'form-inline'
+        self.helper.label_class = 'control-label'
+
+    material_roof = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(roof=True),
+                                           empty_label="Seleccione el Material del Techo",
+                                           widget=forms.Select(attrs={'class': 'form-control'}))
+
+    material_floor = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(floor=True),
+                                            empty_label="Seleccione el Material del Piso",
+                                            widget=forms.Select(attrs={'class': 'form-control'}),
+                                            label="Material del Piso")
+
+    material_wall = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(wall=True),
+                                           empty_label="Seleccione el Material de la Pared",
+                                           widget=forms.Select(attrs={'class': 'form-control'}),
+                                           label="Material de la Pared")
+
+    number_families = forms.ChoiceField(label='Número de Familias',
+                                         choices=[(1, '1'), (2, '2'), (3, '3')],
+                                         widget=forms.Select(attrs={'class': 'form-control',
+                                                                  'placeholder': 'Número de Familias'}),)
+
+    condition_roof = forms.BooleanField(label="Estado del Techo", required=True,
+                                        widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Estado del Techo'}),)
+
+    condition_floor = forms.BooleanField(label="Estado del Piso", required=True,
+                                         widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Estado del Piso'}),)
+
+    condition_wall = forms.BooleanField(label="Estado de la Pared", required=True,
+                                        widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Estado de la Pared'}),)
+
+    home_ownership = forms.ModelChoiceField(queryset=HomeOwnership.objects.all(),
+                                            empty_label="Seleccione el Tipo de Propiedad",
+                                            widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Tipo de Propiedad'}),
+                                            label="Tipo de Propiedad")
+
+    kitchen_location = forms.ChoiceField(label='Ubicación de la Cocina',
+                                         choices=[(1, 'Interior'), (2, 'Exterior')],
+                                         widget=forms.Select(attrs={'class': 'form-control',
+                                                                    'placeholder': 'Ubicación de la Cocina'}))
+
+    cooking_fuel = forms.ModelChoiceField(queryset=CookingFuel.objects.all(),
+                                           empty_label="Cocina con",
+                                           widget=forms.Select(attrs={'class': 'form-control',
+                                                                      'placeholder': 'Combustible de Cocina'}),
+                                           label="Combustible de Cocina")
+
+    home_smoke = forms.BooleanField(label="Humo en el Hogar", required=False,
+                                    widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Humo en el Hogar'}),)
+
+    number_bedrooms = forms.IntegerField(label='Número de Habitaciones', required=False,
+                                         widget=forms.NumberInput(
+                                             attrs={'class': 'form-control', 'placeholder': 'Número de Habitaciones'}),)
+
+    ventilation = forms.BooleanField(label="Ventilación Adecuada?", required=False,
+                                     widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Ventilación Adecuada?'}),)
+
+    lighting = forms.BooleanField(label="Iluminación Adecuada?", required=False,
+                                  widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Iluminación Adecuada?'}),)
+
+
+

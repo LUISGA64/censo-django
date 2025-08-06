@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import (Association, Organizations, Sidewalks, DocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
-                     EducationLevel, SecuritySocial, Handicap, Charge)
+                     EducationLevel, SecuritySocial, Handicap, Charge, SystemParameters, MaterialConstruction,
+                     WaterTreatment, LightingType, WaterSource, CookingFuel, HomeOwnership)
 
 # Register your models here.
 admin.site.register(Association)
@@ -16,3 +17,10 @@ admin.site.register(EducationLevel)
 admin.site.register(SecuritySocial)
 admin.site.register(Handicap)
 admin.site.register(Charge)
+admin.site.register(SystemParameters)
+admin.site.register(MaterialConstruction)
+admin.site.register(HomeOwnership)
+admin.site.register(WaterTreatment)
+admin.site.register(LightingType)
+admin.site.register(WaterSource)
+
