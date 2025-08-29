@@ -275,7 +275,7 @@ class MaterialConstruction(models.Model):
     floor = models.BooleanField(default=False, help_text="¿El material es utilizado en pisos?")
 
     def __str__(self):
-        return f"{self.material_name} - {'Techo' if self.roof else ''} {'Pared' if self.wall else ''} {'Piso' if self.floor else ''}".strip()
+        return f"{self.material_name}"
 
     class Meta:
         verbose_name = "Material de Construcción"

@@ -2,11 +2,13 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 from django.contrib.auth.decorators import login_required
+
+from .models import MaterialConstruction
 from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
-                    delete_person_familyCard, get_system_parameters)
+                    delete_person_familyCard, get_system_parameters, MaterialConstructionView)
 
 
 urlpatterns = [
@@ -21,6 +23,9 @@ urlpatterns = [
     path('familyCard/index', login_required(family_card_index), name='familyCardIndex'),
     path('familyCard/detail/<int:pk>/', login_required(detalle_ficha), name='detailFamilyCard'),
     path('update-family/<int:pk>', login_required(UpdateFamily.as_view()), name='update-family'),
+
+    # Materiales de construcción
+    path('material-construction/<int:pk>', login_required(MaterialConstructionView.as_view()), name='material-construction'),
 
     # ----- PERSONAS -----
     path('personas', login_required(view_persons), name='personas'),

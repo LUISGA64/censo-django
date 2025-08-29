@@ -55,11 +55,13 @@ $(document).ready(function () {
                     const editUrl = EDIT_FAMILY_CARD_URL.replace('0', row.family_card_id);
                     const viewCard = VIEW_FAMILY_CARD_URL.replace('0', row.family_card_id);
                     const newPerson = NEW_PERSON_FAMILY.replace('0', row.family_card_id);
+                    const materialConst = MATERIAL_CONSTRUCTION.replace('0', row.family_card_id);
                     return `
                         <div class="btn-container text-center justify-content-center" role="group">
                             <a href="${editUrl}" class="text-muted text-bolder" title="Editar"><span class="btn-inner--icon"><i class="fa-solid fa-pen-to-square"></i></span></a>
                             <a href="${viewCard}" class="text-muted ms-3" title="Detalles"><span class="btn-inner--icon"><i class="fa-solid fa-binoculars"></i></span></a>
                             <a href="${newPerson}" class="text-muted ms-3"><span class="btn-inner--icon"><i class="fa-solid fa-user-plus"></i></span></a>
+                            <a href="${materialConst}" class="text-muted ms-3" title="Material de construcción"><span class="btn-inner--icon"><i class="fa-solid fa-house"></i></span></a>
                         </div>`;
                 }
             }
@@ -92,5 +94,9 @@ $(document).ready(function () {
     }
     agregarPersona = (id) => {
         window.location.href = "{% url 'createPerson' 0 %}".replace('0', id);
+    }
+
+    materialConstruction = (id) => {
+        window.location.href = "{% url 'materialConstruction' 0 %}".replace('0', id);
     }
 });

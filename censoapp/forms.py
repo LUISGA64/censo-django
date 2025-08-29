@@ -1,5 +1,3 @@
-#from django.forms import ModelForm
-#from django.forms import Field
 from django import forms
 
 from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
@@ -177,7 +175,10 @@ class FormPerson(forms.ModelForm):
 class MaterialConstructionFamilyForm(forms.ModelForm):
     class Meta:
         model = MaterialConstructionFamilyCard
-        fields = '__all__'
+        fields = ['material_roof', 'material_floor', 'material_wall', 'number_families', 'condition_roof',
+                  'condition_floor', 'condition_wall', 'number_families', 'number_people_bedrooms',
+                  'home_ownership', 'kitchen_location', 'cooking_fuel', 'home_smoke', 'number_bedrooms',
+                  'ventilation', 'lighting']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -192,7 +193,7 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
 
     material_floor = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(floor=True),
                                             empty_label="Seleccione el Material del Piso",
-                                            widget=forms.Select(attrs={'class': 'form-control'}),
+                                            widget=forms.Select(attrs={'class': 'form-control text-'}),
                                             label="Material del Piso")
 
     material_wall = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(wall=True),
@@ -205,14 +206,15 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
                                          widget=forms.Select(attrs={'class': 'form-control',
                                                                   'placeholder': 'Número de Familias'}),)
 
-    condition_roof = forms.BooleanField(label="Estado del Techo", required=True,
-                                        widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Estado del Techo'}),)
+    condition_roof = forms.BooleanField(label="¿Techo Adecuado?", required=True,
+                                        widget=forms.CheckboxInput(
+                                            attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Estado del Techo'}),)
 
-    condition_floor = forms.BooleanField(label="Estado del Piso", required=True,
-                                         widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Estado del Piso'}),)
+    condition_floor = forms.BooleanField(label="¿Piso Adecuado?", required=True,
+                                         widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Estado del Piso'}),)
 
-    condition_wall = forms.BooleanField(label="Estado de la Pared", required=True,
-                                        widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Estado de la Pared'}),)
+    condition_wall = forms.BooleanField(label="¿Paredes Adecuadas?", required=True,
+                                        widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Estado de la Pared'}),)
 
     home_ownership = forms.ModelChoiceField(queryset=HomeOwnership.objects.all(),
                                             empty_label="Seleccione el Tipo de Propiedad",
@@ -231,17 +233,17 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
                                            label="Combustible de Cocina")
 
     home_smoke = forms.BooleanField(label="Humo en el Hogar", required=False,
-                                    widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Humo en el Hogar'}),)
+                                    widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Humo en el Hogar'}),)
 
     number_bedrooms = forms.IntegerField(label='Número de Habitaciones', required=False,
                                          widget=forms.NumberInput(
                                              attrs={'class': 'form-control', 'placeholder': 'Número de Habitaciones'}),)
 
     ventilation = forms.BooleanField(label="Ventilación Adecuada?", required=False,
-                                     widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Ventilación Adecuada?'}),)
+                                     widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Ventilación Adecuada?'}),)
 
     lighting = forms.BooleanField(label="Iluminación Adecuada?", required=False,
-                                  widget=forms.Select(attrs={'class': 'form-control form-check-input', 'placeholder': 'Iluminación Adecuada?'}),)
+                                  widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Iluminación Adecuada?'}),)
 
 
 

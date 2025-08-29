@@ -14,8 +14,8 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.forms import inlineformset_factory
-from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters
-from .forms import FormFamilyCard, FormPerson
+from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard
+from .forms import FormFamilyCard, FormPerson, MaterialConstructionFamilyForm
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 
@@ -504,3 +504,23 @@ def get_system_parameters(request):
     except Exception as e:
         logger.error(f"Error al obtener los parámetros del sistema: {e}")
         return JsonResponse({'error': 'Error al obtener los parámetros del sistema'}, status=500)
+
+
+# Registro de Materiales de construcción
+class MaterialConstructionView(LoginRequiredMixin, CreateView):
+    model = MaterialConstructionFamilyCard
+    form_class = MaterialConstructionFamilyForm
+    template_name = 'censo/censo/material_construction_form.html'
+    success_url = reverse_lazy('material_construction_list')
+    context_object_name = 'material_construction'
+    extra_context = {'segment': 'material_construction'}
+
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, "Material de construcción creado correctamente")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Error al crear el material de construcción. Por favor, revise los campos.")
+        return super().form_invalid(form)
