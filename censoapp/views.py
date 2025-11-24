@@ -8,19 +8,17 @@ from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count
 from django.db.models.functions.text import Concat
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
-from django.forms import inlineformset_factory
 from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard
 from .forms import FormFamilyCard, FormPerson, MaterialConstructionFamilyForm
 from django.views.decorators.csrf import csrf_protect
-from django.utils.decorators import method_decorator
 
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -205,17 +203,20 @@ def create_family_card(request):
                     messages.success(request, "Ficha familiar creada correctamente")
                     return redirect('createPerson', pk=family_card.pk)
             except IntegrityError as e:
-                logger.error(f"Error de base de datos: {e}")
+                # logger.error(f"Error de base de datos: {e}")
+                print(e)
                 messages.error(request,
                                "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
             except Exception as e:
-                logger.error(f"Error inesperado: {e}")
+                # logger.error(f"Error inesperado: {e}")
+                print(e)
                 messages.error(request, f"Hubo un problema al crear la ficha familiar: {str(e)}")
                 print(f"Error inesperado: {e}")
         else:
             messages.warning(request,
                              "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
-            logger.warning(f"Errores del formulario: {family_card_form.errors}, {person_form.errors}")
+            # logger.warning(f"Errores del formulario: {family_card_form.errors}, {person_form.errors}")
+            print(person_form.errors)
     else:
         family_card_form = FormFamilyCard()
         person_form = FormPerson()
@@ -231,12 +232,12 @@ def create_family_card(request):
 def crear_persona(request, pk):
     familia = FamilyCard.objects.get(pk=pk)
     if request.method == 'POST':
-        query = Person.objects.filter(identification_person=request.POST['identification_person'])
+        query = Person.objects.filter(identification_person=request.POST.get('identification_person', ''))
         person_form = FormPerson(request.POST)
         if person_form.is_valid():
             if query.exists():
                 messages.error(request, "Ya existe una persona con esa identificación")
-                return render(request, 'censo/censo/../templates/censo/persona/createPerson.html', {
+                return render(request, 'censo/persona/createPerson.html', {
                     'form': person_form,
                     'familia': familia,
                     'segment': 'family_card'
@@ -256,13 +257,20 @@ def crear_persona(request, pk):
                     else:
                         return redirect('familyCardIndex')
             except IntegrityError as e:
+                # logger.error(f"Error al crear persona (IntegrityError): {e}")
+                print(e)
                 messages.error(request,
                                "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
-
-            else:
-                messages.warning(request,
-                                 "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
-                # logger.warning(f"Errores del formulario: {person_form.errors}")
+            except Exception as e:
+                # logger.error(f"Error inesperado al crear persona: {e}")
+                print(e)
+                messages.error(request,
+                               "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
+        else:
+            messages.warning(request,
+                             "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
+            print(request)
+            # logger.warning(f"Errores del formulario: {person_form.errors}")
     else:
         person_form = FormPerson()
 
@@ -303,23 +311,70 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
         return super(UpdateFamily, self).form_valid(form)
 
     def form_invalid(self, form):
-        logger.warning(f"Errores del formulario: {form.errors}")
+        # logger.warning(f"Errores del formulario: {form.errors}")
         messages.warning(self.request, "Hubo un problema con la actualización de la ficha familiar. "
                                        "Por favor, revisa los campos nuevamente.")
 
         return super(UpdateFamily, self).form_invalid(form)
 
+    def post(self, request, *args, **kwargs):
+        """Procesa envíos del formulario de vivienda (material_form) o del form principal.
+        Si el POST contiene 'material_form_submit' procesamos MaterialConstructionFamilyForm; en caso contrario
+        delegamos a la implementación por defecto (UpdateView.post) para actualizar FamilyCard.
+        """
+        # Detectar envío del formulario de materiales por el nombre del botón
+        if 'material_form_submit' in request.POST or 'material_roof' in request.POST:
+            self.object = self.get_object()
+            material_form = MaterialConstructionFamilyForm(request.POST)
+            if material_form.is_valid():
+                try:
+                    with transaction.atomic():
+                        instance = material_form.save(commit=False)
+                        instance.family_card = self.object
+                        instance.save()
+                        material_form.save_m2m()
+                        messages.success(request, "Datos de vivienda guardados correctamente")
+                        # Redirigir a la misma vista y forzar apertura de la pestaña 'vivienda'
+                        url = reverse('update-family', kwargs={'pk': self.object.pk}) + '?tab=vivienda'
+                        return redirect(url)
+                except IntegrityError as e:
+                    # logger.error(f"Error al guardar MaterialConstructionFamilyCard desde UpdateFamily: {e}")
+                    messages.error(request, "No se pudo guardar los datos de vivienda. Por favor revise los campos.")
+                    return self.render_to_response(self.get_context_data(form=self.get_form(), material_form=material_form))
+            else:
+                messages.warning(request, "Hay errores en el formulario de vivienda. Revise los campos.")
+                return self.render_to_response(self.get_context_data(form=self.get_form(), material_form=material_form))
+        # No es el formulario de vivienda: usar comportamiento normal (actualizar FamilyCard)
+        return super().post(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        params_qs = SystemParameters.objects.all()
-        context['segment'] = 'family_card'
-        try:
-            datos_vivienda = SystemParameters.objects.get(key='Datos de Vivienda').value
-        except SystemParameters.DoesNotExist:
-            logger.error("No se encontraron parámetros del sistema para 'Datos de Vivienda'")
-            datos_vivienda = {}
+        # Obtener parámetros del sistema como dict para que el template los consuma fácilmente
+        params = SystemParameters.objects.all().values('key', 'value')
+        system_params = {p['key']: p['value'] for p in params}
 
+        context['segment'] = 'family_card'
+        context['system_params'] = system_params
+
+        # Obtener valor específico para 'Datos de Vivienda' (por compatibilidad con plantillas existentes)
+        datos_vivienda = system_params.get('Datos de Vivienda', 'N')
         context['datos_vivienda'] = datos_vivienda
+
+        # Añadir el formulario de MaterialConstructionFamilyForm al contexto. Si ya existe un registro para la ficha,
+        # inicializar el formulario con esa instancia para permitir edición.
+        family = self.get_object()
+        material_instance = None
+        try:
+            material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(family.pk)
+        except Exception:
+            material_instance = None
+
+        if material_instance:
+            material_form = MaterialConstructionFamilyForm(instance=material_instance)
+        else:
+            material_form = MaterialConstructionFamilyForm()
+
+        context['material_form'] = material_form
 
         return context
 
@@ -344,7 +399,7 @@ class DetailPersona(DetailView):
 
 
 
-# Lista las personas en formato JSON para DataTables
+# Lista las personas in formato JSON para DataTables
 @login_required
 def listar_personas(request):
     draw = int(request.GET.get('draw', 1))
@@ -435,7 +490,7 @@ class UpdatePerson(UpdateView):
         return super(UpdatePerson, self).form_valid(person_form)
 
     def form_invalid(self, form):
-        logger.warning(f"Errores del formulario: {form.errors}")
+        # logger.warning(f"Errores del formulario: {form.errors}")
         messages.warning(self.request, "Hubo un problema con la actualización de la persona. "
                                        "Por favor, revisa los campos nuevamente.")
 
@@ -502,7 +557,7 @@ def get_system_parameters(request):
         data = {param['key']: param['value'] for param in params}
         return JsonResponse(data)
     except Exception as e:
-        logger.error(f"Error al obtener los parámetros del sistema: {e}")
+        # logger.error(f"Error al obtener los parámetros del sistema: {e}")
         return JsonResponse({'error': 'Error al obtener los parámetros del sistema'}, status=500)
 
 
@@ -511,16 +566,49 @@ class MaterialConstructionView(LoginRequiredMixin, CreateView):
     model = MaterialConstructionFamilyCard
     form_class = MaterialConstructionFamilyForm
     template_name = 'censo/censo/material_construction_form.html'
-    success_url = reverse_lazy('material_construction_list')
+    success_url = reverse_lazy('familyCardIndex')
     context_object_name = 'material_construction'
     extra_context = {'segment': 'material_construction'}
 
-
     def form_valid(self, form):
-        form.instance.user = self.request.user
-        messages.success(self.request, "Material de construcción creado correctamente")
-        return super().form_valid(form)
+        # Guardado manual para asegurar que family_card se asigne correctamente
+        pk = self.kwargs.get('pk')
+        try:
+            with transaction.atomic():
+                instance = form.save(commit=False)
+                # Asignar usuario si el modelo tiene ese campo (seguro no lo tiene en este modelo)
+                try:
+                    instance.user = self.request.user
+                except Exception:
+                    pass
+                if pk:
+                    family = get_object_or_404(FamilyCard, pk=pk)
+                    instance.family_card = family
+                instance.save()
+                # guardar m2m si existieran
+                form.save_m2m()
+                # asignar la instancia creada a self.object para compatibilidad con get_success_url()
+                self.object = instance
+            messages.success(self.request, "Material de construcción creado correctamente")
+            return redirect('familyCardIndex')
+        except IntegrityError as e:
+            # logger.error(f"Error al guardar MaterialConstructionFamilyCard: {e}")
+            print(f"Error al guardar MaterialConstructionFamilyCard: {e}")
+            form.add_error(None, "No se pudo guardar el registro por un conflicto en la base de datos.")
+            messages.error(self.request, "Error al crear el material de construcción. Por favor, revise los campos.")
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, "Error al crear el material de construcción. Por favor, revise los campos.")
+        print(form.errors)
         return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        params = SystemParameters.objects.all().values('key', 'value')
+        context['system_params'] = {p['key']: p['value'] for p in params}
+        return context
+
+
+
+class GeneratedAval(Lo)

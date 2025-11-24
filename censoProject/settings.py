@@ -223,17 +223,17 @@ LOGGING = {
         'django': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         'censoapp': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         'django.request': {
             'handlers': ['file', 'console'],
             'level': 'ERROR',
-            'propagate': False,
+            'propagate': True,
         },
     },
 }

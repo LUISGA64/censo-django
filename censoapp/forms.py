@@ -202,9 +202,14 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
                                            label="Material de la Pared")
 
     number_families = forms.ChoiceField(label='Número de Familias',
-                                         choices=[(1, '1'), (2, '2'), (3, '3')],
+                                         choices=[(1, '1'), (2, '2'), (3, '3 o más')],
                                          widget=forms.Select(attrs={'class': 'form-control',
                                                                   'placeholder': 'Número de Familias'}),)
+
+    number_people_bedrooms = forms.ChoiceField(label='Número de Personas por Habitación',
+                                               choices=[(1, '1'), (2, '2'), (3, '3 o más')],
+                                               widget=forms.Select(attrs={'class': 'form-control',
+                                                                        'placeholder': 'Número de Personas por Habitación'}),)
 
     condition_roof = forms.BooleanField(label="¿Techo Adecuado?", required=True,
                                         widget=forms.CheckboxInput(
@@ -235,9 +240,9 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
     home_smoke = forms.BooleanField(label="Humo en el Hogar", required=False,
                                     widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Humo en el Hogar'}),)
 
-    number_bedrooms = forms.IntegerField(label='Número de Habitaciones', required=False,
+    number_bedrooms = forms.IntegerField(label='Número de Habitaciones', required=False, min_value=1, max_value=5,
                                          widget=forms.NumberInput(
-                                             attrs={'class': 'form-control', 'placeholder': 'Número de Habitaciones'}),)
+                                             attrs={'class': 'form-control text-muted', 'placeholder': 'Número de Habitaciones'}),)
 
     ventilation = forms.BooleanField(label="Ventilación Adecuada?", required=False,
                                      widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Ventilación Adecuada?'}),)

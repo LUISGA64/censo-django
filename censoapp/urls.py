@@ -46,4 +46,8 @@ urlpatterns = [
     # Parámetros del aplicativo
     path('api-params/', login_required(get_system_parameters), name='system-parameters'),
 
+
+    # Document Aval
+    # path('aval/')
+
 ]

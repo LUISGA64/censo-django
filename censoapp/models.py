@@ -259,6 +259,8 @@ class Charge(models.Model):
     charge_name = models.CharField(max_length=150, blank=False, null=False, unique=True)
     authorized_sign = models.BooleanField(default=False,
                                           help_text="¿Esta persona está autorizada para firmar documentos?")
+    main_charge = models.BooleanField(default=False,
+                                      help_text="¿Este es el cargo principal?")
 
     def __str__(self):
         return f"{self.charge_name} - {'Autorizado' if self.authorized_sign else 'No Autorizado'}"
@@ -276,6 +278,7 @@ class MaterialConstruction(models.Model):
 
     def __str__(self):
         return f"{self.material_name}"
+
 
     class Meta:
         verbose_name = "Material de Construcción"
@@ -458,3 +461,12 @@ class PublicServices(models.Model):
         verbose_name = "Servicios Públicos"
         verbose_name_plural = "Servicios Públicos"
         unique_together = ('family_card',)
+
+
+
+class AvalGenerated(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, verbose_name="Persona Aval")
+    organization = models.ForeignKey(Organizations, on_delete=models.CASCADE, verbose_name="Organización")
+    detail = models.TextField(verbose_name="Detalle del Aval")
+    date_valid = models.DateField(verbose_name="Fecha de Vencimiento del Aval")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")

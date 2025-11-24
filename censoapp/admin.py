@@ -23,4 +23,3 @@ admin.site.register(HomeOwnership)
 admin.site.register(WaterTreatment)
 admin.site.register(LightingType)
 admin.site.register(WaterSource)
-
