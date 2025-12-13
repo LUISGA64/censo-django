@@ -36,7 +36,11 @@ urlpatterns = [
 
     # Editar el cabeza de familia
     path('personas/edit-head/<int:family>/<int:person>', login_required(update_family_head), name='edit-head-person'),
+    path('update-family-head/<int:family>/<int:person>/', login_required(update_family_head), name='update-family-head'),
+
+    # Desvincular persona de la familia
     path('persona/delete/<int:person>/', login_required(delete_person_familyCard), name='unlink-person-family'),
+    path('delete-person-family/<int:person>/', login_required(delete_person_familyCard), name='delete-person-family'),
 
     # ----- JSON API  ----
     path('json_familycards', login_required(get_family_cards), name='familycards'),

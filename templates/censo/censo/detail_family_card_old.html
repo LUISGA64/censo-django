@@ -1,0 +1,427 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Detalle Ficha{% endblock title %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+    <style>
+        .btn-container {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .nav-pills-family .nav-link.active {
+            background-color: #FFFFFF !important; /* Cambia por el color que desees */
+            color: #1a2035 !important;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-md mb-4 p-2">
+                <div class="card-header bg-white" style="border: none">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0" style="margin-bottom: 0px;">
+                                <a href="{% url 'familyCardIndex' %}" class="btn btn-icon-only me-2">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                </a>
+                                Ficha Familiar #{{ familia.0.family_card__family_card_number }}
+                            </h3>
+                            <p class="text-muted text-sm" style="margin-top: -8px;">Detalles de la familia y sus
+                                miembros</p>
+                        </div>
+                        <div class="col text-end">
+                            <a href="{% url 'createPerson' familia.0.id %}"
+                               class="btn btn-primary mt-2 text-sm text-capitalize">
+                                <i class="fa-solid fa-user-plus"></i> Agregar Persona
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body px-0 pt-0 pb-2 mt-4">
+                    <div class="nav-wrapper position-relative ms-4 me-4 end-0">
+                        <ul class="nav nav-pills nav-fill p-2 nav-pills-family" role="tablist"
+                            style="background-color: #f5f5f5">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#profile-tabs-icons"
+                                   role="tab">
+                                    <i class="fa-solid fa-house"></i> Información de la Vivienda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#dashboard-tabs-icons" role="tab">
+                                    <i class="fa-solid fa-people-roof"></i> Miembros de la Familia</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#saneamiento" role="tab">
+                                    <i class="fa-solid fa-people-roof"></i> Servicios/Saneamiento</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content mt-4">
+                        <div class="tab-pane fade show active ms-4 me-4" id="profile-tabs-icons" role="tabpanel">
+                            <!-- Contenido de My Profile -->
+                            <div class="card border-0 shadow-sm py-2">
+                                <div class="card-header border-0" style="background-color: #e3efff">
+                                    <h5 class="mb-0 text-bolder">Información de la Vivienda</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="container text-start">
+                                        <!-- Primera fila de información -->
+                                        <div class="row">
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-regular fa-file-lines text-muted"></i> Número de Ficha</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__family_card_number }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-house-flag"></i> Dirección</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__address_home|default:"Sin Información" }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Vereda</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__sidewalk_home__sidewalk_name }}</p>
+                                            </div>
+                                        </div>
+                                        <!-- Segunda fila de información -->
+                                        <div class="row mt-2">
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Latitud</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__latitude|default:"No especificada" }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Longitud</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__longitude|default:"No especificada" }}</p>
+                                            </div>
+                                            <div class="col text-start align-content-start">
+                                                <span class="text-muted text-sm" style="margin-bottom: 2px;">
+                                                    <i class="fa-solid fa-location-dot"></i> Zona</span>
+                                                <p style="margin-top: 2px;">{{ familia.0.family_card__zone }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="dashboard-tabs-icons" role="tabpanel">
+                            <!-- Contenido de Dashboard -->
+                            <div class="card border-0 shadow-sm py-2 ms-4 me-4">
+                                <div class="card-header border-0" style="background-color: #e3efff">
+                                    <h5 class="mb-0 text-bolder">Miembros de la Familia</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive p-2">
+                                        <table id="familyCardDetail"
+                                               class="table table-condensed table-striped align-items-center mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                                    style="width: 25%">
+                                                    Persona
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7"
+                                                    style="width: 10%">
+                                                    Identificacion
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                                    Parentesco
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">
+                                                    Vereda
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start">
+                                                    Edad
+                                                </th>
+                                                <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7 text-start"
+                                                    style="width: 7%">
+                                                    Zona
+                                                </th>
+                                                <th class="text-secondary opacity-7"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for card in familia %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">{{ card.first_name_1 }} {{ card.first_name_2 }} {{ card.last_name_1 }}
+                                                                    {{ card.last_name_2 }}</h6>
+                                                                <p class="text-sm text-secondary mb-0">{{ card.document_type__code_document_type }}
+                                                                    - {{ card.identification_person }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">{% if card.family_head %}
+                                                                    <span class="badge bg-gradient-success"
+                                                                          title="Family Head" aria-label="Family Head">Cabeza de Familia</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-gradient-info text-white text-xs">Miembro</span>
+                                                                {% endif %}</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.kinship__description_kinship }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.family_card__sidewalk_home__sidewalk_name }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {% if card.age %}
+                                                                    {{ card.age }} años
+                                                                {% else %}
+                                                                    <span class="text-muted text-xs">No especificada</span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                {{ card.family_card__zone }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <!-- Cambiar el cabeza de familia de la ficha familiar -->
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <a href="#"
+                                                                   class="text-danger text-sm font-weight-bold"
+                                                                   title="Cabeza de Familia"
+                                                                   data-family-id="{{ card.family_card__id }}"
+                                                                   data-person-id="{{ card.id }}"
+                                                                   onclick="return showConfirmSwal(this.getAttribute('data-family-id'), this.getAttribute('data-person-id'));"
+                                                                >
+                                                                    <i class="fa-solid fa-people-roof"></i>
+                                                                </a>
+                                                            </div>
+                                                            <!-- Eliminar Usuario de la ficha familiar -->
+                                                            <div class="d-flex flex-column justify-content-center ms-2">
+                                                                <a href="#"
+                                                                   class="text-danger text-sm font-weight-bold"
+                                                                   title="Eliminar de la ficha familiar"
+                                                                   data-family-id="{{ card.family_card__id }}"
+                                                                   data-person-id="{{ card.id }}"
+                                                                   onclick="return showDeletePersonSwal(this.getAttribute('data-person-id'), this);"
+                                                                >
+                                                                    <i class="fa-regular fa-trash-can"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <div id="loader"
+                                             style="display:none;position:fixed;top:50%;left:50%;z-index:9999;">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="saneamiento" role="tabpanel">
+                            <!-- Contenido de Saneamiento -->
+                            <div class="card border-0 shadow-sm py-2 ms-4 me-4">
+                                <div class="card-header border-0" style="background-color: #e3efff">
+                                    <h5 class="mb-0 text-bolder">Servicios/Saneamiento</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Información sobre servicios y saneamiento de la vivienda.</p>
+                                    <!-- Aquí puedes agregar más detalles sobre servicios/saneamiento -->
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "includes/footer.html" %}
+    </div>
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#familyCardDetail').DataTable({
+                'language': {
+                    'url': '{% static 'assets/js/datatable/es-CO.json' %}'
+                },
+                order: [[1, 'asc']],
+                columns: [
+                    {data: 'persona', searchable: true, orderable: false},
+                    {data: 'identificacion', searchable: true, orderable: false},
+                    {data: 'parentesco', searchable: false, orderable: false},
+                    {data: 'vereda', searchable: false, orderable: false},
+                    {data: 'edad', searchable: false, orderable: false},
+                    {data: 'zona', searchable: false, orderable: false},
+                    {data: 'acciones', searchable: false, orderable: false}
+                ],
+                responsive: true,
+                pagingType: "full_numbers",
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
+                createdRow: function (row) {
+                    $(row).addClass('text-xs');
+                    $('td', row).addClass('text-start');
+                }
+            });
+        });
+    </script>
+    <script>
+
+        const url = "{% url 'edit-head-person' 0 0 %}";
+
+        async function showConfirmSwal(familyId, personId) {
+            event.preventDefault();
+            const result = await Swal.fire({
+                title: '¿Está seguro?',
+                text: '¿Desea marcar a esta persona como cabeza de familia?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check-circle"></i> Sí, continuar',
+                cancelButtonText: '<i class="fa-solid fa-times-circle"></i> Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-outline-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: true
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(url.replace('0', familyId).replace('0', personId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    await Swal.fire({
+                        title: data.title,
+                        text: data.message,
+                        icon: data.status
+                    });
+                    if (data.status === 'success') {
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    await Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al procesar la solicitud.',
+                        icon: 'error'
+                    });
+                }
+            }
+            return false;
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+    <script>
+        const deleteUrl = "{% url 'unlink-person-family' 0 %}";
+
+        async function showDeletePersonSwal(personId, btn) {
+            event.preventDefault();
+            const result = await Swal.fire({
+                title: '¿Está seguro?',
+                text: 'Esta acción eliminará a la persona del grupo familiar.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-trash"></i> Eliminar',
+                cancelButtonText: '<i class="fa-solid fa-times-circle"></i> Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            });
+
+            if (result.isConfirmed) {
+                document.getElementById('loader').style.display = 'block';
+                if (btn) btn.disabled = true;
+                try {
+                    const response = await fetch(deleteUrl.replace('0', personId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    await Swal.fire({
+                        title: data.title,
+                        text: data.message,
+                        icon: data.status
+                    });
+                    if (data.status === 'success') {
+                        // Elimina la fila de la tabla sin recargar
+                        const row = btn.closest('tr');
+                        if (row) row.remove();
+                    }
+                } catch (error) {
+                    await Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al eliminar la persona.',
+                        icon: 'error'
+                    });
+                } finally {
+                    document.getElementById('loader').style.display = 'none';
+                    if (btn) btn.disabled = false;
+                }
+            }
+            return false;
+        }
+    </script>
+{% endblock javascripts %}
+</div>

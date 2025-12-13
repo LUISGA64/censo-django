@@ -8,37 +8,77 @@ from crispy_forms.helper import FormHelper
 
 
 class FormFamilyCard(forms.ModelForm):
+    """Formulario para crear/editar fichas familiares con validaciones mejoradas"""
+
     class Meta:
         model = FamilyCard
-        fields = '__all__'
-    # address_home = forms.CharField(label='Dirección Vivienda',  max_length=50, widget=forms.TextInput(
-    #     attrs={'class': 'form-control', 'placeholder': 'Dirección Vivienda'}))
+        fields = ['sidewalk_home', 'latitude', 'longitude', 'zone', 'organization', 'family_card_number']
 
-    sidewalk_home = forms.ModelChoiceField(queryset=Sidewalks.objects.all(), label_suffix=":",
-                                           empty_label="Seleccione la vereda donde vive",
-                                           widget=forms.Select(attrs={'class': 'form-control',
-                                                                      'placeholder': 'Vereda'}),
-                                           label="Vereda")
-    latitude = forms.CharField(label='Latitud', required=False, max_length=15,
-                               widget=forms.TextInput(
-                                   attrs={'class': 'form-control', 'placeholder': 'Latitud'}))
+    sidewalk_home = forms.ModelChoiceField(
+        queryset=Sidewalks.objects.all(),
+        label="Vereda",
+        empty_label="Seleccione la vereda donde vive",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'placeholder': 'Vereda',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar una vereda.',
+            'invalid_choice': 'Seleccione una vereda válida.'
+        }
+    )
 
-    longitude = forms.CharField(label='Longitud', required=False, max_length=15,
-                                widget=forms.TextInput(
-                                    attrs={'class': 'form-control', 'placeholder': 'Longitud'}))
+    latitude = forms.CharField(
+        label='Latitud',
+        required=False,
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: 4.6097100 (opcional)'
+        }),
+        help_text='Coordenada de latitud (opcional)'
+    )
 
-    zone = forms.ChoiceField(choices=zone, label="Zona",
-                             widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Zona'}))
+    longitude = forms.CharField(
+        label='Longitud',
+        required=False,
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: -74.0817500 (opcional)'
+        }),
+        help_text='Coordenada de longitud (opcional)'
+    )
 
-    organization = forms.ModelChoiceField(queryset=Organizations.objects.all(),
-                                             empty_label="Seleccione el Resguardo",
-                                             widget=forms.Select(attrs={'class': 'form-control',
-                                                                        'placeholder': 'Resguardo'}),
-                                             label="Resguardo Indígena")
-    # family_card_number = forms.IntegerField(label='Número de Familia', disabled=True,
-    #                                         widget=forms.NumberInput(attrs={
-    #                                             'readonly': True,
-    #                                         }),)
+    zone = forms.ChoiceField(
+        choices=zone,
+        label="Zona",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'placeholder': 'Zona',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar una zona.',
+            'invalid_choice': 'Seleccione una zona válida.'
+        }
+    )
+
+    organization = forms.ModelChoiceField(
+        queryset=Organizations.objects.all(),
+        label="Resguardo Indígena",
+        empty_label="Seleccione el Resguardo",
+        required=True,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'placeholder': 'Resguardo'
+        }),
+        error_messages={
+            'required': 'Debe seleccionar un resguardo.',
+            'invalid_choice': 'Seleccione un resguardo válido.'
+        }
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,18 +86,64 @@ class FormFamilyCard(forms.ModelForm):
         self.helper.form_id = 'id-FamilyCard'
         self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
         self.helper.label_class = 'control-label'
-        # deshabilitar field family_card_number
+
+        # Configurar family_card_number como readonly
         self.fields['family_card_number'].required = False
-        self.fields['family_card_number'].widget.attrs['readonly'] = True
+        self.fields['family_card_number'].widget.attrs.update({
+            'readonly': True,
+            'class': 'form-control bg-light',
+            'placeholder': 'Se asignará automáticamente'
+        })
+
+    def clean_latitude(self):
+        """Validar formato de latitud"""
+        latitude = self.cleaned_data.get('latitude')
+        if latitude:
+            try:
+                lat_float = float(latitude)
+                if not -90 <= lat_float <= 90:
+                    raise forms.ValidationError('La latitud debe estar entre -90 y 90 grados.')
+            except ValueError:
+                raise forms.ValidationError('Formato de latitud inválido.')
+        return latitude
+
+    def clean_longitude(self):
+        """Validar formato de longitud"""
+        longitude = self.cleaned_data.get('longitude')
+        if longitude:
+            try:
+                lon_float = float(longitude)
+                if not -180 <= lon_float <= 180:
+                    raise forms.ValidationError('La longitud debe estar entre -180 y 180 grados.')
+            except ValueError:
+                raise forms.ValidationError('Formato de longitud inválido.')
+        return longitude
+
+    def clean(self):
+        """Validaciones cruzadas del formulario"""
+        cleaned_data = super().clean()
+        latitude = cleaned_data.get('latitude')
+        longitude = cleaned_data.get('longitude')
+
+        # Si se proporciona una coordenada, la otra también debe proporcionarse
+        if (latitude and not longitude) or (longitude and not latitude):
+            raise forms.ValidationError(
+                'Debe proporcionar tanto la latitud como la longitud, o dejar ambas en blanco.'
+            )
+
+        return cleaned_data
 
 
 
 class FormPerson(forms.ModelForm):
+    """Formulario para crear/editar personas con validaciones mejoradas"""
+
     class Meta:
         model = Person
-        fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type', 'identification_person',
-                  'gender', 'date_birth', 'kinship', 'social_insurance', 'eps', 'handicap',
-                  'education_level', 'civil_state', 'occupation', 'cell_phone', 'personal_email', ]
+        fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type',
+                  'identification_person', 'gender', 'date_birth', 'kinship', 'social_insurance',
+                  'eps', 'handicap', 'education_level', 'civil_state', 'occupation', 'cell_phone',
+                  'personal_email']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,108 +153,184 @@ class FormPerson(forms.ModelForm):
         self.helper.label_class = 'control-label'
 
     # Primer Nombre
-    first_name_1 = forms.CharField(label='Primer Nombre', max_length=30, widget=forms.TextInput(
-        attrs={'class': 'form-control input-group', 'placeholder': 'Primer Nombre'}))
+    first_name_1 = forms.CharField(
+        label='Primer Nombre',
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Primer Nombre',
+            'required': True,
+            'pattern': r'[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+',
+            'title': 'Solo se permiten letras'
+        }),
+        error_messages={
+            'required': 'El primer nombre es obligatorio.',
+            'max_length': 'El primer nombre no puede tener más de 30 caracteres.'
+        }
+    )
 
     # Segundo Nombre
-    first_name_2 = forms.CharField(label='Segundo Nombre', max_length=30, required=False, widget=forms.TextInput(
-        attrs={'class': 'col-md-3', 'placeholder': 'Segundo Nombre'}))
+    first_name_2 = forms.CharField(
+        label='Segundo Nombre',
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Segundo Nombre (opcional)',
+            'pattern': r'[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+',
+            'title': 'Solo se permiten letras'
+        })
+    )
 
     # Primer Apellido
-    last_name_1 = forms.CharField(label='Primer Apellido', max_length=30,
-                                  widget=forms.TextInput(
-                                      attrs={'class': 'form-control', 'placeholder': 'Primer Apellido'}))
+    last_name_1 = forms.CharField(
+        label='Primer Apellido',
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Primer Apellido',
+            'required': True,
+            'pattern': r'[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+',
+            'title': 'Solo se permiten letras'
+        }),
+        error_messages={
+            'required': 'El primer apellido es obligatorio.',
+            'max_length': 'El primer apellido no puede tener más de 30 caracteres.'
+        }
+    )
 
     # Segundo Apellido
-    last_name_2 = forms.CharField(label='Segundo Apellido', max_length=30, required=False,
-                                  widget=forms.TextInput(
-                                      attrs={'class': 'form-control', 'placeholder': 'Segundo Apellido'}))
+    last_name_2 = forms.CharField(
+        label='Segundo Apellido',
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Segundo Apellido (opcional)',
+            'pattern': r'[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+',
+            'title': 'Solo se permiten letras'
+        })
+    )
 
     # Número Teléfonico
-    cell_phone = forms.CharField(label='Teléfono Móvil', max_length=15, required=False,
-                                 widget=forms.TextInput(
-                                     attrs={'class': 'form-control', 'placeholder': '000-000-0000'}))
+    cell_phone = forms.CharField(
+        label='Teléfono Móvil',
+        max_length=15,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '3001234567',
+            'pattern': '[0-9]{10,15}',
+            'title': 'Ingrese un número de teléfono válido (10-15 dígitos)'
+        }),
+        help_text='10-15 dígitos numéricos'
+    )
 
     # Correo Personal
-    personal_email = forms.EmailField(label='Correo Personal', max_length=50, required=False,
-                                      widget=forms.EmailInput(
-                                          attrs={'class': 'form-control', 'placeholder': 'mi_correo@censoweb.com'}))
+    personal_email = forms.EmailField(
+        label='Correo Electrónico',
+        max_length=50,
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'correo@ejemplo.com',
+            'type': 'email'
+        }),
+        error_messages={
+            'invalid': 'Ingrese una dirección de correo electrónico válida.'
+        }
+    )
 
     # Identificación de la persona
-    identification_person = forms.CharField(label='Identificación', max_length=15,
-                                            widget=forms.TextInput(
-                                                attrs={'class': 'form-control', 'placeholder': 'Identificación'}))
+    identification_person = forms.CharField(
+        label='Número de Identificación',
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Número de documento',
+            'required': True,
+            'pattern': '[0-9A-Za-z-]+',
+            'title': 'Ingrese un número de documento válido'
+        }),
+        error_messages={
+            'required': 'El número de identificación es obligatorio.',
+            'max_length': 'El número de identificación no puede tener más de 15 caracteres.'
+        }
+    )
 
-    # Tipo de Documento
-    document_type = forms.ModelChoiceField(queryset=DocumentType.objects.all(),
-                                           empty_label="Seleccione el Tipo de Documento",
-                                           widget=forms.Select(attrs={'class': 'form-control',
-                                                                      'placeholder': 'Tipo de Documento'}),
-                                           label="Tipo de Documento")
-    # Género
-    gender = forms.ModelChoiceField(queryset=Gender.objects.all(), empty_label="Seleccione el Género",
-                                       widget=forms.Select(
-                                           attrs={'class': 'form-control', 'placeholder': 'Género'}),
-                                       label="Género")
+    # Fecha de nacimiento
+    date_birth = forms.DateField(
+        label='Fecha de Nacimiento',
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'required': True,
+            'max': '9999-12-31'
+        }),
+        error_messages={
+            'required': 'La fecha de nacimiento es obligatoria.',
+            'invalid': 'Ingrese una fecha válida.'
+        }
+    )
 
-    # Fecha de Nacimiento
-    date_birth = forms.DateField(label='Fecha de Nacimiento',
-                                 widget=forms.DateInput(format='%d-%m-%Y',
-                                                        attrs={'class': 'form-control',
-                                                               'placeholder': 'Fecha de Nacimiento',
-                                                               'type': 'date'}))
+    def clean_identification_person(self):
+        """Validar que la identificación no contenga caracteres especiales peligrosos"""
+        identification = self.cleaned_data.get('identification_person')
+        if identification:
+            identification = identification.strip()
+            if len(identification) < 5:
+                raise forms.ValidationError(
+                    'El número de identificación debe tener al menos 5 caracteres.'
+                )
+        return identification
 
-    # Tipo de Afiliación
-    social_insurance = forms.ModelChoiceField(queryset=SecuritySocial.objects.all(),
-                                              empty_label="Seleccione Afiliación",
-                                              widget=forms.Select(attrs={'class': 'form-control',
-                                                                         'placeholder': 'Tipo Afiliación'}),
-                                              label="Tipo Afiliación")
+    def clean_first_name_1(self):
+        """Validar y limpiar el primer nombre"""
+        name = self.cleaned_data.get('first_name_1')
+        if name:
+            name = name.strip().title()
+            if len(name) < 2:
+                raise forms.ValidationError('El primer nombre debe tener al menos 2 caracteres.')
+        return name
 
-    # Empresa de Afiliación
-    eps = forms.ModelChoiceField(queryset=Eps.objects.all(),
-                                 empty_label="Seleccione EPS",
-                                 widget=forms.Select(
-                                     attrs={'class': 'form-control', 'placeholder': 'EPS'}),
-                                 label="EPS")
+    def clean_last_name_1(self):
+        """Validar y limpiar el primer apellido"""
+        lastname = self.cleaned_data.get('last_name_1')
+        if lastname:
+            lastname = lastname.strip().title()
+            if len(lastname) < 2:
+                raise forms.ValidationError('El primer apellido debe tener al menos 2 caracteres.')
+        return lastname
 
-    # Parentesco
-    kinship = forms.ModelChoiceField(queryset=Kinship.objects.all(), empty_label="Seleccione Parentesco",
-                                        widget=forms.Select(attrs={'class': 'form-control',
-                                                                   'placeholder': 'Parentesco'}),
-                                        label="Parentesco")
+    def clean_date_birth(self):
+        """Validar que la fecha de nacimiento sea coherente"""
+        from datetime import date, timedelta
+        date_birth = self.cleaned_data.get('date_birth')
 
-    # Tipo de Discapacidad
-    # handicap = forms.ChoiceField(choices=handicap,
-    #                              widget=forms.Select(
-    #                                  attrs={'class': 'form-control', 'placeholder': 'Discapacidad'}),
-    #                              label="Discapacidad")
-    handicap = forms.ModelChoiceField(queryset=Handicap.objects.all(), empty_label="Seleccione Discapacidad",
-                                      widget=forms.Select(attrs={'class': 'form-control',
-                                                          'placeholder': 'Discapacidad'},
-                                                          ),
-                                        label="Discapacidad")
+        if date_birth:
+            today = date.today()
+            min_date = today - timedelta(days=365 * 120)  # Máximo 120 años
+            max_date = today  # No puede ser fecha futura
 
-    # Nivel Educativo
-    education_level = forms.ModelChoiceField(queryset=EducationLevel.objects.all(),
-                                             empty_label="Seleccione Nivel de Educación",
-                                             widget=forms.Select(attrs={'class': 'form-control',
-                                                                        'placeholder': 'Nivel de Educación'}),
-                                             label="Nivel de Educación")
+            if date_birth > max_date:
+                raise forms.ValidationError('La fecha de nacimiento no puede ser una fecha futura.')
 
-    # Estado Civil
-    civil_state = forms.ModelChoiceField(queryset=CivilState.objects.all(),
-                                         empty_label="Seleccione Estado Civil",
-                                         widget=forms.Select(attrs={'class': 'form-control',
-                                                                    'placeholder': 'Estado Civil'}),
-                                         label="Estado Civil")
+            if date_birth < min_date:
+                raise forms.ValidationError('La fecha de nacimiento no puede ser anterior a 120 años.')
 
-    # Ocupación
-    occupation = forms.ModelChoiceField(queryset=Occupancy.objects.all(), empty_label="Seleccione Ocupación",
-                                        widget=forms.Select(attrs={'class': 'form-control',
-                                                                   'placeholder': 'Ocupación'}),
-                                        label="Ocupación")
+        return date_birth
 
+    def clean_cell_phone(self):
+        """Validar formato de teléfono"""
+        phone = self.cleaned_data.get('cell_phone')
+        if phone:
+            # Eliminar espacios y guiones
+            phone = phone.replace(' ', '').replace('-', '')
+            if not phone.isdigit():
+                raise forms.ValidationError('El teléfono debe contener solo números.')
+            if len(phone) < 10:
+                raise forms.ValidationError('El teléfono debe tener al menos 10 dígitos.')
+        return phone
 
 
 
@@ -189,7 +351,8 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
 
     material_roof = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(roof=True),
                                            empty_label="Seleccione el Material del Techo",
-                                           widget=forms.Select(attrs={'class': 'form-control'}))
+                                           widget=forms.Select(attrs={'class': 'form-control'}),
+                                           label="Material del Techo")
 
     material_floor = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(floor=True),
                                             empty_label="Seleccione el Material del Piso",

@@ -1,182 +1,519 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
-{% block title %} Comuneros {% endblock title %}
+
+{% block title %}Detalle de Persona{% endblock title %}
 
 {% block stylesheets %}
+    {{ block.super }}
     <style>
-    .dato-valor {
-        font-size: 0.99rem;
-        font-weight: 400;
-        color: #212529;
-        margin-bottom: 1rem;
-    }
+        /* ===================================
+           DISEÑO PROFESIONAL CORPORATIVO
+           Color principal: #2196F3
+           =================================== */
 
-    .nav-pills-person .nav-link.active {
-            background-color: #8ca1cb !important; /* Cambia por el color que desees */
-            color: #1a2035 !important;
+        .profile-header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 0;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
         }
 
-</style>
+        .avatar-container {
+            position: relative;
+        }
+
+        .avatar-xl {
+            width: 100px;
+            height: 100px;
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            object-fit: cover;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: #6B7280;
+            font-size: 1.2rem;
+        }
+
+        .breadcrumb-item a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: #374151;
+        }
+
+        /* Tabs profesionales */
+        .nav-pills-custom {
+            background: white;
+            border-radius: 8px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-pills-custom .nav-link {
+            color: #6B7280;
+            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills-custom .nav-link:hover {
+            background: #F3F4F6;
+            color: #2196F3;
+        }
+
+        .nav-pills-custom .nav-link.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+        }
+
+        /* Cards de información */
+        .info-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .info-card-header {
+            background: #F9FAFB;
+            border-bottom: 2px solid #2196F3;
+            padding: 1rem;
+            font-weight: 600;
+            color: #1F2937;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .info-card-header i {
+            color: #2196F3;
+            margin-right: 0.5rem;
+        }
+
+        .info-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: #6B7280;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .info-label i {
+            margin-right: 0.5rem;
+            color: #9CA3AF;
+        }
+
+        .info-value {
+            color: #1F2937;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* Badge personalizado */
+        .badge-custom {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .badge-family-head {
+            background: #4CAF50;
+            color: white;
+            padding: 0.35rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        /* Botones */
+        .btn-action {
+            background: white;
+            color: #2196F3;
+            border: 2px solid white;
+            padding: 0.625rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1976D2;
+            transform: translateY(-1px);
+        }
+
+        /* Lista de miembros de familia */
+        .family-member-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #F3F4F6;
+            transition: background 0.2s ease;
+        }
+
+        .family-member-item:hover {
+            background: #F9FAFB;
+        }
+
+        .family-member-item:last-child {
+            border-bottom: none;
+        }
+
+        .family-member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E3F2FD;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2196F3;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6B7280;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #D1D5DB;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 1.5rem;
+            }
+
+            .avatar-xl {
+                width: 80px;
+                height: 80px;
+            }
+
+            .nav-pills-custom .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .info-card-header {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
 {% endblock stylesheets %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="row mt-8">
-            <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
-                <div class="row gx-4">
-                    <div class="col-auto">
-                        <div class="avatar avatar-xl position-relative">
-                            <img src="{% static 'assets/img/user-censo/user.png' %}" alt="profile_image"
-                                 class="w-100 border-radius-lg shadow-sm">
-                        </div>
-                    </div>
-                    <div class="col-auto my-auto">
-                        <div class="h-100">
-                            <h5 class="mb-1">
-                                {{ persona.first_name_1 }} {{ persona.first_name_2 }} {{ persona.last_name_1 }}
-                                {{ persona.last_name_2 }}
-                            </h5>
-                            <p class="mb-0 font-weight-bold text-sm mt-1">
-                                {{ persona.document_type__document_type }}: {{ persona.identification_person }}
-                            </p>
-                        </div>
-                    </div>
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'home' %}">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'personas' %}">
+                        <i class="fas fa-users"></i> Personas
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">
+                    {{ persona.first_name_1 }} {{ persona.last_name_1 }}
+                </li>
+            </ol>
+        </nav>
 
-                    <div class="col-lg-4 col-md-6 my-sm-auto me-sm-0 mx-auto mt-3">
-                        <div class="nav-wrapper position-relative end-0">
-                            <ul class="nav nav-pills nav-fill bg-transparent" role="tablist">
-                                <li class="nav-item me-4">
-                                    <a class="nav-link mb-0 px-0 py-1 text-end me-4" title="Editar Persona"
-                                       href="{% url 'updated-person' persona.id %}">
-                                        <i class="fas fa-user-edit text-sm"></i>
-                                        <span class="ms-1">Editar</span>
-                                    </a>
-                                </li>
-                            </ul>
+        <!-- Profile Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="profile-header">
+                    <div class="row align-items-center">
+                        <!-- Avatar -->
+                        <div class="col-auto">
+                            <div class="avatar-container">
+                                <img src="{% static 'assets/img/user-censo/user.png' %}"
+                                     alt="Avatar"
+                                     class="avatar-xl">
+                            </div>
+                        </div>
+
+                        <!-- Información Principal -->
+                        <div class="col">
+                            <h3 class="mb-2">
+                                {{ persona.first_name_1 }}
+                                {% if persona.first_name_2 %}{{ persona.first_name_2 }}{% endif %}
+                                {{ persona.last_name_1 }}
+                                {% if persona.last_name_2 %}{{ persona.last_name_2 }}{% endif %}
+                                {% if persona.family_head %}
+                                    <span class="badge badge-family-head ms-2">
+                                        <i class="fas fa-crown" style="font-size: 0.65rem;"></i> Jefe
+                                    </span>
+                                {% endif %}
+                            </h3>
+                            <p class="mb-1" style="opacity: 0.9;">
+                                <i class="fas fa-id-card me-2"></i>
+                                {{ persona.document_type.document_type }}:
+                                <strong>{{ persona.identification_person }}</strong>
+                            </p>
+                            {% if age %}
+                            <p class="mb-0" style="opacity: 0.9;">
+                                <i class="fas fa-birthday-cake me-2"></i>
+                                {{ age }} años
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="col-auto">
+                            {% if can_edit %}
+                            <a href="{% url 'updated-person' persona.id %}"
+                               class="btn btn-action">
+                                <i class="fas fa-edit me-2"></i>
+                                Editar Persona
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Contenido Principal -->
         <div class="row mt-4">
             <div class="col-12">
-                <div class="card shadow-md mb-4 p-4">
-                    <div class="card-body px-0 pt-0 pb-0">
-                        <div class="nav-wrapper position-relative end-0">
-                            <ul class="nav nav-pills nav-fill p-1 nav-pills-person" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab"
-                                       href="#profile-tabs-icons" role="tab" aria-controls="preview"
-                                       aria-selected="true">
-                                        <i class="fa-regular fa-address-card"></i> Información Personal
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab"
-                                       href="#dashboard-tabs-icons" role="tab" aria-controls="code"
-                                       aria-selected="false">
-                                        <i class="ni ni-laptop text-sm me-2"></i> Información Adicional
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <!-- Tabs -->
+                        <ul class="nav nav-pills nav-pills-custom mb-4" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-personal"
+                                        type="button">
+                                    <i class="fas fa-user me-2"></i>
+                                    Información Personal
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-salud"
+                                        type="button">
+                                    <i class="fas fa-heartbeat me-2"></i>
+                                    Salud
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-familia"
+                                        type="button">
+                                    <i class="fas fa-home me-2"></i>
+                                    Familia
+                                </button>
+                            </li>
+                        </ul>
+
                         <div class="tab-content">
-                            <div class="tab-pane fade show active" id="profile-tabs-icons" role="tabpanel"
-                                 aria-labelledby="profile-tab-icons">
-                                <!-- Tarjeta de Datos Personales -->
-                                <div class="row g-3 mt-4">
-                                    <!-- Datos Educación -->
-                                    <div class="col-12 col-md-6">
-                                        <div class="card shadow-sm h-100 border-0">
-                                            <div class="card-header text-bold text-start py-2">
-                                                <i class="fa-regular fa-user me-2"></i>Datos Personales
+                            <!-- Tab: Información Personal -->
+                            <div class="tab-pane fade show active" id="tab-personal">
+                                <div class="row g-4">
+                                    <!-- Datos Personales -->
+                                    <div class="col-md-6">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <i class="fas fa-user-circle"></i>
+                                                Datos Personales
                                             </div>
                                             <div class="card-body p-3">
-                                                <div class="row">
-                                                    <!-- Nombres -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-user me-1 text-muted text-bold"></i>Nombres
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-user"></i>
+                                                                Nombres
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.first_name_1 }}
+                                                                {% if persona.first_name_2 %}{{ persona.first_name_2 }}{% endif %}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.first_name_1 }} {{ persona.first_name_2 }}</div>
                                                     </div>
-                                                    <!-- Apellidos -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold">
-                                                            <i class="fas fa-user me-1 text-muted text-bold"></i>Apellidos
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-user"></i>
+                                                                Apellidos
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.last_name_1 }}
+                                                                {% if persona.last_name_2 %}{{ persona.last_name_2 }}{% endif %}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.last_name_1 }} {{ persona.last_name_2 }}</div>
                                                     </div>
-                                                    <!-- Información del Documento -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-id-card me-1 text-muted text-bold"></i>Documento
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-calendar"></i>
+                                                                Fecha de Nacimiento
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.date_birth|date:"d/m/Y"|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.document_type__document_type }}
-                                                            - {{ persona.identification_person }}</div>
                                                     </div>
-                                                    <!-- Fecha de Nacimiento y Género -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-calendar-alt me-1 text-muted text-bold"></i>Fecha
-                                                            de nacimiento
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-venus-mars"></i>
+                                                                Género
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.gender.gender|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.date_birth }}</div>
                                                     </div>
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-venus-mars me-1 text-muted text-bold"></i>Género
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-ring"></i>
+                                                                Estado Civil
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.civil_state.state_civil|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.gender__gender }}</div>
                                                     </div>
-                                                    <!-- Estado Civil -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-ring me-1 text-muted text-bold"></i>Estado Civil
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-graduation-cap"></i>
+                                                                Nivel Educativo
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.education_level.education_level|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.civil_state__state_civil }}</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Contacto -->
-                                    <div class="col-12 col-md-6">
-                                        <div class="card shadow-sm h-100 border-0">
-                                            <div class="card-header text-bold text-start py-2">
-                                                <i class="fas fa-address-book me-2"></i>Contacto
+
+                                    <!-- Contacto y Ubicación -->
+                                    <div class="col-md-6">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <i class="fas fa-address-book"></i>
+                                                Contacto y Ubicación
                                             </div>
                                             <div class="card-body p-3">
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-home-alt me-1 text-muted text-bold"></i>Dirección
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-phone"></i>
+                                                                Celular
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.cell_phone|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.family_card__sidewalk_home__sidewalk_name }}</div>
                                                     </div>
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-map-location me-1 text-muted text-bold"></i>Zona
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-envelope"></i>
+                                                                Email
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.personal_email|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.family_card__zone }}</div>
                                                     </div>
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-map-marker-alt me-1 text-muted text-bold"></i>Dirección Complementaria
+                                                    {% if family_card %}
+                                                    <div class="col-md-12">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-map-marker-alt"></i>
+                                                                Vereda
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ family_card.sidewalk_home.sidewalk_name }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.family_card__address_home|default:"Sin Información" }}</div>
                                                     </div>
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-phone me-1 text-muted text-bold"></i>Celular
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-city"></i>
+                                                                Zona
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ family_card.get_zone_display }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.cell_phone }}</div>
                                                     </div>
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-envelope me-1 text-muted text-bold"></i>Email
+                                                    <div class="col-md-12">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-home"></i>
+                                                                Dirección
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ family_card.address_home|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.personal_email }}</div>
+                                                    </div>
+                                                    {% endif %}
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-briefcase"></i>
+                                                                Ocupación
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.occupation.description_occupancy|default:"No registrado" }}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -185,54 +522,197 @@
                                 </div>
                             </div>
 
-                            <div class="tab-pane fade" id="dashboard-tabs-icons" role="tabpanel"
-                                 aria-labelledby="dashboard-tab-icons">
-                                <div class="row g-3 mt-4">
-                                    <!-- Datos Personales -->
-                                    <div class="col-12 col-md-6">
-                                        <div class="card shadow-sm h-100 border-0">
-                                            <div class="card-header text-bold text-start py-2">
-                                                <i class="fa-regular fa-hospital"></i> Afiliación a Salud
+                            <!-- Tab: Salud -->
+                            <div class="tab-pane fade" id="tab-salud">
+                                <div class="row g-4">
+                                    <!-- Afiliación a Salud -->
+                                    <div class="col-md-6">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <i class="fas fa-hospital"></i>
+                                                Afiliación a Salud
                                             </div>
                                             <div class="card-body p-3">
-                                                <div class="row">
-                                                    <!-- EPS -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-user me-1 text-muted text-bold"></i>Empresa de Salud (EPS)
+                                                <div class="row g-3">
+                                                    <div class="col-md-12">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-hospital-user"></i>
+                                                                EPS
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.eps.name_eps|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.eps__name_eps }} </div>
                                                     </div>
-                                                    <!-- Régimen de Afiliación -->
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold"><i
-                                                                class="fas fa-user me-1 text-muted text-bold"></i>Régimen de Seguridad Social
+                                                    <div class="col-md-12">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-shield-alt"></i>
+                                                                Régimen
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.social_insurance.affiliation|default:"No registrado" }}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.social_insurance__affiliation }}</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Contacto -->
-                                    <div class="col-12 col-md-6">
-                                        <div class="card shadow-sm h-100 border-0">
-                                            <div class="card-header text-bold text-start py-2">
-                                                <i class="fa-regular fa-heart"></i> Condiciones de Salud
+
+                                    <!-- Condiciones de Salud -->
+                                    <div class="col-md-6">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <i class="fas fa-heartbeat"></i>
+                                                Condiciones de Salud
                                             </div>
                                             <div class="card-body p-3">
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <div class="text-muted text-xs text-bold">
-                                                            <i class="fa-brands fa-accessible-icon"></i> Tipo de Discapacidad
+                                                <div class="row g-3">
+                                                    <div class="col-md-12">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-wheelchair"></i>
+                                                                Discapacidad
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {% if persona.handicap %}
+                                                                    {{ persona.handicap.handicap }}
+                                                                {% else %}
+                                                                    Ninguna
+                                                                {% endif %}
+                                                            </span>
                                                         </div>
-                                                        <div class="dato-valor">{{ persona.handicap__handicap }}</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Tab: Familia -->
+                            <div class="tab-pane fade" id="tab-familia">
+                                {% if family_card %}
+                                <div class="row g-4">
+                                    <!-- Información de la Ficha Familiar -->
+                                    <div class="col-md-6">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <i class="fas fa-home"></i>
+                                                Ficha Familiar
+                                            </div>
+                                            <div class="card-body p-3">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-hashtag"></i>
+                                                                Número de Ficha
+                                                            </span>
+                                                            <span class="info-value">
+                                                                <a href="{% url 'detailFamilyCard' family_card.id %}"
+                                                                   class="text-primary">
+                                                                    #{{ family_card.family_card_number }}
+                                                                </a>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-users"></i>
+                                                                Total Miembros
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ total_family_members }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-user-tie"></i>
+                                                                Cabeza de Familia
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {% if family_head_obj %}
+                                                                    {{ family_head_obj.first_name_1 }} {{ family_head_obj.last_name_1 }}
+                                                                {% else %}
+                                                                    <span class="text-warning">Sin asignar</span>
+                                                                {% endif %}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="info-item">
+                                                            <span class="info-label">
+                                                                <i class="fas fa-people-arrows"></i>
+                                                                Parentesco
+                                                            </span>
+                                                            <span class="info-value">
+                                                                {{ persona.kinship.description_kinship|default:"No registrado" }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Miembros de la Familia -->
+                                    <div class="col-md-6">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <i class="fas fa-users"></i>
+                                                Otros Miembros de la Familia
+                                            </div>
+                                            <div class="card-body p-0">
+                                                {% if family_members %}
+                                                    {% for member in family_members %}
+                                                    <div class="family-member-item">
+                                                        <div class="family-member-avatar">
+                                                            {{ member.first_name_1|first }}{{ member.last_name_1|first }}
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="fw-bold text-dark">
+                                                                {{ member.first_name_1 }} {{ member.last_name_1 }}
+                                                                {% if member.family_head %}
+                                                                    <span class="badge badge-family-head ms-1">
+                                                                        <i class="fas fa-crown" style="font-size: 0.65rem;"></i> Jefe
+                                                                    </span>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="text-muted" style="font-size: 0.85rem;">
+                                                                {{ member.kinship.description_kinship|default:"No especificado" }}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <a href="{% url 'detail-person' member.id %}"
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <div class="empty-state">
+                                                        <i class="fas fa-users"></i>
+                                                        <p>No hay otros miembros en esta familia</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-home"></i>
+                                    <h5>Sin Ficha Familiar</h5>
+                                    <p>Esta persona no está asociada a ninguna ficha familiar</p>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -241,8 +721,21 @@
         </div>
     </div>
 {% endblock content %}
-{% block javascripts %}
-    <script>
 
+{% block javascripts %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus en el primer tab si hay un hash en la URL
+            const hash = window.location.hash;
+            if (hash) {
+                const tabButton = document.querySelector(`button[data-bs-target="${hash}"]`);
+                if (tabButton) {
+                    const tab = new bootstrap.Tab(tabButton);
+                    tab.show();
+                }
+            }
+        });
     </script>
-{% endblock %}
+{% endblock javascripts %}
+

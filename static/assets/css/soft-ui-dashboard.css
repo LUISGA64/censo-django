@@ -6,74 +6,117 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 :root {
-  --bs-blue: #63B3ED;
-  --bs-indigo: #596CFF;
-  --bs-purple: #6f42c1;
-  --bs-pink: #d63384;
-  --bs-red: #F56565;
-  --bs-orange: #fd7e14;
-  --bs-yellow: #FBD38D;
-  --bs-green: #81E6D9;
-  --bs-teal: #20c997;
-  --bs-cyan: #0dcaf0;
-  --bs-white: #fff;
-  --bs-gray: #6c757d;
-  --bs-gray-dark: #343a40;
-  --bs-gray-100: #f8f9fa;
-  --bs-gray-200: #e9ecef;
-  --bs-gray-300: #dee2e6;
-  --bs-gray-400: #ced4da;
-  --bs-gray-500: #adb5bd;
-  --bs-gray-600: #6c757d;
-  --bs-gray-700: #495057;
-  --bs-gray-800: #343a40;
-  --bs-gray-900: #212529;
-  --bs-primary: #0166cc;
-  --bs-secondary: #8392AB;
-  --bs-success: #82d616;
-  --bs-info: #17c1e8;
-  --bs-warning: #fbcf33;
-  --bs-danger: #ea0606;
-  --bs-light: #e9ecef;
-  --bs-dark: #344767;
-  --bs-white: #fff;
-  --bs-primary-rgb: 203, 12, 159;
-  --bs-secondary-rgb: 131, 146, 171;
-  --bs-success-rgb: 130, 214, 22;
-  --bs-info-rgb: 23, 193, 232;
-  --bs-warning-rgb: 251, 207, 51;
-  --bs-danger-rgb: 234, 6, 6;
-  --bs-light-rgb: 233, 236, 239;
-  --bs-dark-rgb: 52, 71, 103;
-  --bs-white-rgb: 255, 255, 255;
+  /* ===================================
+     PALETA EMPRESARIAL PROFESIONAL
+     Sistema Robusto y Moderno
+     ================================== */
+
+  /* Azules Corporativos - Base del Sistema */
+  --bs-blue: #2563EB;           /* Azul principal - vibrante y confiable */
+  --bs-indigo: #4F46E5;         /* Índigo corporativo - profesional */
+  --bs-purple: #7C3AED;         /* Púrpura ejecutivo - innovación */
+  --bs-pink: #DB2777;           /* Rosa corporativo - acentos */
+  --bs-cyan: #06B6D4;           /* Cian empresarial - tecnología */
+
+  /* Colores de Estado - Semáforo Profesional */
+  --bs-red: #DC2626;            /* Rojo corporativo - alertas críticas */
+  --bs-orange: #EA580C;         /* Naranja - advertencias importantes */
+  --bs-yellow: #F59E0B;         /* Amarillo - atención moderada */
+  --bs-green: #059669;          /* Verde corporativo - éxito/aprobado */
+  --bs-teal: #0D9488;           /* Verde azulado - estados positivos */
+
+  /* Escala de Grises Profesional - Jerarquía Visual */
+  --bs-white: #FFFFFF;
+  --bs-gray: #6B7280;           /* Gris medio - textos secundarios */
+  --bs-gray-dark: #1F2937;      /* Gris oscuro - textos importantes */
+  --bs-gray-100: #F3F4F6;       /* Casi blanco - fondos sutiles */
+  --bs-gray-200: #E5E7EB;       /* Muy claro - separadores */
+  --bs-gray-300: #D1D5DB;       /* Claro - bordes suaves */
+  --bs-gray-400: #9CA3AF;       /* Medio claro - deshabilitados */
+  --bs-gray-500: #6B7280;       /* Medio - iconos secundarios */
+  --bs-gray-600: #4B5563;       /* Medio oscuro - textos terciarios */
+  --bs-gray-700: #374151;       /* Oscuro - textos secundarios */
+  --bs-gray-800: #1F2937;       /* Muy oscuro - textos primarios */
+  --bs-gray-900: #111827;       /* Casi negro - headers */
+
+  /* Colores Funcionales del Sistema */
+  --bs-primary: #1E40AF;        /* Azul profundo - acción principal */
+  --bs-secondary: #475569;      /* Gris azulado - acciones secundarias */
+  --bs-success: #047857;        /* Verde esmeralda - operaciones exitosas */
+  --bs-info: #0284C7;           /* Azul información - mensajes informativos */
+  --bs-warning: #D97706;        /* Ámbar - precauciones */
+  --bs-danger: #B91C1C;         /* Rojo intenso - errores críticos */
+  --bs-light: #F9FAFB;          /* Casi blanco - fondos claros */
+  --bs-dark: #1E293B;           /* Azul oscuro - fondos oscuros */
+
+  /* Valores RGB para transparencias */
+  --bs-primary-rgb: 30, 64, 175;
+  --bs-secondary-rgb: 71, 85, 105;
+  --bs-success-rgb: 4, 120, 87;
+  --bs-info-rgb: 2, 132, 199;
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-danger-rgb: 185, 28, 28;
+  --bs-light-rgb: 249, 250, 251;
+  --bs-dark-rgb: 30, 41, 59;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
-  --bs-body-color-rgb: 103, 116, 142;
+  --bs-body-color-rgb: 55, 65, 81;
   --bs-body-bg-rgb: 255, 255, 255;
-  --bs-font-sans-serif: "Open Sans";
-  --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+
+  /* Tipografía Profesional */
+  --bs-font-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --bs-font-monospace: "JetBrains Mono", "Fira Code", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Gradientes Corporativos */
+  --bs-gradient: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(37, 99, 235, 0.05));
+  --bs-gradient-primary: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%);
+  --bs-gradient-secondary: linear-gradient(135deg, #475569 0%, #64748B 100%);
+  --bs-gradient-success: linear-gradient(135deg, #047857 0%, #059669 100%);
+  --bs-gradient-info: linear-gradient(135deg, #0284C7 0%, #0EA5E9 100%);
+  --bs-gradient-dark: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+
+  /* Configuración del Body */
   --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-body-font-size: 1rem;
+  --bs-body-font-size: 0.9375rem;
   --bs-body-font-weight: 400;
-  --bs-body-line-height: 1.5;
-  --bs-body-color: #67748e;
-  --bs-body-bg: #fff;
+  --bs-body-line-height: 1.6;
+  --bs-body-color: #374151;
+  --bs-body-bg: #FFFFFF;
+
+  /* Bordes y Radios */
   --bs-border-width: 1px;
   --bs-border-style: solid;
-  --bs-border-color: #dee2e6;
-  --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
-  --bs-border-radius: 0.375rem;
-  --bs-border-radius-sm: 0.25rem;
+  --bs-border-color: #E5E7EB;
+  --bs-border-color-translucent: rgba(0, 0, 0, 0.08);
+  --bs-border-radius: 0.5rem;
+  --bs-border-radius-sm: 0.375rem;
   --bs-border-radius-lg: 0.75rem;
   --bs-border-radius-xl: 1rem;
   --bs-border-radius-2xl: 1.5rem;
   --bs-border-radius-pill: 50rem;
-  --bs-heading-color: #344767;
-  --bs-link-color: #0166cc;
-  --bs-link-hover-color: #830866;
-  --bs-code-color: #d63384;
-  --bs-highlight-bg: #fcf8e3;
+
+  /* Colores de Texto */
+  --bs-heading-color: #111827;
+  --bs-link-color: #1E40AF;
+  --bs-link-hover-color: #1E3A8A;
+  --bs-code-color: #7C3AED;
+  --bs-highlight-bg: #FEF3C7;
+
+  /* Sombras Profesionales */
+  --bs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --bs-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --bs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --bs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Colores Adicionales para Estados */
+  --color-accent: #2563EB;
+  --color-muted: #9CA3AF;
+  --color-hover: #1E3A8A;
+  --color-active: #1E40AF;
+  --color-disabled: #D1D5DB;
+  --color-border: #E5E7EB;
+  --color-background-subtle: #F9FAFB;
+  --color-background-muted: #F3F4F6;
 }
 
 *,

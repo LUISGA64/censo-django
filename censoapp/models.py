@@ -213,14 +213,24 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        self.first_name_1 = self.first_name_1.strip().lower().capitalize()
-        self.first_name_2 = self.first_name_2.strip().lower().capitalize()
-        self.last_name_1 = self.last_name_1.strip().lower().capitalize()
-        self.last_name_2 = self.last_name_2.strip().lower().capitalize()
+        # Normalizar campos de texto - manejar None y vacíos
+        if self.first_name_1:
+            self.first_name_1 = self.first_name_1.strip().lower().capitalize()
+        if self.first_name_2:
+            self.first_name_2 = self.first_name_2.strip().lower().capitalize()
+        if self.last_name_1:
+            self.last_name_1 = self.last_name_1.strip().lower().capitalize()
+        if self.last_name_2:
+            self.last_name_2 = self.last_name_2.strip().lower().capitalize()
+
+        # Normalizar email y teléfono
         self.personal_email = self.personal_email.strip().lower() if self.personal_email else ''
         self.cell_phone = self.cell_phone.strip() if self.cell_phone else ''
-        self.identification_person = self.identification_person.strip()
-        # super(Person, self).save(*args, **kwargs)
+
+        # Identificación siempre es requerida
+        if self.identification_person:
+            self.identification_person = self.identification_person.strip()
+
         super().save(*args, **kwargs)
 
     @property

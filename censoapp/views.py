@@ -1,12 +1,11 @@
-import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction, IntegrityError
-from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count
+from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count, Sum
 from django.db.models.functions.text import Concat
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
@@ -117,106 +116,228 @@ def family_card_index(request):
                   {'segment': 'family_card'})
 
 
-# Función para obtener las fichas familiares en formato JSON para DataTables
+# Función optimizada para obtener las fichas familiares en formato JSON para DataTables
+@login_required
 def get_family_cards(request):
-    draw = int(request.GET.get('draw', 1))
-    start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 10))
-    search_value = request.GET.get('search[value]', '')
+    """
+    Vista optimizada para listar fichas familiares con paginación server-side.
+    Incluye búsqueda multi-campo, ordenamiento y conteo de miembros.
+    """
+    try:
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        search_value = request.GET.get('search[value]', '').strip()
+        order_column = request.GET.get('order[0][column]', '0')
+        order_dir = request.GET.get('order[0][dir]', 'asc')
 
-    queryset = (Person.objects.select_related('family_card', 'sidewalk_home')
-                .filter(family_head=True, state=True)
-                .values('family_card__family_card_number', 'family_card_id', 'first_name_1', 'first_name_2',
-                        'last_name_1',
-                        'last_name_2', 'identification_person', 'document_type__code_document_type',
-                        'family_card__sidewalk_home__sidewalk_name', 'family_card__zone')).order_by(
-        'family_card__family_card_number')
+        # Columnas ordenables
+        order_columns = [
+            'family_card__family_card_number',
+            'full_name',
+            'family_card__sidewalk_home__sidewalk_name',
+            'person_count',
+        ]
 
-    # Crear la columna full_name en la consulta
-    queryset = queryset.annotate(
-        full_name=Concat('first_name_1', Value(' '), 'first_name_2', Value(' '), 'last_name_1', Value(' '),
-                         'last_name_2'),
-        person_count=Count('family_card__person'),
-        persona_count_gender=Count('family_card__person__gender'),
-    )
+        # Validar índice de columna
+        try:
+            order_by = order_columns[int(order_column)]
+            if order_dir == 'desc':
+                order_by = f'-{order_by}'
+        except (IndexError, ValueError):
+            order_by = 'family_card__family_card_number'
 
-    # Filtrar por el valor de búsqueda
-    if search_value:
-        queryset = queryset.filter(
-            Q(full_name__icontains=search_value) |
-            Q(identification_person__icontains=search_value) |
-            Q(family_card__family_card_number__icontains=search_value) |
-            Q(family_card__sidewalk_home__sidewalk_name__icontains=search_value) |
-            Q(family_card__zone__icontains=search_value)
-        ).order_by('id')
+        # Query optimizado con select_related para evitar N+1 queries
+        queryset = (Person.objects
+                    .select_related('family_card', 'family_card__sidewalk_home',
+                                  'family_card__organization', 'document_type')
+                    .filter(family_head=True, state=True, family_card__state=True)
+                    .values('family_card__family_card_number', 'family_card_id',
+                           'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                           'identification_person', 'document_type__code_document_type',
+                           'family_card__sidewalk_home__sidewalk_name', 'family_card__zone',
+                           'family_card__address_home', 'family_card__organization__organization_name')
+                    .annotate(
+                        full_name=Concat('first_name_1', Value(' '), 'first_name_2',
+                                       Value(' '), 'last_name_1', Value(' '), 'last_name_2'),
+                        person_count=Count('family_card__person',
+                                         filter=Q(family_card__person__state=True))
+                    ))
 
-    # Paginación
-    paginator = Paginator(queryset, length)
-    page = paginator.get_page(start // length + 1)
+        # Búsqueda optimizada con OR en múltiples campos
+        if search_value:
+            queryset = queryset.filter(
+                Q(first_name_1__icontains=search_value) |
+                Q(first_name_2__icontains=search_value) |
+                Q(last_name_1__icontains=search_value) |
+                Q(last_name_2__icontains=search_value) |
+                Q(identification_person__icontains=search_value) |
+                Q(family_card__family_card_number__icontains=search_value) |
+                Q(family_card__sidewalk_home__sidewalk_name__icontains=search_value) |
+                Q(family_card__zone__icontains=search_value) |
+                Q(family_card__address_home__icontains=search_value)
+            )
 
-    # Serializar los datos
-    data = list(page.object_list)
+        # Total de registros antes de aplicar filtros
+        total_records = Person.objects.filter(
+            family_head=True,
+            state=True,
+            family_card__state=True
+        ).count()
 
-    # Devolver los datos y el total de registros
-    response_data = {
-        'draw': draw,
-        'recordsTotal': paginator.count,
-        'recordsFiltered': paginator.count,
-        'data': data
-    }
-    return JsonResponse(response_data)
+        # Total de registros después de aplicar filtros
+        filtered_records = queryset.count()
+
+        # Aplicar ordenamiento
+        queryset = queryset.order_by(order_by)
+
+        # Paginación
+        paginator = Paginator(queryset, length)
+        page_number = (start // length) + 1
+
+        try:
+            page = paginator.get_page(page_number)
+        except Exception:
+            page = paginator.get_page(1)
+
+        # Serializar los datos
+        data = list(page.object_list)
+
+        # Respuesta JSON para DataTables
+        response_data = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        # logger.error(f"Error en get_family_cards: {e}")
+        return JsonResponse({
+            'draw': 1,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'error': 'Error al cargar los datos'
+        }, status=500)
 
 
-# Función para crear una ficha familiar y una persona en la misma vista (Wizard)
+# Función optimizada para crear ficha familiar con cabeza de familia
 @login_required
 def create_family_card(request):
+    """
+    Vista para crear una nueva ficha familiar junto con el cabeza de familia.
+    Incluye validaciones robustas y mensajes claros para el usuario.
+    """
     if request.method == 'POST':
         family_card_form = FormFamilyCard(request.POST)
         person_form = FormPerson(request.POST)
 
-        # Verificar si el número de identificación ya existe
-        if 'identification_person' in request.POST:
-            identification_person = request.POST['identification_person']
-            if Person.objects.filter(identification_person=identification_person).exists():
-                messages.error(request, "Ya existe una persona con esa identificación.")
+        # Validación 1: Verificar duplicidad de identificación ANTES de validar formularios
+        identification_person = request.POST.get('identification_person', '').strip()
+        if identification_person:
+            existing_person = Person.objects.filter(
+                identification_person=identification_person,
+                state=True
+            ).first()
 
-            family_card_form_is_valid = family_card_form.is_valid()
-            print(f"Family Card Form Valid: {family_card_form_is_valid}")
-            person_form_is_valid = person_form.is_valid()
-            print(f"Person Form Valid: {person_form_is_valid}")
+            if existing_person:
+                messages.error(
+                    request,
+                    f"El documento {identification_person} ya está registrado para "
+                    f"{existing_person.full_name} en la ficha {existing_person.family_card.family_card_number}."
+                )
+                return render(request, 'censo/censo/createFamilyCard.html', {
+                    'family_card_form': family_card_form,
+                    'person_form': person_form,
+                    'segment': 'family_card'
+                })
 
+        # Validación 2: Validar edad mínima del cabeza de familia (18 años)
+        date_birth = request.POST.get('date_birth')
+        if date_birth:
+            from datetime import date, datetime
+            try:
+                birth_date = datetime.strptime(date_birth, '%Y-%m-%d').date()
+                today = date.today()
+                age = today.year - birth_date.year - (
+                    (today.month, today.day) < (birth_date.month, birth_date.day)
+                )
+
+                if age < 18:
+                    messages.error(
+                        request,
+                        f"El cabeza de familia debe ser mayor de 18 años. "
+                        f"La edad registrada es de {age} años."
+                    )
+                    return render(request, 'censo/censo/createFamilyCard.html', {
+                        'family_card_form': family_card_form,
+                        'person_form': person_form,
+                        'segment': 'family_card'
+                    })
+            except ValueError:
+                messages.error(request, "Formato de fecha de nacimiento inválido.")
+                return render(request, 'censo/censo/createFamilyCard.html', {
+                    'family_card_form': family_card_form,
+                    'person_form': person_form,
+                    'segment': 'family_card'
+                })
+
+        # Validación 3: Validar formularios
         if family_card_form.is_valid() and person_form.is_valid():
             try:
                 with transaction.atomic():
-
-                    # Crear instancia de FamilyCard
+                    # Crear FamilyCard
                     family_card = family_card_form.save(commit=False)
-                    family_card.family_card_number = FamilyCard.objects.count() + 1
+                    family_card.family_card_number = FamilyCard.get_next_family_card_number()
+                    family_card.state = True
                     family_card.save()
 
-                    # Crear instancia de Person
+                    # Crear Person (cabeza de familia)
                     person = person_form.save(commit=False)
                     person.family_card = family_card
                     person.family_head = True
+                    person.state = True
                     person.save()
 
-                    messages.success(request, "Ficha familiar creada correctamente")
+                    messages.success(
+                        request,
+                        f"Ficha familiar #{family_card.family_card_number} creada exitosamente. "
+                        f"Cabeza de familia: {person.full_name}"
+                    )
                     return redirect('createPerson', pk=family_card.pk)
+
             except IntegrityError as e:
-                # logger.error(f"Error de base de datos: {e}")
-                print(e)
-                messages.error(request,
-                               "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
+                messages.error(
+                    request,
+                    "Error al guardar: Ya existe un registro con estos datos. "
+                    "Por favor, verifique la información."
+                )
             except Exception as e:
-                # logger.error(f"Error inesperado: {e}")
-                print(e)
-                messages.error(request, f"Hubo un problema al crear la ficha familiar: {str(e)}")
-                print(f"Error inesperado: {e}")
+                messages.error(
+                    request,
+                    "Ocurrió un error inesperado al crear la ficha familiar. "
+                    "Por favor, contacte al administrador."
+                )
         else:
-            messages.warning(request,
-                             "Hubo un problema al crear la ficha familiar. Por favor, revise los campos nuevamente.")
-            # logger.warning(f"Errores del formulario: {family_card_form.errors}, {person_form.errors}")
-            print(person_form.errors)
+            # Mostrar errores específicos de los formularios
+            if family_card_form.errors:
+                for field, errors in family_card_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Datos de vivienda - {field}: {error}")
+
+            if person_form.errors:
+                for field, errors in person_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Datos de persona - {field}: {error}")
+
+            if not (family_card_form.errors or person_form.errors):
+                messages.warning(
+                    request,
+                    "Por favor, complete todos los campos obligatorios del formulario."
+                )
     else:
         family_card_form = FormFamilyCard()
         person_form = FormPerson()
@@ -230,102 +351,340 @@ def create_family_card(request):
 
 @login_required
 def crear_persona(request, pk):
-    familia = FamilyCard.objects.get(pk=pk)
+    """
+    Vista para agregar un nuevo miembro a una ficha familiar existente.
+    Incluye validaciones robustas y mensajes claros para el usuario.
+    """
+    # Validar que la ficha familiar existe y está activa
+    try:
+        familia = get_object_or_404(FamilyCard, pk=pk, state=True)
+    except Exception:
+        messages.error(request, "La ficha familiar no existe o no está activa.")
+        return redirect('familyCardIndex')
+
     if request.method == 'POST':
-        query = Person.objects.filter(identification_person=request.POST.get('identification_person', ''))
         person_form = FormPerson(request.POST)
-        if person_form.is_valid():
-            if query.exists():
-                messages.error(request, "Ya existe una persona con esa identificación")
+
+        # Validación 1: Verificar duplicidad de identificación ANTES de validar formulario
+        identification_person = request.POST.get('identification_person', '').strip()
+        if identification_person:
+            existing_person = Person.objects.filter(
+                identification_person=identification_person,
+                state=True
+            ).first()
+
+            if existing_person:
+                messages.error(
+                    request,
+                    f"El documento {identification_person} ya está registrado para "
+                    f"{existing_person.full_name} en la ficha #{existing_person.family_card.family_card_number}."
+                )
                 return render(request, 'censo/persona/createPerson.html', {
-                    'form': person_form,
+                    'person_form': person_form,
                     'familia': familia,
                     'segment': 'family_card'
                 })
 
+        # Validación 2: Si se marca como cabeza de familia, validar que sea mayor de 18 años
+        is_family_head = request.POST.get('family_head') == 'on'
+        date_birth = request.POST.get('date_birth')
+
+        if is_family_head and date_birth:
+            from datetime import date, datetime
+            try:
+                birth_date = datetime.strptime(date_birth, '%Y-%m-%d').date()
+                today = date.today()
+                age = today.year - birth_date.year - (
+                    (today.month, today.day) < (birth_date.month, birth_date.day)
+                )
+
+                if age < 18:
+                    messages.error(
+                        request,
+                        f"El cabeza de familia debe ser mayor de 18 años. "
+                        f"La edad registrada es de {age} años."
+                    )
+                    return render(request, 'censo/persona/createPerson.html', {
+                        'person_form': person_form,
+                        'familia': familia,
+                        'segment': 'family_card'
+                    })
+            except ValueError:
+                messages.error(request, "Formato de fecha de nacimiento inválido.")
+                return render(request, 'censo/persona/createPerson.html', {
+                    'person_form': person_form,
+                    'familia': familia,
+                    'segment': 'family_card'
+                })
+
+        # Validación 3: Verificar que no haya otro cabeza de familia si se marca como tal
+        if is_family_head:
+            existing_head = Person.objects.filter(
+                family_card=familia,
+                family_head=True,
+                state=True
+            ).first()
+
+            if existing_head:
+                messages.error(
+                    request,
+                    f"Ya existe un cabeza de familia en esta ficha: {existing_head.full_name}. "
+                    f"Primero debe cambiar el rol del cabeza actual."
+                )
+                return render(request, 'censo/persona/createPerson.html', {
+                    'person_form': person_form,
+                    'familia': familia,
+                    'segment': 'family_card'
+                })
+
+        # Validación 4: Validar formulario
+        if person_form.is_valid():
             try:
                 with transaction.atomic():
                     person = person_form.save(commit=False)
                     person.family_card = familia
                     person.state = True
                     person.save()
-                    messages.success(request, "Persona creada correctamente, Registre otra persona si lo desea.")
 
-                    # Redireccionar a la creación de otra persona o a la lista de fichas familiares
+                    # Mensaje de éxito personalizado
+                    messages.success(
+                        request,
+                        f"Miembro agregado exitosamente: {person.full_name}. "
+                        f"Total de miembros en la ficha: {familia.person_set.filter(state=True).count()}"
+                    )
+
+                    # Redireccionar según la acción del usuario
                     if 'add_another' in request.POST:
                         return redirect('createPerson', pk=familia.pk)
                     else:
-                        return redirect('familyCardIndex')
-            except IntegrityError as e:
-                # logger.error(f"Error al crear persona (IntegrityError): {e}")
-                print(e)
-                messages.error(request,
-                               "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
-            except Exception as e:
-                # logger.error(f"Error inesperado al crear persona: {e}")
-                print(e)
-                messages.error(request,
-                               "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
+                        return redirect('detailFamilyCard', pk=familia.pk)
+
+            except IntegrityError:
+                messages.error(
+                    request,
+                    "Error al guardar: Ya existe un registro con estos datos. "
+                    "Por favor, verifique la información."
+                )
+            except Exception:
+                messages.error(
+                    request,
+                    "Ocurrió un error inesperado al agregar el miembro. "
+                    "Por favor, contacte al administrador."
+                )
         else:
-            messages.warning(request,
-                             "Hubo un problema al crear la persona. Por favor, revise los campos nuevamente.")
-            print(request)
-            # logger.warning(f"Errores del formulario: {person_form.errors}")
+            # Mostrar errores específicos del formulario
+            if person_form.errors:
+                for field, errors in person_form.errors.items():
+                    for error in errors:
+                        field_label = person_form.fields.get(field).label if field in person_form.fields else field
+                        messages.error(request, f"{field_label}: {error}")
+
+            if not person_form.errors:
+                messages.warning(
+                    request,
+                    "Por favor, complete todos los campos obligatorios del formulario."
+                )
     else:
         person_form = FormPerson()
+
+    # Obtener información adicional de la familia para el contexto
+    total_members = familia.person_set.filter(state=True).count()
+    family_head = familia.person_set.filter(family_head=True, state=True).first()
 
     return render(request, 'censo/persona/createPerson.html', {
         'person_form': person_form,
         'familia': familia,
+        'total_members': total_members,
+        'family_head': family_head,
         'segment': 'family_card'
     })
 
 
-# Muestra el detalle de la ficha familiar
+# Muestra el detalle de la ficha familiar - Vista optimizada
 @login_required
 def detalle_ficha(request, pk):
-    familia = (Person.objects.
-               select_related('family_card', 'kinship', 'document_type', 'sidewalk')
-               .filter(family_card_id=pk)
-               .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'date_birth',
-                       'identification_person', 'document_type__code_document_type', 'kinship__description_kinship',
-                       'family_card__family_card_number', 'family_card__sidewalk_home__sidewalk_name', 'family_head',
-                       'family_card__zone', 'family_card__address_home', 'family_card__id')
-               .annotate(age=ExpressionWrapper(now().year - F('date_birth__year'), output_field=fields.IntegerField()))
-               )
+    """
+    Vista optimizada para mostrar el detalle de una ficha familiar.
+    Incluye información de la vivienda y todos los miembros de la familia.
+    """
+    try:
+        # Verificar que la ficha familiar existe
+        family_card = get_object_or_404(FamilyCard, pk=pk, state=True)
 
-    return render(request, 'censo/censo/detail_family_card.html',
-                  {'familia': familia, 'segment': 'family_card', })
+        # Query optimizado con select_related para evitar N+1 queries
+        familia = (Person.objects
+                   .select_related('family_card', 'family_card__sidewalk_home',
+                                 'family_card__organization', 'kinship', 'document_type', 'gender')
+                   .filter(family_card_id=pk, state=True)
+                   .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                          'date_birth', 'identification_person', 'document_type__code_document_type',
+                          'kinship__description_kinship', 'family_card__family_card_number',
+                          'family_card__sidewalk_home__sidewalk_name', 'family_head',
+                          'family_card__zone', 'family_card__address_home', 'family_card__id',
+                          'family_card__latitude', 'family_card__longitude',
+                          'family_card__organization__organization_name', 'gender__gender',
+                          'cell_phone', 'personal_email')
+                   .annotate(
+                       age=ExpressionWrapper(now().year - F('date_birth__year'),
+                                           output_field=fields.IntegerField())
+                   )
+                   .order_by('-family_head', 'date_birth'))
+
+        # Verificar que hay miembros en la familia
+        if not familia.exists():
+            messages.warning(request, "No se encontraron miembros en esta ficha familiar.")
+
+        # Calcular estadísticas de la familia
+        total_miembros = familia.count()
+        cabeza_familia = familia.filter(family_head=True).first()
+        promedio_edad = familia.aggregate(promedio=ExpressionWrapper(
+            Sum(now().year - F('date_birth__year')) / Count('id'),
+            output_field=fields.FloatField()
+        ))['promedio']
+
+        context = {
+            'familia': familia,
+            'family_card': family_card,
+            'total_miembros': total_miembros,
+            'cabeza_familia': cabeza_familia,
+            'promedio_edad': round(promedio_edad, 1) if promedio_edad else 0,
+            'segment': 'family_card',
+        }
+
+        return render(request, 'censo/censo/detail_family_card.html', context)
+
+    except Exception as e:
+        messages.error(request, "Hubo un error al cargar el detalle de la ficha familiar.")
+        return redirect('familyCardIndex')
 
 
 class UpdateFamily(LoginRequiredMixin, UpdateView):
+    """
+    Vista optimizada para actualizar fichas familiares.
+    Maneja dos formularios: datos de ubicación y datos de vivienda.
+    Incluye validaciones robustas y mensajes claros para el usuario.
+    """
     model = FamilyCard
     fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization']
     template_name = 'censo/censo/edit-family-card.html'
     success_url = reverse_lazy('familyCardIndex')
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
+    def get_queryset(self):
+        """Optimizar query con select_related para evitar N+1"""
+        return FamilyCard.objects.select_related(
+            'sidewalk_home',
+            'organization'
+        ).filter(state=True)
 
-        messages.success(self.request, "Ficha familiar actualizada correctamente")
-        return super(UpdateFamily, self).form_valid(form)
+    def form_valid(self, form):
+        """Validar y guardar el formulario de ubicación"""
+        try:
+            # Validar coordenadas si se proporcionan
+            latitude = form.cleaned_data.get('latitude')
+            longitude = form.cleaned_data.get('longitude')
+
+            if latitude or longitude:
+                if not (latitude and longitude):
+                    messages.error(
+                        self.request,
+                        "Debe proporcionar tanto la latitud como la longitud, o dejar ambas en blanco."
+                    )
+                    return self.form_invalid(form)
+
+                # Validar rangos
+                try:
+                    lat_float = float(latitude) if isinstance(latitude, str) else latitude
+                    lon_float = float(longitude) if isinstance(longitude, str) else longitude
+
+                    if not (-90 <= lat_float <= 90):
+                        messages.error(
+                            self.request,
+                            f"La latitud debe estar entre -90 y 90 grados. Valor ingresado: {lat_float}"
+                        )
+                        return self.form_invalid(form)
+
+                    if not (-180 <= lon_float <= 180):
+                        messages.error(
+                            self.request,
+                            f"La longitud debe estar entre -180 y 180 grados. Valor ingresado: {lon_float}"
+                        )
+                        return self.form_invalid(form)
+                except (ValueError, TypeError):
+                    messages.error(
+                        self.request,
+                        "Las coordenadas deben ser valores numéricos válidos."
+                    )
+                    return self.form_invalid(form)
+
+            # Guardar
+            with transaction.atomic():
+                form.instance.user = self.request.user
+                response = super(UpdateFamily, self).form_valid(form)
+
+                messages.success(
+                    self.request,
+                    f"Ficha familiar #{self.object.family_card_number} actualizada correctamente."
+                )
+                return response
+
+        except Exception as e:
+            messages.error(
+                self.request,
+                "Ocurrió un error al actualizar la ficha familiar. Por favor, intente nuevamente."
+            )
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
-        # logger.warning(f"Errores del formulario: {form.errors}")
-        messages.warning(self.request, "Hubo un problema con la actualización de la ficha familiar. "
-                                       "Por favor, revisa los campos nuevamente.")
-
+        """Mostrar errores específicos del formulario"""
+        if form.errors:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    field_name = form.fields[field].label if field in form.fields else field
+                    messages.error(self.request, f"{field_name}: {error}")
+        else:
+            messages.warning(
+                self.request,
+                "Hubo un problema con la actualización. Por favor, revise los campos."
+            )
         return super(UpdateFamily, self).form_invalid(form)
 
     def post(self, request, *args, **kwargs):
-        """Procesa envíos del formulario de vivienda (material_form) o del form principal.
-        Si el POST contiene 'material_form_submit' procesamos MaterialConstructionFamilyForm; en caso contrario
-        delegamos a la implementación por defecto (UpdateView.post) para actualizar FamilyCard.
         """
-        # Detectar envío del formulario de materiales por el nombre del botón
-        if 'material_form_submit' in request.POST or 'material_roof' in request.POST:
-            self.object = self.get_object()
-            material_form = MaterialConstructionFamilyForm(request.POST)
+        Procesa envíos del formulario de vivienda o del formulario principal.
+        Detecta automáticamente cuál formulario se está enviando.
+        """
+        self.object = self.get_object()
+
+        # Detectar si es el formulario de materiales de vivienda
+        if 'material_form_submit' in request.POST:
+            return self._handle_material_form(request)
+
+        # Formulario principal de ubicación
+        return super().post(request, *args, **kwargs)
+
+    def _handle_material_form(self, request):
+        """Procesar el formulario de materiales de vivienda"""
+        try:
+            # Verificar si ya existe un registro para esta ficha
+            material_instance = None
+            try:
+                material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(
+                    self.object.pk
+                )
+            except Exception:
+                pass
+
+            # Crear formulario con instancia existente o nueva
+            if material_instance:
+                material_form = MaterialConstructionFamilyForm(
+                    request.POST,
+                    instance=material_instance
+                )
+                action = "actualizados"
+            else:
+                material_form = MaterialConstructionFamilyForm(request.POST)
+                action = "guardados"
+
             if material_form.is_valid():
                 try:
                     with transaction.atomic():
@@ -333,130 +692,297 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
                         instance.family_card = self.object
                         instance.save()
                         material_form.save_m2m()
-                        messages.success(request, "Datos de vivienda guardados correctamente")
-                        # Redirigir a la misma vista y forzar apertura de la pestaña 'vivienda'
+
+                        messages.success(
+                            request,
+                            f"Datos de vivienda {action} correctamente para la ficha #{self.object.family_card_number}."
+                        )
+
+                        # Redirigir y mantener la pestaña vivienda activa
                         url = reverse('update-family', kwargs={'pk': self.object.pk}) + '?tab=vivienda'
                         return redirect(url)
-                except IntegrityError as e:
-                    # logger.error(f"Error al guardar MaterialConstructionFamilyCard desde UpdateFamily: {e}")
-                    messages.error(request, "No se pudo guardar los datos de vivienda. Por favor revise los campos.")
-                    return self.render_to_response(self.get_context_data(form=self.get_form(), material_form=material_form))
+
+                except IntegrityError:
+                    messages.error(
+                        request,
+                        "Error: Ya existe un registro de vivienda para esta ficha. Use el formulario para actualizar."
+                    )
+                except Exception:
+                    messages.error(
+                        request,
+                        "Ocurrió un error al guardar los datos de vivienda. Por favor, intente nuevamente."
+                    )
             else:
-                messages.warning(request, "Hay errores en el formulario de vivienda. Revise los campos.")
-                return self.render_to_response(self.get_context_data(form=self.get_form(), material_form=material_form))
-        # No es el formulario de vivienda: usar comportamiento normal (actualizar FamilyCard)
-        return super().post(request, *args, **kwargs)
+                # Mostrar errores específicos
+                for field, errors in material_form.errors.items():
+                    for error in errors:
+                        field_name = material_form.fields[field].label if field in material_form.fields else field
+                        messages.error(request, f"Vivienda - {field_name}: {error}")
+
+            # Renderizar con errores
+            return self.render_to_response(
+                self.get_context_data(
+                    form=self.get_form(),
+                    material_form=material_form
+                )
+            )
+
+        except Exception:
+            messages.error(
+                request,
+                "Error inesperado al procesar el formulario de vivienda."
+            )
+            return redirect('update-family', pk=self.object.pk)
 
     def get_context_data(self, **kwargs):
+        """Agregar contexto optimizado con información de la ficha"""
         context = super().get_context_data(**kwargs)
-        # Obtener parámetros del sistema como dict para que el template los consuma fácilmente
-        params = SystemParameters.objects.all().values('key', 'value')
-        system_params = {p['key']: p['value'] for p in params}
+
+        # Parámetros del sistema (cacheados si es posible)
+        params = SystemParameters.objects.all().only('key', 'value')
+        system_params = {p.key: p.value for p in params}
 
         context['segment'] = 'family_card'
         context['system_params'] = system_params
+        context['datos_vivienda'] = system_params.get('Datos de Vivienda', 'N')
 
-        # Obtener valor específico para 'Datos de Vivienda' (por compatibilidad con plantillas existentes)
-        datos_vivienda = system_params.get('Datos de Vivienda', 'N')
-        context['datos_vivienda'] = datos_vivienda
+        # Información de la familia para el contexto
+        family = self.object
 
-        # Añadir el formulario de MaterialConstructionFamilyForm al contexto. Si ya existe un registro para la ficha,
-        # inicializar el formulario con esa instancia para permitir edición.
-        family = self.get_object()
+        # Contar miembros activos de forma eficiente
+        context['total_members'] = Person.objects.filter(
+            family_card=family,
+            state=True
+        ).count()
+
+        # Obtener cabeza de familia
+        context['family_head'] = Person.objects.filter(
+            family_card=family,
+            family_head=True,
+            state=True
+        ).only('first_name_1', 'last_name_1').first()
+
+        # Formulario de materiales de vivienda
         material_instance = None
         try:
             material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(family.pk)
         except Exception:
-            material_instance = None
+            pass
 
-        if material_instance:
-            material_form = MaterialConstructionFamilyForm(instance=material_instance)
+        if 'material_form' not in kwargs:
+            if material_instance:
+                context['material_form'] = MaterialConstructionFamilyForm(instance=material_instance)
+                context['material_exists'] = True
+            else:
+                context['material_form'] = MaterialConstructionFamilyForm()
+                context['material_exists'] = False
         else:
-            material_form = MaterialConstructionFamilyForm()
-
-        context['material_form'] = material_form
+            context['material_form'] = kwargs['material_form']
+            context['material_exists'] = bool(material_instance)
 
         return context
 
 
-class DetailPersona(DetailView):
+class DetailPersona(LoginRequiredMixin, DetailView):
+    """
+    Vista optimizada para mostrar el detalle de una persona.
+    Incluye validaciones, carga optimizada de datos relacionados y contexto enriquecido.
+    """
     model = Person
     template_name = 'censo/persona/detail_person.html'
     context_object_name = 'persona'
 
     def get_queryset(self):
-        return (Person.objects
-                .select_related('document_type', 'gender', 'education_level', 'civil_state', 'occupation',
-                                'security_social', 'eps', 'kinship', 'family_card', 'handicap')
-                .filter(id=self.kwargs['pk'], state=True)
-                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
-                        'identification_person', 'document_type__document_type', 'date_birth', 'gender__gender',
-                        'document_type__code_document_type', 'cell_phone', 'personal_email', 'handicap__handicap',
-                        'education_level__education_level', 'civil_state__state_civil', 'kinship__description_kinship',
-                        'occupation__description_occupancy', 'eps__name_eps', 'social_insurance__affiliation',
-                        'family_card__sidewalk_home__sidewalk_name', 'family_head', 'family_card__zone',
-                        'family_card__address_home'))
+        """
+        Query optimizado con select_related para evitar N+1 queries.
+        Solo carga registros activos para seguridad.
+        """
+        return Person.objects.select_related(
+            'document_type',
+            'gender',
+            'education_level',
+            'civil_state',
+            'occupation',
+            'social_insurance',
+            'eps',
+            'kinship',
+            'family_card',
+            'family_card__sidewalk_home',
+            'family_card__organization',
+            'handicap'
+        ).filter(state=True)
+
+    def get_object(self, queryset=None):
+        """Validar que la persona existe y está activa"""
+        try:
+            obj = super().get_object(queryset)
+            if not obj.state:
+                raise Http404("Esta persona no está disponible.")
+            return obj
+        except Person.DoesNotExist:
+            raise Http404("Persona no encontrada.")
+
+    def get_context_data(self, **kwargs):
+        """Agregar contexto enriquecido con información relacionada"""
+        context = super().get_context_data(**kwargs)
+        persona = self.object
+
+        # Calcular edad
+        if persona.date_birth:
+            from datetime import date
+            today = date.today()
+            age = today.year - persona.date_birth.year - (
+                (today.month, today.day) < (persona.date_birth.month, persona.date_birth.day)
+            )
+            context['age'] = age
+        else:
+            context['age'] = None
+
+        # Información de la familia (optimizado)
+        if persona.family_card:
+            family = persona.family_card
+
+            # Total de miembros de la familia
+            context['total_family_members'] = Person.objects.filter(
+                family_card=family,
+                state=True
+            ).count()
+
+            # Cabeza de familia
+            context['family_head_obj'] = Person.objects.filter(
+                family_card=family,
+                family_head=True,
+                state=True
+            ).only('first_name_1', 'last_name_1', 'id').first()
+
+            # Miembros de la familia (limitado a 10 para rendimiento)
+            context['family_members'] = Person.objects.filter(
+                family_card=family,
+                state=True
+            ).exclude(
+                id=persona.id
+            ).select_related(
+                'kinship', 'gender'
+            ).only(
+                'id', 'first_name_1', 'last_name_1', 'kinship__description_kinship',
+                'gender__gender', 'date_birth', 'family_head'
+            )[:10]
+
+            context['family_card'] = family
+        else:
+            context['total_family_members'] = 0
+            context['family_head_obj'] = None
+            context['family_members'] = []
+            context['family_card'] = None
+
+        # Información de seguridad
+        context['segment'] = 'persons'
+        context['can_edit'] = self.request.user.is_authenticated
+
+        return context
 
 
 
-# Lista las personas in formato JSON para DataTables
+# Lista las personas en formato JSON para DataTables
 @login_required
 def listar_personas(request):
-    draw = int(request.GET.get('draw', 1))
-    start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 7))
-    search_value = request.GET.get('search[value]', '')
-    order_column = request.GET.get('order[0][column]', '0')
-    order_dir = request.GET.get('order[0][dir]', 'asc')
+    """
+    Vista optimizada para listar personas con paginación server-side.
+    Incluye búsqueda, ordenamiento y cálculo de edad eficiente.
+    """
+    try:
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        search_value = request.GET.get('search[value]', '').strip()
+        order_column = request.GET.get('order[0][column]', '0')
+        order_dir = request.GET.get('order[0][dir]', 'asc')
 
-    order_columns = [
-        'first_name_1',
-        'identification_person',
-        'document_type__document_type',
-        'date_birth',
-        'gender__gender',
-        'document_type__code_document_type',
-        'family_head',
-        'family_card__family_card_number',
-        'family_card'
-    ]
+        # Columnas ordenables
+        order_columns = [
+            'first_name_1',
+            'date_birth',
+            'age',
+            'gender__gender',
+            'family_card__family_card_number',
+        ]
 
-    order_by = order_columns[int(order_column)]
-    if order_dir == 'desc':
-        order_by = f'-{order_by}'
+        # Validar índice de columna
+        try:
+            order_by = order_columns[int(order_column)]
+            if order_dir == 'desc':
+                order_by = f'-{order_by}'
+        except (IndexError, ValueError):
+            order_by = 'first_name_1'
 
-    personas = (Person.objects
-                .select_related('document_type', 'gender')
-                .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
-                        'identification_person', 'document_type__document_type', 'date_birth', 'family_card',
-                        'document_type__code_document_type', 'family_head', 'family_card__family_card_number')
-                .annotate(gender=F('gender__gender'),
-                          age=ExpressionWrapper(now().year - F('date_birth__year'), output_field=fields.IntegerField()))
-                .filter(state=True))
+        # Query optimizado con select_related para evitar N+1 queries
+        personas = (Person.objects
+                    .select_related('document_type', 'gender', 'family_card', 'family_card__sidewalk_home')
+                    .filter(state=True)
+                    .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                            'identification_person', 'document_type__code_document_type', 'date_birth',
+                            'family_card', 'family_head', 'family_card__family_card_number',
+                            'family_card__sidewalk_home__sidewalk_name')
+                    .annotate(
+                        gender=F('gender__gender'),
+                        age=ExpressionWrapper(
+                            now().year - F('date_birth__year'),
+                            output_field=fields.IntegerField()
+                        )
+                    ))
 
-    if search_value:
-        personas = personas.filter(
-            Q(first_name_1__icontains=search_value) |
-            Q(first_name_2__icontains=search_value) |
-            Q(last_name_1__icontains=search_value) |
-            Q(last_name_2__icontains=search_value) |
-            Q(identification_person__icontains=search_value)
-        )
+        # Búsqueda optimizada con OR en múltiples campos
+        if search_value:
+            personas = personas.filter(
+                Q(first_name_1__icontains=search_value) |
+                Q(first_name_2__icontains=search_value) |
+                Q(last_name_1__icontains=search_value) |
+                Q(last_name_2__icontains=search_value) |
+                Q(identification_person__icontains=search_value) |
+                Q(family_card__family_card_number__icontains=search_value) |
+                Q(family_card__sidewalk_home__sidewalk_name__icontains=search_value)
+            )
 
-    personas = personas.order_by(order_by)
-    paginator = Paginator(personas, length)
-    page = paginator.get_page(start // length + 1)
+        # Total de registros antes de aplicar filtros (para DataTables)
+        total_records = Person.objects.filter(state=True).count()
 
-    data = list(page.object_list)
+        # Total de registros después de aplicar filtros
+        filtered_records = personas.count()
 
-    response_data = {
-        'draw': draw,
-        'recordsTotal': paginator.count,
-        'recordsFiltered': paginator.count,
-        'data': data
-    }
+        # Aplicar ordenamiento
+        personas = personas.order_by(order_by)
 
-    return JsonResponse(response_data)
+        # Paginación
+        paginator = Paginator(personas, length)
+        page_number = (start // length) + 1
+
+        try:
+            page = paginator.get_page(page_number)
+        except Exception:
+            page = paginator.get_page(1)
+
+        # Serializar los datos
+        data = list(page.object_list)
+
+        # Respuesta JSON para DataTables
+        response_data = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        # logger.error(f"Error en listar_personas: {e}")
+        return JsonResponse({
+            'draw': 1,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'error': 'Error al cargar los datos'
+        }, status=500)
 
 
 # Vista para mostrar la lista de personas en la plantilla HTML.
@@ -475,25 +1001,84 @@ class UpdatePerson(UpdateView):
 
     def form_valid(self, person_form):
         person = person_form.save(commit=False)
+
+        # VALIDACIÓN 1: Solo puede haber un cabeza de familia por ficha
+        if person.family_head:
+            otros_jefes = Person.objects.filter(
+                family_card=person.family_card,
+                family_head=True,
+                state=True
+            ).exclude(pk=person.pk)
+
+            if otros_jefes.exists():
+                jefe_actual = otros_jefes.first()
+                messages.error(
+                    self.request,
+                    f"Ya existe un cabeza de familia en esta ficha: {jefe_actual.full_name}. "
+                    f"Primero debe cambiar el rol del cabeza actual."
+                )
+                return self.form_invalid(person_form)
+
+        # VALIDACIÓN 2: El cabeza de familia debe ser mayor de 18 años
+        if person.family_head and person.date_birth:
+            from datetime import date
+            today = date.today()
+            age = today.year - person.date_birth.year - (
+                (today.month, today.day) < (person.date_birth.month, person.date_birth.day)
+            )
+
+            if age < 18:
+                messages.error(
+                    self.request,
+                    f"El cabeza de familia debe ser mayor de 18 años. "
+                    f"La persona tiene {age} años."
+                )
+                return self.form_invalid(person_form)
+
+        # VALIDACIÓN 3: El documento de identidad debe ser único
+        if person.identification_person:
+            duplicado = Person.objects.filter(
+                identification_person=person.identification_person,
+                state=True
+            ).exclude(pk=person.pk).first()
+
+            if duplicado:
+                messages.error(
+                    self.request,
+                    f"El documento {person.identification_person} ya está registrado "
+                    f"para {duplicado.full_name} en la ficha {duplicado.family_card.family_card_number}."
+                )
+                return self.form_invalid(person_form)
+
+        # Guardar persona
         person_form.instance.user = self.request.user
         person.save()
 
+        # LÓGICA: Desactivar ficha si no quedan miembros activos
         if not person.state:
-            miembros_activos = Person.objects.filter(family_card_id=person.family_card_id, state=True).count()
+            miembros_activos = Person.objects.filter(
+                family_card_id=person.family_card_id,
+                state=True
+            ).count()
+
             if miembros_activos == 0:
                 ficha = person.family_card
                 ficha.state = False
                 ficha.family_card_number = 0
                 ficha.save()
+                messages.warning(
+                    self.request,
+                    "La ficha familiar ha sido desactivada porque no quedan miembros activos."
+                )
 
         messages.success(self.request, "Persona actualizada correctamente")
         return super(UpdatePerson, self).form_valid(person_form)
 
     def form_invalid(self, form):
-        # logger.warning(f"Errores del formulario: {form.errors}")
-        messages.warning(self.request, "Hubo un problema con la actualización de la persona. "
-                                       "Por favor, revisa los campos nuevamente.")
-
+        messages.error(
+            self.request,
+            "Por favor, corrija los errores en el formulario antes de continuar."
+        )
         return super(UpdatePerson, self).form_invalid(form)
 
 
@@ -609,6 +1194,3 @@ class MaterialConstructionView(LoginRequiredMixin, CreateView):
         context['system_params'] = {p['key']: p['value'] for p in params}
         return context
 
-
-
-class GeneratedAval(Lo)
