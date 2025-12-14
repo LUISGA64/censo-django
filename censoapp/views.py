@@ -1486,9 +1486,9 @@ def export_persons_excel(request):
                 persona.eps.name_eps if persona.eps else '',  # Corregido: name_eps
                 persona.kinship.description_kinship if persona.kinship else '',
                 persona.gender.gender if persona.gender else '',
-                persona.civil_state.description_civil_state if persona.civil_state else '',
+                persona.civil_state.state_civil if persona.civil_state else '',  # Corregido: state_civil
                 persona.occupation.description_occupancy if persona.occupation else '',
-                persona.education_level.description_education_level if persona.education_level else '',
+                persona.education_level.education_level if persona.education_level else '',  # Corregido: education_level
                 persona.cell_phone or '',
                 cabeza_text
             ]
