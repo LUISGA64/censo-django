@@ -1,0 +1,36 @@
+[
+  {
+    "model": "censoapp.documenttype",
+    "pk": 1,
+    "fields": {
+      "document_type_name": "Aval",
+      "description": "Documento de aval expedido por la organización para una persona del censo",
+      "requires_expiration": true,
+      "template_content": "La organización {organization} expide el presente AVAL a {person_name}, identificado con {document_type} No. {identification}, miembro de nuestra comunidad indígena.\n\nEl presente aval tiene una vigencia desde {issue_date} hasta {expiration_date}.\n\nSe expide en {location} a los {day} días del mes de {month} de {year}.",
+      "is_active": true
+    }
+  },
+  {
+    "model": "censoapp.documenttype",
+    "pk": 2,
+    "fields": {
+      "document_type_name": "Constancia de Pertenencia",
+      "description": "Constancia que certifica que una persona pertenece a la organización indígena",
+      "requires_expiration": false,
+      "template_content": "La organización {organization} certifica que {person_name}, identificado con {document_type} No. {identification}, pertenece a nuestra comunidad indígena como miembro activo del censo poblacional.\n\nLa presente constancia se expide para los fines que el interesado considere conveniente.\n\nDada en {location} a los {day} días del mes de {month} de {year}.",
+      "is_active": true
+    }
+  },
+  {
+    "model": "censoapp.documenttype",
+    "pk": 3,
+    "fields": {
+      "document_type_name": "Certificado",
+      "description": "Certificado general expedido por la organización",
+      "requires_expiration": false,
+      "template_content": "La organización {organization} CERTIFICA que {person_name}, identificado con {document_type} No. {identification}, se encuentra registrado en el censo de nuestra comunidad indígena.\n\nSe expide la presente certificación a solicitud del interesado.\n\nDada en {location} a los {day} días del mes de {month} de {year}.",
+      "is_active": true
+    }
+  }
+]
+

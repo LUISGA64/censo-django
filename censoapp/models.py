@@ -182,12 +182,17 @@ class Occupancy(models.Model):
         return self.description_occupancy
 
 
-class DocumentType(models.Model):
+class IdentificationDocumentType(models.Model):
+    """Tipos de documentos de identificación personal (CC, TI, etc.)"""
     code_document_type = models.CharField(blank=False, null=False, unique=True, max_length=3)
     document_type = models.CharField(blank=False, null=False, max_length=25)
 
     def __str__(self):
         return f"{self.document_type}"
+
+    class Meta:
+        verbose_name = "Tipo de Documento de Identidad"
+        verbose_name_plural = "Tipos de Documentos de Identidad"
 
 
 class Gender(models.Model):
@@ -265,7 +270,7 @@ class Person(models.Model):
     last_name_2 = models.CharField(blank=True, null=True, max_length=30, verbose_name="Segundo Apellido")
     identification_person = models.CharField(blank=False, null=False, unique=True, max_length=15,
                                              verbose_name="Identificación")
-    document_type = models.ForeignKey('DocumentType', on_delete=models.CASCADE, verbose_name="Tipo de documento",
+    document_type = models.ForeignKey('IdentificationDocumentType', on_delete=models.CASCADE, verbose_name="Tipo de documento",
                                       blank=False, null=False)
 
     cell_phone = models.CharField(blank=True, null=True, max_length=15, verbose_name="Teléfono Móvil")
@@ -622,9 +627,377 @@ class PublicServices(models.Model):
 
 
 
-class AvalGenerated(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, verbose_name="Persona Aval")
-    organization = models.ForeignKey(Organizations, on_delete=models.CASCADE, verbose_name="Organización")
-    detail = models.TextField(verbose_name="Detalle del Aval")
-    date_valid = models.DateField(verbose_name="Fecha de Vencimiento del Aval")
+class DocumentType(models.Model):
+    """
+    Tipos de documentos que puede generar la organización.
+    Ej: Aval, Constancia de Pertenencia, Certificado, etc.
+    """
+    document_type_name = models.CharField(
+        max_length=100,
+        blank=False,
+        null=False,
+        unique=True,
+        verbose_name="Tipo de Documento"
+    )
+    description = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Descripción",
+        help_text="Descripción del tipo de documento"
+    )
+    requires_expiration = models.BooleanField(
+        default=True,
+        verbose_name="Requiere Fecha de Vencimiento",
+        help_text="¿Este tipo de documento tiene fecha de vencimiento?"
+    )
+    template_content = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Plantilla del Documento",
+        help_text="Plantilla base del contenido del documento. Use {variables} para campos dinámicos."
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Activo"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+
+    def __str__(self):
+        return self.document_type_name
+
+    class Meta:
+        verbose_name = "Tipo de Documento"
+        verbose_name_plural = "Tipos de Documentos"
+        ordering = ['document_type_name']
+
+
+class BoardPosition(models.Model):
+    """
+    Cargos de la Junta Directiva de la organización.
+    Cada cargo puede tener un titular y un suplente.
+    """
+    POSITION_CHOICES = [
+        ('GOBERNADOR', 'Gobernador'),
+        ('ALCALDE', 'Alcalde'),
+        ('CAPITAN', 'Capitán'),
+        ('ALGUACIL', 'Alguacil'),
+        ('COMISARIO', 'Comisario'),
+        ('TESORERO', 'Tesorero'),
+        ('SECRETARIO', 'Secretario'),
+    ]
+
+    organization = models.ForeignKey(
+        Organizations,
+        on_delete=models.CASCADE,
+        verbose_name="Organización",
+        related_name='board_positions'
+    )
+    position_name = models.CharField(
+        max_length=50,
+        choices=POSITION_CHOICES,
+        verbose_name="Cargo",
+        help_text="Cargo en la junta directiva"
+    )
+
+    # Titular del cargo
+    holder_person = models.ForeignKey(
+        Person,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=False,
+        related_name='board_position_holder',
+        verbose_name="Titular del Cargo",
+        help_text="Persona que ocupa el cargo como titular"
+    )
+
+    # Suplente del cargo
+    alternate_person = models.ForeignKey(
+        Person,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='board_position_alternate',
+        verbose_name="Suplente del Cargo",
+        help_text="Persona que ocupa el cargo como suplente"
+    )
+
+    can_sign_documents = models.BooleanField(
+        default=False,
+        verbose_name="Autorizado para Firmar",
+        help_text="¿Esta persona está autorizada para firmar documentos oficiales?"
+    )
+
+    start_date = models.DateField(
+        verbose_name="Fecha de Inicio",
+        help_text="Fecha en que inició en el cargo"
+    )
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de Finalización",
+        help_text="Fecha en que finalizó en el cargo (dejar vacío si está activo)"
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Activo",
+        help_text="¿El cargo está actualmente activo?"
+    )
+
+    observations = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+
+    # Auditoría de cambios
+    history = HistoricalRecords()
+
+    def __str__(self):
+        holder_name = self.holder_person.full_name if self.holder_person else "Sin asignar"
+        return f"{self.get_position_name_display()} - {holder_name} ({self.organization.organization_name})"
+
+    class Meta:
+        verbose_name = "Cargo de Junta Directiva"
+        verbose_name_plural = "Cargos de Junta Directiva"
+        unique_together = [('organization', 'position_name', 'is_active')]
+        ordering = ['organization', 'position_name']
+
+    def clean(self):
+        """Validaciones a nivel de modelo"""
+        # Validar que el titular y suplente no sean la misma persona
+        if self.holder_person and self.alternate_person:
+            if self.holder_person == self.alternate_person:
+                raise ValidationError("El titular y el suplente no pueden ser la misma persona.")
+
+        # Validar que la persona pertenezca a la misma organización
+        if self.holder_person:
+            if self.holder_person.family_card.organization != self.organization:
+                raise ValidationError(
+                    f"El titular {self.holder_person.full_name} no pertenece a la organización {self.organization.organization_name}"
+                )
+
+        if self.alternate_person:
+            if self.alternate_person.family_card.organization != self.organization:
+                raise ValidationError(
+                    f"El suplente {self.alternate_person.full_name} no pertenece a la organización {self.organization.organization_name}"
+                )
+
+        # Validar fechas
+        if self.end_date and self.start_date:
+            if self.end_date < self.start_date:
+                raise ValidationError("La fecha de finalización no puede ser anterior a la fecha de inicio.")
+
+        # Validar que no exista otro cargo activo con el mismo cargo en la organización
+        if self.is_active:
+            existing = BoardPosition.objects.filter(
+                organization=self.organization,
+                position_name=self.position_name,
+                is_active=True
+            )
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+
+            if existing.exists():
+                raise ValidationError(
+                    f"Ya existe un cargo activo de {self.get_position_name_display()} en {self.organization.organization_name}"
+                )
+
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class GeneratedDocument(models.Model):
+    """
+    Documentos generados por la organización para personas del censo.
+    Reemplaza el antiguo modelo AvalGenerated con un sistema más completo.
+    """
+    # Tipo de documento
+    document_type = models.ForeignKey(
+        DocumentType,
+        on_delete=models.CASCADE,
+        verbose_name="Tipo de Documento",
+        help_text="Tipo de documento a generar (Aval, Constancia, etc.)"
+    )
+
+    # Persona beneficiaria del documento
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        verbose_name="Persona Beneficiaria",
+        help_text="Persona del censo para quien se genera el documento",
+        related_name='documents_received'
+    )
+
+    # Organización que expide el documento
+    organization = models.ForeignKey(
+        Organizations,
+        on_delete=models.CASCADE,
+        verbose_name="Organización que Expide",
+        help_text="Organización que genera y expide el documento"
+    )
+
+    # Contenido del documento
+    document_content = models.TextField(
+        verbose_name="Contenido del Documento",
+        help_text="Contenido completo del documento generado"
+    )
+
+    # Fecha de generación y vigencia
+    issue_date = models.DateField(
+        verbose_name="Fecha de Expedición",
+        help_text="Fecha en que se expide el documento"
+    )
+    expiration_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de Vencimiento",
+        help_text="Fecha de vencimiento del documento (si aplica)"
+    )
+
+    # Número de documento (consecutivo)
+    document_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Número de Documento",
+        help_text="Número consecutivo del documento"
+    )
+
+    # Firmantes del documento (miembros de la junta directiva)
+    signers = models.ManyToManyField(
+        BoardPosition,
+        verbose_name="Firmantes",
+        help_text="Miembros de la junta directiva que firman el documento",
+        related_name='signed_documents',
+        blank=True
+    )
+
+    # Estado del documento
+    STATUS_CHOICES = [
+        ('DRAFT', 'Borrador'),
+        ('ISSUED', 'Expedido'),
+        ('EXPIRED', 'Vencido'),
+        ('REVOKED', 'Revocado'),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='DRAFT',
+        verbose_name="Estado"
+    )
+
+    # Observaciones y notas
+    observations = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones"
+    )
+
+    # Usuario que generó el documento
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Creado por",
+        related_name='documents_created'
+    )
+
+    # Auditoría
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+
+    # Auditoría de cambios
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return f"{self.document_type.document_type_name} - {self.person.full_name} ({self.document_number or 'S/N'})"
+
+    class Meta:
+        verbose_name = "Documento Generado"
+        verbose_name_plural = "Documentos Generados"
+        ordering = ['-created_at']
+
+    def clean(self):
+        """Validaciones a nivel de modelo"""
+        # Validar que la persona pertenezca a la organización que expide
+        if self.person and self.organization:
+            if self.person.family_card.organization != self.organization:
+                raise ValidationError(
+                    f"La persona {self.person.full_name} no pertenece a la organización {self.organization.organization_name}"
+                )
+
+        # Validar fecha de vencimiento
+        if self.expiration_date and self.issue_date:
+            if self.expiration_date < self.issue_date:
+                raise ValidationError("La fecha de vencimiento no puede ser anterior a la fecha de expedición.")
+
+        # Validar que si el tipo de documento requiere vencimiento, se proporcione
+        if self.document_type and self.document_type.requires_expiration:
+            if not self.expiration_date:
+                raise ValidationError(
+                    f"El tipo de documento '{self.document_type.document_type_name}' requiere fecha de vencimiento."
+                )
+
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        # Generar número de documento si no existe
+        if not self.document_number:
+            from datetime import datetime
+            year = datetime.now().year
+            # Contar documentos del mismo tipo en el año actual
+            count = GeneratedDocument.objects.filter(
+                document_type=self.document_type,
+                organization=self.organization,
+                created_at__year=year
+            ).count() + 1
+
+            # Formato: TIPO-ORG-AÑO-###
+            doc_type_abbr = self.document_type.document_type_name[:3].upper()
+            org_abbr = self.organization.organization_name[:3].upper()
+            self.document_number = f"{doc_type_abbr}-{org_abbr}-{year}-{count:04d}"
+
+        # Actualizar estado si está vencido
+        if self.expiration_date:
+            from datetime import date
+            if self.expiration_date < date.today() and self.status == 'ISSUED':
+                self.status = 'EXPIRED'
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_active_documents_for_person(cls, person):
+        """Obtener documentos activos de una persona"""
+        from datetime import date
+        return cls.objects.filter(
+            person=person,
+            status='ISSUED',
+            expiration_date__gte=date.today()
+        )
+
+    @property
+    def is_expired(self):
+        """Verifica si el documento está vencido"""
+        if not self.expiration_date:
+            return False
+        from datetime import date
+        return self.expiration_date < date.today()
+
+    @property
+    def days_until_expiration(self):
+        """Días hasta el vencimiento"""
+        if not self.expiration_date:
+            return None
+        from datetime import date
+        delta = self.expiration_date - date.today()
+        return delta.days if delta.days > 0 else 0

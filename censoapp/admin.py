@@ -1,16 +1,16 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import (Association, Organizations, Sidewalks, DocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
+from .models import (Association, Organizations, Sidewalks, IdentificationDocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
                      EducationLevel, SecuritySocial, Handicap, Charge, SystemParameters, MaterialConstruction,
                      WaterTreatment, LightingType, WaterSource, CookingFuel, HomeOwnership, FamilyCard, Person,
-                     MaterialConstructionFamilyCard, UserProfile)
+                     MaterialConstructionFamilyCard, UserProfile, DocumentType, BoardPosition, GeneratedDocument)
 from .utils import invalidate_system_parameters_cache
 
 # Register your models here.
 admin.site.register(Association)
 admin.site.register(Organizations)
 admin.site.register(Sidewalks)
-admin.site.register(DocumentType)
+admin.site.register(IdentificationDocumentType)
 admin.site.register(Gender)
 admin.site.register(Eps)
 admin.site.register(Kinship)
@@ -106,6 +106,142 @@ class UserProfileAdmin(admin.ModelAdmin):
         Filtrar perfiles segun organizacion del usuario admin.
         Superusuarios ven todos.
         """
+        qs = super().get_queryset(request)
+
+        if request.user.is_superuser:
+            return qs
+
+        if hasattr(request.user, 'profile'):
+            if request.user.profile.can_view_all_organizations:
+                return qs
+            return qs.filter(organization=request.user.profile.organization)
+
+        return qs.none()
+
+
+# ============================================================================
+# ADMINISTRACIÓN DE DOCUMENTOS Y JUNTA DIRECTIVA
+# ============================================================================
+
+@admin.register(DocumentType)
+class DocumentTypeAdmin(admin.ModelAdmin):
+    """Administración de tipos de documentos"""
+    list_display = ['document_type_name', 'requires_expiration', 'is_active', 'created_at']
+    list_filter = ['is_active', 'requires_expiration', 'created_at']
+    search_fields = ['document_type_name', 'description']
+    list_per_page = 20
+
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('document_type_name', 'description', 'is_active')
+        }),
+        ('Configuración', {
+            'fields': ('requires_expiration', 'template_content')
+        }),
+    )
+
+
+@admin.register(BoardPosition)
+class BoardPositionAdmin(SimpleHistoryAdmin):
+    """Administración de cargos de junta directiva"""
+    list_display = ['position_name', 'organization', 'holder_person_name', 'alternate_person_name',
+                   'can_sign_documents', 'is_active', 'start_date']
+    list_filter = ['organization', 'position_name', 'is_active', 'can_sign_documents']
+    search_fields = ['holder_person__first_name_1', 'holder_person__last_name_1',
+                    'alternate_person__first_name_1', 'alternate_person__last_name_1']
+    list_per_page = 20
+    date_hierarchy = 'start_date'
+
+    fieldsets = (
+        ('Organización y Cargo', {
+            'fields': ('organization', 'position_name')
+        }),
+        ('Titular y Suplente', {
+            'fields': ('holder_person', 'alternate_person')
+        }),
+        ('Permisos', {
+            'fields': ('can_sign_documents',)
+        }),
+        ('Vigencia', {
+            'fields': ('start_date', 'end_date', 'is_active')
+        }),
+        ('Información Adicional', {
+            'fields': ('observations',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def holder_person_name(self, obj):
+        return obj.holder_person.full_name if obj.holder_person else "-"
+    holder_person_name.short_description = "Titular"
+
+    def alternate_person_name(self, obj):
+        return obj.alternate_person.full_name if obj.alternate_person else "-"
+    alternate_person_name.short_description = "Suplente"
+
+    def get_queryset(self, request):
+        """Filtrar por organización del usuario"""
+        qs = super().get_queryset(request)
+
+        if request.user.is_superuser:
+            return qs
+
+        if hasattr(request.user, 'profile'):
+            if request.user.profile.can_view_all_organizations:
+                return qs
+            return qs.filter(organization=request.user.profile.organization)
+
+        return qs.none()
+
+
+@admin.register(GeneratedDocument)
+class GeneratedDocumentAdmin(SimpleHistoryAdmin):
+    """Administración de documentos generados"""
+    list_display = ['document_number', 'document_type', 'person_name', 'organization',
+                   'status', 'issue_date', 'expiration_date', 'created_by']
+    list_filter = ['status', 'document_type', 'organization', 'issue_date']
+    search_fields = ['document_number', 'person__first_name_1', 'person__last_name_1',
+                    'person__identification_person']
+    list_per_page = 20
+    date_hierarchy = 'issue_date'
+    filter_horizontal = ['signers']
+
+    fieldsets = (
+        ('Tipo y Beneficiario', {
+            'fields': ('document_type', 'person', 'organization')
+        }),
+        ('Contenido', {
+            'fields': ('document_content',)
+        }),
+        ('Fechas y Número', {
+            'fields': ('document_number', 'issue_date', 'expiration_date')
+        }),
+        ('Firmantes', {
+            'fields': ('signers',)
+        }),
+        ('Estado', {
+            'fields': ('status', 'observations')
+        }),
+        ('Auditoría', {
+            'fields': ('created_by',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = ['document_number', 'created_by']
+
+    def person_name(self, obj):
+        return obj.person.full_name
+    person_name.short_description = "Persona"
+
+    def save_model(self, request, obj, form, change):
+        """Asignar usuario creador automáticamente"""
+        if not change:  # Solo en creación
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        """Filtrar por organización del usuario"""
         qs = super().get_queryset(request)
 
         if request.user.is_superuser:
