@@ -1,0 +1,2152 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2024-07-21T00:34:01.796Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "1",
+    "object_repr": "GENARO SANCHEZ 1234567",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2024-07-21T00:35:36.642Z",
+    "user": 1,
+    "content_type": 17,
+    "object_id": "1",
+    "object_repr": "Resguardo Indígena Puracé",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2024-07-21T00:37:06.632Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "1",
+    "object_repr": "Soltero",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2024-07-21T00:37:11.655Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "2",
+    "object_repr": "Casado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2024-07-21T00:37:24.347Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "1",
+    "object_repr": "Registro Civil",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2024-07-21T00:37:33.743Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "2",
+    "object_repr": "Tarjeta Identidad",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 7,
+  "fields": {
+    "action_time": "2024-07-21T00:37:47.634Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "3",
+    "object_repr": "Cédula Ciudadanía",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 8,
+  "fields": {
+    "action_time": "2024-07-21T00:37:55.214Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "1",
+    "object_repr": "Primaria",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 9,
+  "fields": {
+    "action_time": "2024-07-21T00:38:00.031Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "2",
+    "object_repr": "Secundaria",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 10,
+  "fields": {
+    "action_time": "2024-07-21T00:38:08.006Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "3",
+    "object_repr": "Profesional",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 11,
+  "fields": {
+    "action_time": "2024-07-21T00:38:19.004Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "1",
+    "object_repr": "AIC",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 12,
+  "fields": {
+    "action_time": "2024-07-21T00:38:25.856Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "2",
+    "object_repr": "Sanitas",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 13,
+  "fields": {
+    "action_time": "2024-07-21T00:38:33.776Z",
+    "user": 1,
+    "content_type": 14,
+    "object_id": "1",
+    "object_repr": "Femenino",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 14,
+  "fields": {
+    "action_time": "2024-07-21T00:38:39.003Z",
+    "user": 1,
+    "content_type": 14,
+    "object_id": "2",
+    "object_repr": "Masculino",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 15,
+  "fields": {
+    "action_time": "2024-07-21T00:38:45.239Z",
+    "user": 1,
+    "content_type": 15,
+    "object_id": "1",
+    "object_repr": "Padre",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 16,
+  "fields": {
+    "action_time": "2024-07-21T00:38:52.502Z",
+    "user": 1,
+    "content_type": 15,
+    "object_id": "2",
+    "object_repr": "Hijo",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 17,
+  "fields": {
+    "action_time": "2024-07-21T00:39:08.160Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "1",
+    "object_repr": "Empleado Público",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 18,
+  "fields": {
+    "action_time": "2024-07-21T00:39:13.493Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "2",
+    "object_repr": "Empleado Privado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 19,
+  "fields": {
+    "action_time": "2024-07-21T00:39:19.441Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "3",
+    "object_repr": "Estudiante",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 20,
+  "fields": {
+    "action_time": "2024-07-21T00:39:52.008Z",
+    "user": 1,
+    "content_type": 18,
+    "object_id": "1",
+    "object_repr": "Subsidiado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 21,
+  "fields": {
+    "action_time": "2024-07-21T00:39:57.313Z",
+    "user": 1,
+    "content_type": 18,
+    "object_id": "2",
+    "object_repr": "Contributivo",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 22,
+  "fields": {
+    "action_time": "2024-07-21T00:40:05.127Z",
+    "user": 1,
+    "content_type": 19,
+    "object_id": "1",
+    "object_repr": "Puracé",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 23,
+  "fields": {
+    "action_time": "2024-07-21T00:40:11.245Z",
+    "user": 1,
+    "content_type": 19,
+    "object_id": "2",
+    "object_repr": "Campamento",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 24,
+  "fields": {
+    "action_time": "2024-10-28T00:38:29.539Z",
+    "user": 1,
+    "content_type": 15,
+    "object_id": "3",
+    "object_repr": "Madre",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 25,
+  "fields": {
+    "action_time": "2025-01-05T17:13:09.477Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "3",
+    "object_repr": "Cedula Ciudadania",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Document type\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 26,
+  "fields": {
+    "action_time": "2025-06-23T01:55:35.536Z",
+    "user": 1,
+    "content_type": 28,
+    "object_id": "1",
+    "object_repr": "Gobernador Principal - Autorizado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 27,
+  "fields": {
+    "action_time": "2025-06-23T01:56:02.583Z",
+    "user": 1,
+    "content_type": 28,
+    "object_id": "2",
+    "object_repr": "Secretario Principal - Autorizado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 28,
+  "fields": {
+    "action_time": "2025-07-05T14:12:41.487Z",
+    "user": 1,
+    "content_type": 27,
+    "object_id": "1",
+    "object_repr": "Datos de Vivienda: S",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 29,
+  "fields": {
+    "action_time": "2025-07-06T15:54:48.903Z",
+    "user": 1,
+    "content_type": 27,
+    "object_id": "1",
+    "object_repr": "Datos de Vivienda: N",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Value\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 30,
+  "fields": {
+    "action_time": "2025-07-27T13:15:42.333Z",
+    "user": 1,
+    "content_type": 29,
+    "object_id": "1",
+    "object_repr": "Teja",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 31,
+  "fields": {
+    "action_time": "2025-10-25T12:38:50.181Z",
+    "user": 1,
+    "content_type": 27,
+    "object_id": "2",
+    "object_repr": "Datos de Vivienda: N",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Value\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 32,
+  "fields": {
+    "action_time": "2025-10-25T12:39:14.095Z",
+    "user": 1,
+    "content_type": 27,
+    "object_id": "2",
+    "object_repr": "Datos de Vivienda: S",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Value\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 33,
+  "fields": {
+    "action_time": "2025-11-23T04:29:30.669Z",
+    "user": 1,
+    "content_type": 28,
+    "object_id": "3",
+    "object_repr": "cargo 1 - Autorizado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 34,
+  "fields": {
+    "action_time": "2025-11-23T04:29:40.537Z",
+    "user": 1,
+    "content_type": 28,
+    "object_id": "4",
+    "object_repr": "cargo 2 - Autorizado",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 35,
+  "fields": {
+    "action_time": "2025-12-14T17:34:19.748Z",
+    "user": 1,
+    "content_type": 17,
+    "object_id": "2",
+    "object_repr": "Resguardo Indigena de Prueba",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 36,
+  "fields": {
+    "action_time": "2025-12-14T17:35:16.452Z",
+    "user": 1,
+    "content_type": 4,
+    "object_id": "2",
+    "object_repr": "prueba",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 37,
+  "fields": {
+    "action_time": "2025-12-14T17:35:50.002Z",
+    "user": 1,
+    "content_type": 42,
+    "object_id": "2",
+    "object_repr": "prueba - Resguardo Indigena de Prueba",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$FZcmAGVoNkM6y4KBWW0g4O$RCalmdplDpKpd2TS/y59GFkDCkNAOnxHW5lVDDDLXKw=",
+    "last_login": "2025-12-14T18:18:10.427Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin@email.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2024-07-20T23:51:51.243Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$YeBEwGoYitTm3kOhcgqd7a$hk+j2yiDcF4qo6+01wSW95yOivgZaVOVQmH0CREUsS8=",
+    "last_login": "2025-12-14T17:37:36.369Z",
+    "is_superuser": false,
+    "username": "prueba",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-12-14T17:35:15.983Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sites.site",
+  "pk": 1,
+  "fields": {
+    "domain": "example.com",
+    "name": "example.com"
+  }
+},
+{
+  "model": "censoapp.association",
+  "pk": 1,
+  "fields": {
+    "association_name": "GENARO SANCHEZ",
+    "association_identification": "1234567",
+    "association_type_document": "NIT",
+    "association_phone_mobile": "3112223365",
+    "association_phone": "6028223322",
+    "association_address": "Carrera 2 calle 1Norte",
+    "association_departament": "Cauca",
+    "association_email": "asociacion@email.com.co",
+    "association_logo": "Association/2.png"
+  }
+},
+{
+  "model": "censoapp.organizations",
+  "pk": 1,
+  "fields": {
+    "organization_name": "Resguardo Indígena Puracé",
+    "organization_identification": "22345677",
+    "organization_type_identification": "NIT",
+    "organization_territory": "Pueblo Kokonuko",
+    "organization_email": "resguardo_purace@email.com",
+    "organization_mobile_phone": "3114445566",
+    "organization_phone": "6028477041",
+    "organization_address": "Kilómetro 3 Vía al Huila",
+    "organization_logo": "Images/logo-1933884_1280.webp",
+    "association_id": 1
+  }
+},
+{
+  "model": "censoapp.organizations",
+  "pk": 2,
+  "fields": {
+    "organization_name": "Resguardo Indigena de Prueba",
+    "organization_identification": "4552123",
+    "organization_type_identification": "NIT",
+    "organization_territory": "Territorio",
+    "organization_email": "prueba@ermail.com",
+    "organization_mobile_phone": "3112223322",
+    "organization_phone": "6028444444",
+    "organization_address": "Dirección de Prueba",
+    "organization_logo": "Images/IN_LOGO_Dark.png",
+    "association_id": 1
+  }
+},
+{
+  "model": "censoapp.userprofile",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "organization": 1,
+    "role": "ADMIN",
+    "can_view_all_organizations": true,
+    "is_active": true,
+    "created_at": "2025-12-14T16:41:40.131Z",
+    "updated_at": "2025-12-14T18:18:10.432Z"
+  }
+},
+{
+  "model": "censoapp.userprofile",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "organization": 2,
+    "role": "VIEWER",
+    "can_view_all_organizations": false,
+    "is_active": true,
+    "created_at": "2025-12-14T17:35:50.000Z",
+    "updated_at": "2025-12-14T17:37:36.375Z"
+  }
+},
+{
+  "model": "censoapp.sidewalks",
+  "pk": 1,
+  "fields": {
+    "sidewalk_name": "Puracé",
+    "organization_id": 1
+  }
+},
+{
+  "model": "censoapp.sidewalks",
+  "pk": 2,
+  "fields": {
+    "sidewalk_name": "Campamento",
+    "organization_id": 1
+  }
+},
+{
+  "model": "censoapp.civilstate",
+  "pk": 1,
+  "fields": {
+    "code_state_civil": "1",
+    "state_civil": "Soltero"
+  }
+},
+{
+  "model": "censoapp.civilstate",
+  "pk": 2,
+  "fields": {
+    "code_state_civil": "2",
+    "state_civil": "Casado"
+  }
+},
+{
+  "model": "censoapp.educationlevel",
+  "pk": 1,
+  "fields": {
+    "code_education_level": "1",
+    "education_level": "Primaria"
+  }
+},
+{
+  "model": "censoapp.educationlevel",
+  "pk": 2,
+  "fields": {
+    "code_education_level": "2",
+    "education_level": "Secundaria"
+  }
+},
+{
+  "model": "censoapp.educationlevel",
+  "pk": 3,
+  "fields": {
+    "code_education_level": "3",
+    "education_level": "Profesional"
+  }
+},
+{
+  "model": "censoapp.eps",
+  "pk": 1,
+  "fields": {
+    "code_eps": "EPS001",
+    "name_eps": "AIC"
+  }
+},
+{
+  "model": "censoapp.eps",
+  "pk": 2,
+  "fields": {
+    "code_eps": "EPS002",
+    "name_eps": "Sanitas"
+  }
+},
+{
+  "model": "censoapp.kinship",
+  "pk": 1,
+  "fields": {
+    "code_kinship": "1",
+    "description_kinship": "Padre"
+  }
+},
+{
+  "model": "censoapp.kinship",
+  "pk": 2,
+  "fields": {
+    "code_kinship": "2",
+    "description_kinship": "Hijo"
+  }
+},
+{
+  "model": "censoapp.kinship",
+  "pk": 3,
+  "fields": {
+    "code_kinship": "3",
+    "description_kinship": "Madre"
+  }
+},
+{
+  "model": "censoapp.occupancy",
+  "pk": 1,
+  "fields": {
+    "description_occupancy": "Empleado Público"
+  }
+},
+{
+  "model": "censoapp.occupancy",
+  "pk": 2,
+  "fields": {
+    "description_occupancy": "Empleado Privado"
+  }
+},
+{
+  "model": "censoapp.occupancy",
+  "pk": 3,
+  "fields": {
+    "description_occupancy": "Estudiante"
+  }
+},
+{
+  "model": "censoapp.documenttype",
+  "pk": 1,
+  "fields": {
+    "code_document_type": "RC",
+    "document_type": "Registro Civil"
+  }
+},
+{
+  "model": "censoapp.documenttype",
+  "pk": 2,
+  "fields": {
+    "code_document_type": "TI",
+    "document_type": "Tarjeta Identidad"
+  }
+},
+{
+  "model": "censoapp.documenttype",
+  "pk": 3,
+  "fields": {
+    "code_document_type": "CC",
+    "document_type": "Cedula Ciudadania"
+  }
+},
+{
+  "model": "censoapp.gender",
+  "pk": 1,
+  "fields": {
+    "gender_code": "F",
+    "gender": "Femenino"
+  }
+},
+{
+  "model": "censoapp.gender",
+  "pk": 2,
+  "fields": {
+    "gender_code": "M",
+    "gender": "Masculino"
+  }
+},
+{
+  "model": "censoapp.handicap",
+  "pk": 1,
+  "fields": {
+    "code_handicap": "1",
+    "handicap": "Ninguna"
+  }
+},
+{
+  "model": "censoapp.securitysocial",
+  "pk": 1,
+  "fields": {
+    "code_security_social": "1",
+    "affiliation": "Subsidiado"
+  }
+},
+{
+  "model": "censoapp.securitysocial",
+  "pk": 2,
+  "fields": {
+    "code_security_social": "2",
+    "affiliation": "Contributivo"
+  }
+},
+{
+  "model": "censoapp.historicalfamilycard",
+  "pk": 1,
+  "fields": {
+    "id": 16,
+    "address_home": "Test auditoria",
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "R",
+    "family_card_number": 11,
+    "state": true,
+    "created_at": "2025-12-14T15:14:58.868Z",
+    "updated_at": "2025-12-14T15:14:58.868Z",
+    "sidewalk_home": 1,
+    "organization": 1,
+    "history_date": "2025-12-14T15:14:58.879Z",
+    "history_change_reason": null,
+    "history_type": "+",
+    "history_user": null
+  }
+},
+{
+  "model": "censoapp.historicalfamilycard",
+  "pk": 2,
+  "fields": {
+    "id": 16,
+    "address_home": "Test auditoria actualizada",
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "U",
+    "family_card_number": 11,
+    "state": true,
+    "created_at": "2025-12-14T15:14:58.868Z",
+    "updated_at": "2025-12-14T15:14:59.813Z",
+    "sidewalk_home": 1,
+    "organization": 1,
+    "history_date": "2025-12-14T15:14:59.821Z",
+    "history_change_reason": null,
+    "history_type": "~",
+    "history_user": null
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 1,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 1,
+    "state": true,
+    "created_at": "2024-10-27T22:30:04.522Z",
+    "updated_at": "2025-12-14T02:18:10.044Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 6,
+  "fields": {
+    "address_home": "prueba",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 2,
+    "state": true,
+    "created_at": "2024-10-27T23:19:00.980Z",
+    "updated_at": "2024-10-27T23:19:00.980Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 7,
+  "fields": {
+    "address_home": "Prueba",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Urbana",
+    "organization": 1,
+    "family_card_number": 3,
+    "state": true,
+    "created_at": "2024-10-27T23:20:43.145Z",
+    "updated_at": "2025-12-14T02:43:26.558Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 9,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 4,
+    "state": true,
+    "created_at": "2025-01-11T15:45:27.467Z",
+    "updated_at": "2025-06-22T16:05:31.410Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 10,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 5,
+    "state": true,
+    "created_at": "2025-06-22T15:08:08.900Z",
+    "updated_at": "2025-06-22T15:08:08.900Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 11,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 6,
+    "state": true,
+    "created_at": "2025-06-22T16:06:43.881Z",
+    "updated_at": "2025-06-22T16:06:43.881Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 12,
+  "fields": {
+    "address_home": "Prueba",
+    "sidewalk_home": 2,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Urbana",
+    "organization": 1,
+    "family_card_number": 7,
+    "state": true,
+    "created_at": "2025-06-29T21:47:00.686Z",
+    "updated_at": "2025-06-29T21:47:00.686Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 13,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 0,
+    "state": false,
+    "created_at": "2025-06-29T22:37:45.406Z",
+    "updated_at": "2025-06-30T00:19:07.037Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 14,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 9,
+    "state": true,
+    "created_at": "2025-06-29T23:24:42.687Z",
+    "updated_at": "2025-06-29T23:24:42.687Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 15,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 10,
+    "state": true,
+    "created_at": "2025-12-13T01:28:18.633Z",
+    "updated_at": "2025-12-13T03:11:27.741Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 16,
+  "fields": {
+    "address_home": "Test auditoria actualizada",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "U",
+    "organization": 1,
+    "family_card_number": 11,
+    "state": true,
+    "created_at": "2025-12-14T15:14:58.868Z",
+    "updated_at": "2025-12-14T15:14:59.813Z"
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 1,
+  "fields": {
+    "first_name_1": "Luis",
+    "first_name_2": "Gabriel",
+    "last_name_1": "Quira",
+    "last_name_2": "Mazabuel",
+    "identification_person": "10291925",
+    "document_type": 3,
+    "cell_phone": "3117009855",
+    "personal_email": "luisgalic64@gmail.com",
+    "gender": 2,
+    "date_birth": "1978-08-13",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 2,
+    "occupation": 2,
+    "family_card": 1,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 6,
+  "fields": {
+    "first_name_1": "Fabio",
+    "first_name_2": "Humberto",
+    "last_name_1": "Quira",
+    "last_name_2": "Manquillo",
+    "identification_person": "10524773",
+    "document_type": 3,
+    "cell_phone": "3105193453",
+    "personal_email": "fabioquira@gmail.com",
+    "gender": 2,
+    "date_birth": "1950-08-13",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 1,
+    "civil_state": 2,
+    "occupation": 2,
+    "family_card": 6,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 7,
+  "fields": {
+    "first_name_1": "Oscar",
+    "first_name_2": "Fernando",
+    "last_name_1": "Gomez",
+    "last_name_2": "Palencia",
+    "identification_person": "10236566",
+    "document_type": 3,
+    "cell_phone": "310223566",
+    "personal_email": "oscargomez@gmail.com",
+    "gender": 2,
+    "date_birth": "1978-01-01",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 2,
+    "occupation": 1,
+    "family_card": 7,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 8,
+  "fields": {
+    "first_name_1": "Mary",
+    "first_name_2": "Luz",
+    "last_name_1": "Rosero",
+    "last_name_2": "Sotelo",
+    "identification_person": "37121824",
+    "document_type": 3,
+    "cell_phone": "3113104200",
+    "personal_email": "roseromary22@gmail.com",
+    "gender": 1,
+    "date_birth": "1980-02-22",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 2,
+    "occupation": 2,
+    "family_card": 1,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 9,
+  "fields": {
+    "first_name_1": "Maria",
+    "first_name_2": "Alejandra",
+    "last_name_1": "Quira",
+    "last_name_2": "Rosero",
+    "identification_person": "1058936932",
+    "document_type": 2,
+    "cell_phone": "3113104200",
+    "personal_email": "aleja@gmail.com",
+    "gender": 1,
+    "date_birth": "2013-11-23",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 2,
+    "handicap": 1,
+    "education_level": 2,
+    "civil_state": 1,
+    "occupation": 3,
+    "family_card": 1,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 10,
+  "fields": {
+    "first_name_1": "Rosa",
+    "first_name_2": "Claudia",
+    "last_name_1": "Rosero",
+    "last_name_2": "Sotelo",
+    "identification_person": "37456789",
+    "document_type": 3,
+    "cell_phone": "3117483870",
+    "personal_email": "pancapanca@gmail.com",
+    "gender": 1,
+    "date_birth": "1975-01-01",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 3,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 2,
+    "occupation": 3,
+    "family_card": 7,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 13,
+  "fields": {
+    "first_name_1": "Arley",
+    "first_name_2": "Horacio",
+    "last_name_1": "Quira",
+    "last_name_2": "Mazabuel",
+    "identification_person": "76331131",
+    "document_type": 3,
+    "cell_phone": "3115878664",
+    "personal_email": "horacioquira@email.com",
+    "gender": 2,
+    "date_birth": "1978-06-01",
+    "social_insurance": 2,
+    "eps": 1,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 1,
+    "occupation": 2,
+    "family_card": 9,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 14,
+  "fields": {
+    "first_name_1": "Maria",
+    "first_name_2": "José",
+    "last_name_1": "Quira",
+    "last_name_2": "Bolaños",
+    "identification_person": "1060103123",
+    "document_type": 3,
+    "cell_phone": "3112336655",
+    "personal_email": "majo@email.com",
+    "gender": 1,
+    "date_birth": "2000-08-17",
+    "social_insurance": 2,
+    "eps": 1,
+    "kinship": 2,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 1,
+    "occupation": 3,
+    "family_card": 9,
+    "family_head": false,
+    "state": false
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 15,
+  "fields": {
+    "first_name_1": "Herlinda",
+    "first_name_2": "",
+    "last_name_1": "Mazabuel",
+    "last_name_2": "Mazabuel",
+    "identification_person": "25624103",
+    "document_type": 3,
+    "cell_phone": "3127769542",
+    "personal_email": "herlindamazabuel@email.com",
+    "gender": 1,
+    "date_birth": "1955-11-25",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 3,
+    "handicap": 1,
+    "education_level": 1,
+    "civil_state": 2,
+    "occupation": 3,
+    "family_card": 6,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 16,
+  "fields": {
+    "first_name_1": "Gabriela",
+    "first_name_2": "",
+    "last_name_1": "Gomez",
+    "last_name_2": "Rosero",
+    "identification_person": "45663212",
+    "document_type": 2,
+    "cell_phone": "3112236655",
+    "personal_email": "gabriela@email.com",
+    "gender": 1,
+    "date_birth": "2008-08-16",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 2,
+    "handicap": 1,
+    "education_level": 2,
+    "civil_state": 1,
+    "occupation": 3,
+    "family_card": 7,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 17,
+  "fields": {
+    "first_name_1": "Milton",
+    "first_name_2": "Arbey",
+    "last_name_1": "Quira",
+    "last_name_2": "Mazabuel",
+    "identification_person": "10298993",
+    "document_type": 3,
+    "cell_phone": "3115554466",
+    "personal_email": "miemail@email.com",
+    "gender": 1,
+    "date_birth": "1983-04-08",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 2,
+    "civil_state": 1,
+    "occupation": 1,
+    "family_card": 10,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 18,
+  "fields": {
+    "first_name_1": "Emiro",
+    "first_name_2": "Hernando",
+    "last_name_1": "Rosero",
+    "last_name_2": "Sotelo",
+    "identification_person": "87715972",
+    "document_type": 3,
+    "cell_phone": "322556699",
+    "personal_email": "emiro@hotmail.com",
+    "gender": 2,
+    "date_birth": "1977-12-31",
+    "social_insurance": 1,
+    "eps": 1,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 1,
+    "occupation": 3,
+    "family_card": 11,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 19,
+  "fields": {
+    "first_name_1": "Maria",
+    "first_name_2": "Isabela",
+    "last_name_1": "Quira",
+    "last_name_2": "",
+    "identification_person": "106235645",
+    "document_type": 2,
+    "cell_phone": "3112233666",
+    "personal_email": "miemail@email.com",
+    "gender": 1,
+    "date_birth": "2017-11-25",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 2,
+    "handicap": 1,
+    "education_level": 1,
+    "civil_state": 1,
+    "occupation": 3,
+    "family_card": 10,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 20,
+  "fields": {
+    "first_name_1": "Sairy",
+    "first_name_2": "",
+    "last_name_1": "Quira",
+    "last_name_2": "",
+    "identification_person": "1062365669",
+    "document_type": 1,
+    "cell_phone": "3225556688",
+    "personal_email": "horacio_quira@email.com",
+    "gender": 1,
+    "date_birth": "2020-11-21",
+    "social_insurance": 2,
+    "eps": 1,
+    "kinship": 2,
+    "handicap": 1,
+    "education_level": 1,
+    "civil_state": 1,
+    "occupation": 3,
+    "family_card": 9,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 21,
+  "fields": {
+    "first_name_1": "Pepito",
+    "first_name_2": "",
+    "last_name_1": "Perez",
+    "last_name_2": "",
+    "identification_person": "12345556",
+    "document_type": 3,
+    "cell_phone": "3113100000",
+    "personal_email": "miemail@email.com",
+    "gender": 2,
+    "date_birth": "1970-05-13",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 1,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 2,
+    "occupation": 1,
+    "family_card": 15,
+    "family_head": true,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.person",
+  "pk": 22,
+  "fields": {
+    "first_name_1": "Maria",
+    "first_name_2": "",
+    "last_name_1": "Perez",
+    "last_name_2": "",
+    "identification_person": "25634256",
+    "document_type": 3,
+    "cell_phone": "3001234561",
+    "personal_email": "maria@email.com",
+    "gender": 1,
+    "date_birth": "1971-01-01",
+    "social_insurance": 2,
+    "eps": 2,
+    "kinship": 3,
+    "handicap": 1,
+    "education_level": 3,
+    "civil_state": 2,
+    "occupation": 2,
+    "family_card": 15,
+    "family_head": false,
+    "state": true
+  }
+},
+{
+  "model": "censoapp.systemparameters",
+  "pk": 1,
+  "fields": {
+    "key": "family_card_number",
+    "value": "0"
+  }
+},
+{
+  "model": "censoapp.systemparameters",
+  "pk": 2,
+  "fields": {
+    "key": "Datos de Vivienda",
+    "value": "S"
+  }
+},
+{
+  "model": "censoapp.charge",
+  "pk": 1,
+  "fields": {
+    "charge_name": "Gobernador Principal",
+    "authorized_sign": false,
+    "main_charge": false
+  }
+},
+{
+  "model": "censoapp.charge",
+  "pk": 2,
+  "fields": {
+    "charge_name": "Secretario Principal",
+    "authorized_sign": false,
+    "main_charge": false
+  }
+},
+{
+  "model": "censoapp.charge",
+  "pk": 3,
+  "fields": {
+    "charge_name": "cargo 1",
+    "authorized_sign": true,
+    "main_charge": true
+  }
+},
+{
+  "model": "censoapp.charge",
+  "pk": 4,
+  "fields": {
+    "charge_name": "cargo 2",
+    "authorized_sign": true,
+    "main_charge": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 2,
+  "fields": {
+    "material_name": "Teja",
+    "roof": true,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 3,
+  "fields": {
+    "material_name": "Eternit",
+    "roof": true,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 4,
+  "fields": {
+    "material_name": "Zinc",
+    "roof": true,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 5,
+  "fields": {
+    "material_name": "Paja",
+    "roof": true,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 6,
+  "fields": {
+    "material_name": "Palma",
+    "roof": true,
+    "wall": true,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 7,
+  "fields": {
+    "material_name": "Cartón",
+    "roof": true,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 8,
+  "fields": {
+    "material_name": "Plancha de cemento",
+    "roof": true,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 9,
+  "fields": {
+    "material_name": "Cabuya",
+    "roof": true,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 10,
+  "fields": {
+    "material_name": "Cactus",
+    "roof": true,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 11,
+  "fields": {
+    "material_name": "Guadua",
+    "roof": true,
+    "wall": true,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 12,
+  "fields": {
+    "material_name": "Plástico",
+    "roof": true,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 13,
+  "fields": {
+    "material_name": "Tierra",
+    "roof": false,
+    "wall": false,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 14,
+  "fields": {
+    "material_name": "Cemento",
+    "roof": false,
+    "wall": false,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 15,
+  "fields": {
+    "material_name": "Baldosa",
+    "roof": false,
+    "wall": false,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 16,
+  "fields": {
+    "material_name": "Ladrillo",
+    "roof": false,
+    "wall": true,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 17,
+  "fields": {
+    "material_name": "Tabla o Madera",
+    "roof": false,
+    "wall": true,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 18,
+  "fields": {
+    "material_name": "Cerámica",
+    "roof": false,
+    "wall": false,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 19,
+  "fields": {
+    "material_name": "Mármol",
+    "roof": false,
+    "wall": false,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 20,
+  "fields": {
+    "material_name": "Esterilla",
+    "roof": false,
+    "wall": true,
+    "floor": true
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 21,
+  "fields": {
+    "material_name": "Bahareque",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 22,
+  "fields": {
+    "material_name": "Bloque",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 23,
+  "fields": {
+    "material_name": "Adobe",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 24,
+  "fields": {
+    "material_name": "Caña de Maíz",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 25,
+  "fields": {
+    "material_name": "Bagazo",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 26,
+  "fields": {
+    "material_name": "Carrizo",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 27,
+  "fields": {
+    "material_name": "Muro Tendinoso",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 28,
+  "fields": {
+    "material_name": "Tapia Pisada",
+    "roof": false,
+    "wall": true,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.materialconstruction",
+  "pk": 29,
+  "fields": {
+    "material_name": "Ninguno",
+    "roof": false,
+    "wall": false,
+    "floor": false
+  }
+},
+{
+  "model": "censoapp.homeownership",
+  "pk": 1,
+  "fields": {
+    "ownership_type": "Propia"
+  }
+},
+{
+  "model": "censoapp.homeownership",
+  "pk": 2,
+  "fields": {
+    "ownership_type": "Arriendo"
+  }
+},
+{
+  "model": "censoapp.homeownership",
+  "pk": 3,
+  "fields": {
+    "ownership_type": "Casa Familiar"
+  }
+},
+{
+  "model": "censoapp.homeownership",
+  "pk": 4,
+  "fields": {
+    "ownership_type": "Posada"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 1,
+  "fields": {
+    "fuel_type": "Gas Propano"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 2,
+  "fields": {
+    "fuel_type": "Gas Domiciliario"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 3,
+  "fields": {
+    "fuel_type": "Gasolina"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 4,
+  "fields": {
+    "fuel_type": "Leña"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 5,
+  "fields": {
+    "fuel_type": "Energía Electrica"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 6,
+  "fields": {
+    "fuel_type": "Carbón"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 7,
+  "fields": {
+    "fuel_type": "Petróleo"
+  }
+},
+{
+  "model": "censoapp.cookingfuel",
+  "pk": 8,
+  "fields": {
+    "fuel_type": "Biogas"
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 1,
+  "fields": {
+    "management_type": "Usan para abono",
+    "biodegradable": true,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 2,
+  "fields": {
+    "management_type": "Entierran",
+    "biodegradable": true,
+    "recyclable": true,
+    "non_recyclable": true,
+    "hazardous": true,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 3,
+  "fields": {
+    "management_type": "Uso de alimento para animales",
+    "biodegradable": true,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 4,
+  "fields": {
+    "management_type": "Recolección domiciliaria",
+    "biodegradable": true,
+    "recyclable": true,
+    "non_recyclable": false,
+    "hazardous": true,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 5,
+  "fields": {
+    "management_type": "Al rio",
+    "biodegradable": true,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 6,
+  "fields": {
+    "management_type": "Queman",
+    "biodegradable": true,
+    "recyclable": true,
+    "non_recyclable": true,
+    "hazardous": true,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 7,
+  "fields": {
+    "management_type": "Al río",
+    "biodegradable": false,
+    "recyclable": true,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 8,
+  "fields": {
+    "management_type": "Campo Abierto",
+    "biodegradable": false,
+    "recyclable": true,
+    "non_recyclable": true,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": true
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 9,
+  "fields": {
+    "management_type": "Reciclan y/o reutilizan",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": true,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 10,
+  "fields": {
+    "management_type": "recoleccion domiciliaria",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": true,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 11,
+  "fields": {
+    "management_type": "campo abierto (bosque, zonas verdes, huertas)",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": true,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 12,
+  "fields": {
+    "management_type": "Fuentes de agua (Rio, quebrada, Mar, etc)",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": true,
+    "hazardous": true,
+    "excreta": false,
+    "wastewater": true
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 13,
+  "fields": {
+    "management_type": "Recolección especial (Hospitalarios)",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": true,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 14,
+  "fields": {
+    "management_type": "Recolección especial (Agricolas)",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": true,
+    "excreta": false,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 15,
+  "fields": {
+    "management_type": "Letrina",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 16,
+  "fields": {
+    "management_type": "Taza o inodoro con alcantarillado",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 17,
+  "fields": {
+    "management_type": "Taza o inodoro con pozo séptico",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 18,
+  "fields": {
+    "management_type": "Fuentes de agua (Rio, Quebrada, Mar)",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 19,
+  "fields": {
+    "management_type": "Hueco",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 20,
+  "fields": {
+    "management_type": "Otros (abono, alimento de animales)",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": true,
+    "wastewater": false
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 21,
+  "fields": {
+    "management_type": "Alcantarillado",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": true
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 22,
+  "fields": {
+    "management_type": "Pozo séptico",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": true
+  }
+},
+{
+  "model": "censoapp.wastemanagement",
+  "pk": 23,
+  "fields": {
+    "management_type": "Trampa de grasas",
+    "biodegradable": false,
+    "recyclable": false,
+    "non_recyclable": false,
+    "hazardous": false,
+    "excreta": false,
+    "wastewater": true
+  }
+},
+{
+  "model": "censoapp.materialconstructionfamilycard",
+  "pk": 1,
+  "fields": {
+    "family_card": 1,
+    "material_roof": 3,
+    "material_wall": 16,
+    "material_floor": 18,
+    "number_families": 1,
+    "number_people_bedrooms": 1,
+    "condition_roof": "True",
+    "condition_wall": "True",
+    "condition_floor": "True",
+    "home_ownership": 3,
+    "kitchen_location": 1,
+    "cooking_fuel": 2,
+    "home_smoke": true,
+    "number_bedrooms": 3,
+    "ventilation": true,
+    "lighting": true
+  }
+}
+]
