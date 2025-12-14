@@ -91,14 +91,47 @@ def profile(request):
 
 @login_required
 def association(request):
-    if request.method == 'GET':
-        associations = Association.objects.all()
-        context = {'segment': 'association'}
-        return render(request, 'censo/configuracion/association.html',
-                      {'associations': associations, 'segment': 'association'})
-    else:
-        messages.error(request, "No se pudo cargar la página")
-        return HttpResponse('No se pudo cargar la página')
+    """
+    Vista optimizada para mostrar asociaciones.
+    Incluye paginación, búsqueda y carga optimizada de datos.
+    """
+    try:
+        # Query optimizado
+        associations_list = Association.objects.all().order_by('-id')
+
+        # Búsqueda (si se proporciona)
+        search_query = request.GET.get('search', '').strip()
+        if search_query:
+            associations_list = associations_list.filter(
+                Q(association_name__icontains=search_query) |
+                Q(association_identification__icontains=search_query) |
+                Q(association_email__icontains=search_query)
+            )
+
+        # Paginación
+        paginator = Paginator(associations_list, 10)  # 10 por página
+        page_number = request.GET.get('page', 1)
+
+        try:
+            associations = paginator.get_page(page_number)
+        except Exception:
+            associations = paginator.get_page(1)
+
+        context = {
+            'associations': associations,
+            'search_query': search_query,
+            'total_associations': associations_list.count(),
+            'segment': 'association'
+        }
+
+        return render(request, 'censo/configuracion/association.html', context)
+
+    except Exception as e:
+        messages.error(request, f"Error al cargar las asociaciones: {str(e)}")
+        return render(request, 'censo/configuracion/association.html', {
+            'associations': [],
+            'segment': 'association'
+        })
 
 
 class CreateAssociation(CreateView):
