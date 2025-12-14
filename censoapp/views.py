@@ -1335,3 +1335,199 @@ class MaterialConstructionView(LoginRequiredMixin, CreateView):
         context['system_params'] = {p['key']: p['value'] for p in params}
         return context
 
+
+# ============================================================================
+# EXPORTACIÓN A EXCEL
+# ============================================================================
+
+@login_required
+def export_persons_excel(request):
+    """
+    Exporta el listado de personas a Excel con el formato solicitado.
+    Respeta el filtro de organización del usuario.
+
+    Columnas:
+    Nro de ficha, dirección, zona, tipo documento identidad, identificación,
+    nombre 1, nombre 2, apellido 1, apellido 2, fecha nacimiento, eps,
+    parentesco, género, estado civil, ocupación, nivel educativo, teléfono,
+    cabeza de hogar
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from datetime import datetime
+
+    try:
+        # Query base de personas
+        personas = Person.objects.select_related(
+            'family_card',
+            'family_card__sidewalk_home',
+            'family_card__organization',
+            'document_type',
+            'gender',
+            'eps',
+            'kinship',
+            'civil_state',
+            'occupation',
+            'education_level'
+        ).filter(state=True)
+
+        # Filtrar por organización del usuario
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                personas = personas.filter(family_card__organization=user_organization)
+            else:
+                # Sin organización, retornar vacío
+                messages.error(request, "No tiene una organización asignada.")
+                return redirect('personas')
+
+        # Ordenar por ficha y cabeza de familia
+        personas = personas.order_by('family_card__family_card_number', '-family_head')
+
+        # Crear workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Personas Registradas"
+
+        # Estilos
+        header_font = Font(name='Arial', size=11, bold=True, color='FFFFFF')
+        header_fill = PatternFill(start_color='2196F3', end_color='2196F3', fill_type='solid')
+        header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+        cell_border = Border(
+            left=Side(style='thin', color='CCCCCC'),
+            right=Side(style='thin', color='CCCCCC'),
+            top=Side(style='thin', color='CCCCCC'),
+            bottom=Side(style='thin', color='CCCCCC')
+        )
+
+        # Headers según el orden solicitado
+        headers = [
+            'Nro de Ficha',
+            'Dirección',
+            'Zona',
+            'Tipo Documento',
+            'Identificación',
+            'Nombre 1',
+            'Nombre 2',
+            'Apellido 1',
+            'Apellido 2',
+            'Fecha Nacimiento',
+            'EPS',
+            'Parentesco',
+            'Género',
+            'Estado Civil',
+            'Ocupación',
+            'Nivel Educativo',
+            'Teléfono',
+            'Cabeza de Hogar'
+        ]
+
+        # Escribir headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = cell_border
+
+        # Ajustar anchos de columna
+        column_widths = {
+            'A': 15,  # Nro Ficha
+            'B': 30,  # Dirección
+            'C': 10,  # Zona
+            'D': 15,  # Tipo Doc
+            'E': 15,  # Identificación
+            'F': 15,  # Nombre 1
+            'G': 15,  # Nombre 2
+            'H': 15,  # Apellido 1
+            'I': 15,  # Apellido 2
+            'J': 15,  # Fecha Nac
+            'K': 25,  # EPS
+            'L': 20,  # Parentesco
+            'M': 12,  # Género
+            'N': 15,  # Estado Civil
+            'O': 20,  # Ocupación
+            'P': 20,  # Nivel Educativo
+            'Q': 15,  # Teléfono
+            'R': 15   # Cabeza Hogar
+        }
+
+        for col, width in column_widths.items():
+            ws.column_dimensions[col].width = width
+
+        # Escribir datos
+        row_num = 2
+        for persona in personas:
+            # Determinar zona
+            zona_text = ''
+            if persona.family_card and persona.family_card.zone:
+                zona_text = 'Urbana' if persona.family_card.zone == 'U' else 'Rural'
+
+            # Cabeza de hogar
+            cabeza_text = 'SÍ' if persona.family_head else 'NO'
+
+            # Fecha de nacimiento formateada
+            fecha_nac = persona.date_birth.strftime('%Y-%m-%d') if persona.date_birth else ''
+
+            # Datos según el orden solicitado
+            row_data = [
+                persona.family_card.family_card_number if persona.family_card else '',
+                persona.family_card.address_home if persona.family_card and persona.family_card.address_home else '',
+                zona_text,
+                persona.document_type.code_document_type if persona.document_type else '',
+                persona.identification_person or '',
+                persona.first_name_1 or '',
+                persona.first_name_2 or '',
+                persona.last_name_1 or '',
+                persona.last_name_2 or '',
+                fecha_nac,
+                persona.eps.eps_name if persona.eps else '',
+                persona.kinship.description_kinship if persona.kinship else '',
+                persona.gender.gender if persona.gender else '',
+                persona.civil_state.description_civil_state if persona.civil_state else '',
+                persona.occupation.description_occupancy if persona.occupation else '',
+                persona.education_level.description_education_level if persona.education_level else '',
+                persona.cell_phone or '',
+                cabeza_text
+            ]
+
+            for col_num, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col_num)
+                cell.value = value
+                cell.border = cell_border
+                cell.alignment = Alignment(vertical='center')
+
+            row_num += 1
+
+        # Agregar filtros
+        ws.auto_filter.ref = ws.dimensions
+
+        # Congelar primera fila
+        ws.freeze_panes = 'A2'
+
+        # Crear response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+
+        # Nombre del archivo con fecha y organización
+        org_name = ''
+        if hasattr(request, 'user_organization') and request.user_organization:
+            org_name = f"_{request.user_organization.organization_name.replace(' ', '_')}"
+
+        filename = f'personas_registradas{org_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+
+        wb.save(response)
+
+        # Log de exportación
+        print(f"Exportación Excel de personas: {personas.count()} registros - Usuario: {request.user.username}")
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f"Error al exportar a Excel: {str(e)}")
+        return redirect('personas')
+

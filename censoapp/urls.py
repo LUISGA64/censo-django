@@ -8,7 +8,7 @@ from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
-                    delete_person_familyCard, get_system_parameters, MaterialConstructionView)
+                    delete_person_familyCard, get_system_parameters, MaterialConstructionView, export_persons_excel)
 
 
 urlpatterns = [
@@ -49,6 +49,9 @@ urlpatterns = [
 
     # Parámetros del aplicativo
     path('api-params/', login_required(get_system_parameters), name='system-parameters'),
+
+    # ----- EXPORTACIONES -----
+    path('export/personas/excel/', login_required(export_persons_excel), name='export-persons-excel'),
 
 
     # Document Aval
