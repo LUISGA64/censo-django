@@ -70,6 +70,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
     'simple_history.middleware.HistoryRequestMiddleware',
+    'censoapp.middleware.OrganizationFilterMiddleware',  # Multi-organizacion
 ]
 
 

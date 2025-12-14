@@ -3,6 +3,9 @@ from django.db import models
 from .choices import zone
 from django.db.models import Max
 from simple_history.models import HistoricalRecords
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 
@@ -37,6 +40,99 @@ class Organizations(models.Model):
 
     def __str__(self):
         return self.organization_name
+
+
+class UserProfile(models.Model):
+    """
+    Perfil de usuario vinculado a una organizacion.
+    Permite que cada usuario solo acceda a datos de su organizacion.
+    Implementa multi-tenancy a nivel de aplicacion.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='profile',
+        verbose_name="Usuario"
+    )
+    organization = models.ForeignKey(
+        'Organizations',
+        on_delete=models.CASCADE,
+        verbose_name="Organizacion del Usuario",
+        help_text="Organizacion a la que pertenece el usuario"
+    )
+    role = models.CharField(
+        max_length=50,
+        choices=[
+            ('ADMIN', 'Administrador de Organizacion'),
+            ('OPERATOR', 'Operador'),
+            ('VIEWER', 'Solo Consulta')
+        ],
+        default='OPERATOR',
+        verbose_name="Rol"
+    )
+
+    # Permisos especiales
+    can_view_all_organizations = models.BooleanField(
+        default=False,
+        verbose_name="Acceso a todas las organizaciones",
+        help_text="Solo para administradores de la asociacion. Permite ver datos de todas las organizaciones."
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Activo",
+        help_text="Indica si el perfil esta activo"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creacion")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Actualizacion")
+
+    class Meta:
+        verbose_name = "Perfil de Usuario"
+        verbose_name_plural = "Perfiles de Usuario"
+        ordering = ['user__username']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.organization.organization_name}"
+
+    def has_permission_to_view_organization(self, organization):
+        """
+        Verifica si el usuario tiene permiso para ver datos de una organizacion especifica.
+        """
+        if self.user.is_superuser or self.can_view_all_organizations:
+            return True
+        return self.organization == organization
+
+
+# Signal para crear perfil automaticamente al crear usuario
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """
+    Crea automaticamente un perfil cuando se crea un nuevo usuario.
+    Si el usuario es superuser, se le da acceso a todas las organizaciones.
+    """
+    if created and not hasattr(instance, 'profile'):
+        # Para superusuarios, crear perfil con acceso global
+        if instance.is_superuser:
+            # Obtener la primera organizacion o None
+            first_org = Organizations.objects.first()
+            if first_org:
+                UserProfile.objects.create(
+                    user=instance,
+                    organization=first_org,
+                    role='ADMIN',
+                    can_view_all_organizations=True
+                )
+        # Para usuarios normales, se debe asignar organizacion manualmente desde admin
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """
+    Guarda el perfil cuando se guarda el usuario.
+    """
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
 
 
 class Sidewalks(models.Model):

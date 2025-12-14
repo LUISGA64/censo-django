@@ -15,6 +15,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard
 from .forms import FormFamilyCard, FormPerson, MaterialConstructionFamilyForm
 from django.views.decorators.csrf import csrf_protect
+from .mixins import OrganizationFilterMixin, OrganizationPermissionMixin, OrganizationFormMixin
 
 
 # logger = logging.getLogger(__name__)
@@ -151,18 +152,32 @@ def get_family_cards(request):
         queryset = (Person.objects
                     .select_related('family_card', 'family_card__sidewalk_home',
                                   'family_card__organization', 'document_type')
-                    .filter(family_head=True, state=True, family_card__state=True)
-                    .values('family_card__family_card_number', 'family_card_id',
+                    .filter(family_head=True, state=True, family_card__state=True))
+
+        # Filtrar por organización del usuario (multi-tenancy)
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                queryset = queryset.filter(family_card__organization=user_organization)
+            else:
+                # Usuario sin organización, retornar vacío
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': 0,
+                    'recordsFiltered': 0,
+                    'data': []
+                })
+
+        queryset = queryset.values('family_card__family_card_number', 'family_card_id',
                            'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
                            'identification_person', 'document_type__code_document_type',
                            'family_card__sidewalk_home__sidewalk_name', 'family_card__zone',
-                           'family_card__address_home', 'family_card__organization__organization_name')
-                    .annotate(
+                           'family_card__address_home', 'family_card__organization__organization_name').annotate(
                         full_name=Concat('first_name_1', Value(' '), 'first_name_2',
                                        Value(' '), 'last_name_1', Value(' '), 'last_name_2'),
                         person_count=Count('family_card__person',
                                          filter=Q(family_card__person__state=True))
-                    ))
+                    )
 
         # Búsqueda optimizada con OR en múltiples campos
         if search_value:
@@ -178,12 +193,20 @@ def get_family_cards(request):
                 Q(family_card__address_home__icontains=search_value)
             )
 
-        # Total de registros antes de aplicar filtros
-        total_records = Person.objects.filter(
+        # Total de registros antes de aplicar filtros (respetando organización)
+        total_queryset = Person.objects.filter(
             family_head=True,
             state=True,
             family_card__state=True
-        ).count()
+        )
+
+        # Aplicar filtro de organización al total también
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                total_queryset = total_queryset.filter(family_card__organization=user_organization)
+
+        total_records = total_queryset.count()
 
         # Total de registros después de aplicar filtros
         filtered_records = queryset.count()
@@ -506,10 +529,18 @@ def detalle_ficha(request, pk):
     """
     Vista optimizada para mostrar el detalle de una ficha familiar.
     Incluye información de la vivienda y todos los miembros de la familia.
+    Valida permisos de organización (multi-tenancy).
     """
     try:
         # Verificar que la ficha familiar existe
         family_card = get_object_or_404(FamilyCard, pk=pk, state=True)
+
+        # Validar permisos de organización
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if not user_organization or family_card.organization != user_organization:
+                messages.error(request, "No tiene permiso para acceder a esta ficha familiar.")
+                return redirect('familyCardIndex')
 
         # Query optimizado con select_related para evitar N+1 queries
         familia = (Person.objects
@@ -559,11 +590,17 @@ def detalle_ficha(request, pk):
         return redirect('familyCardIndex')
 
 
-class UpdateFamily(LoginRequiredMixin, UpdateView):
+class UpdateFamily(LoginRequiredMixin, OrganizationPermissionMixin,
+                   OrganizationFilterMixin, OrganizationFormMixin, UpdateView):
     """
     Vista optimizada para actualizar fichas familiares.
     Maneja dos formularios: datos de ubicación y datos de vivienda.
     Incluye validaciones robustas y mensajes claros para el usuario.
+
+    Mixins:
+    - OrganizationPermissionMixin: Valida que el usuario tenga permiso para editar la ficha
+    - OrganizationFilterMixin: Filtra fichas por organización del usuario
+    - OrganizationFormMixin: Limita opciones de organización/vereda en formularios
     """
     model = FamilyCard
     form_class = FormFamilyCard
@@ -572,7 +609,9 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         """Optimizar query con select_related para evitar N+1"""
-        return FamilyCard.objects.select_related(
+        # El mixin ya filtra por organización, aquí solo optimizamos
+        queryset = super().get_queryset()
+        return queryset.select_related(
             'sidewalk_home',
             'organization'
         ).filter(state=True)
@@ -784,10 +823,15 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
         return context
 
 
-class DetailPersona(LoginRequiredMixin, DetailView):
+class DetailPersona(LoginRequiredMixin, OrganizationPermissionMixin,
+                    OrganizationFilterMixin, DetailView):
     """
     Vista optimizada para mostrar el detalle de una persona.
     Incluye validaciones, carga optimizada de datos relacionados y contexto enriquecido.
+
+    Mixins:
+    - OrganizationPermissionMixin: Valida que el usuario tenga permiso para ver la persona
+    - OrganizationFilterMixin: Filtra personas por organización del usuario
     """
     model = Person
     template_name = 'censo/persona/detail_person.html'
@@ -797,8 +841,10 @@ class DetailPersona(LoginRequiredMixin, DetailView):
         """
         Query optimizado con select_related para evitar N+1 queries.
         Solo carga registros activos para seguridad.
+        El mixin ya filtra por organización.
         """
-        return Person.objects.select_related(
+        queryset = super().get_queryset()
+        return queryset.select_related(
             'document_type',
             'gender',
             'education_level',
@@ -992,7 +1038,15 @@ def view_persons(request):
 
 
 # Vista para editar una persona
-class UpdatePerson(UpdateView):
+class UpdatePerson(LoginRequiredMixin, OrganizationPermissionMixin,
+                   OrganizationFilterMixin, UpdateView):
+    """
+    Vista para editar una persona.
+
+    Mixins:
+    - OrganizationPermissionMixin: Valida que el usuario tenga permiso para editar
+    - OrganizationFilterMixin: Filtra personas por organización del usuario
+    """
     model = Person
     fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type', 'identification_person',
               'date_birth', 'cell_phone', 'personal_email', 'gender', 'kinship', 'education_level', 'civil_state',

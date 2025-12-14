@@ -3,7 +3,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import (Association, Organizations, Sidewalks, DocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
                      EducationLevel, SecuritySocial, Handicap, Charge, SystemParameters, MaterialConstruction,
                      WaterTreatment, LightingType, WaterSource, CookingFuel, HomeOwnership, FamilyCard, Person,
-                     MaterialConstructionFamilyCard)
+                     MaterialConstructionFamilyCard, UserProfile)
 from .utils import invalidate_system_parameters_cache
 
 # Register your models here.
@@ -78,3 +78,43 @@ class MaterialConstructionFamilyCardAdmin(SimpleHistoryAdmin):
     list_filter = ['home_ownership', 'cooking_fuel']
     search_fields = ['family_card__family_card_number']
     history_list_display = ['number_bedrooms', 'ventilation', 'lighting']
+
+
+# UserProfile admin con gestion de multi-organizacion
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'organization', 'role', 'can_view_all_organizations', 'is_active', 'created_at']
+    list_filter = ['role', 'organization', 'can_view_all_organizations', 'is_active']
+    search_fields = ['user__username', 'user__email', 'organization__organization_name']
+    readonly_fields = ['created_at', 'updated_at']
+
+    fieldsets = (
+        ('Usuario', {
+            'fields': ('user', 'organization')
+        }),
+        ('Permisos', {
+            'fields': ('role', 'can_view_all_organizations', 'is_active')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_queryset(self, request):
+        """
+        Filtrar perfiles segun organizacion del usuario admin.
+        Superusuarios ven todos.
+        """
+        qs = super().get_queryset(request)
+
+        if request.user.is_superuser:
+            return qs
+
+        if hasattr(request.user, 'profile'):
+            if request.user.profile.can_view_all_organizations:
+                return qs
+            return qs.filter(organization=request.user.profile.organization)
+
+        return qs.none()
+
