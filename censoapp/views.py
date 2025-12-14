@@ -15,7 +15,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard
 from .forms import FormFamilyCard, FormPerson, MaterialConstructionFamilyForm
 from django.views.decorators.csrf import csrf_protect
-from .mixins import OrganizationFilterMixin, OrganizationPermissionMixin, OrganizationFormMixin
+from .mixins import OrganizationFilterMixin, OrganizationPermissionMixin, OrganizationFormMixin, ReadOnlyPermissionMixin
 
 
 # logger = logging.getLogger(__name__)
@@ -286,7 +286,18 @@ def create_family_card(request):
     """
     Vista para crear una nueva ficha familiar junto con el cabeza de familia.
     Incluye validaciones robustas y mensajes claros para el usuario.
+    Valida permisos de escritura (usuarios VIEWER no pueden crear).
     """
+    # Validar permisos de escritura
+    if not request.user.is_superuser:
+        user_role = getattr(request, 'user_role', None)
+        if user_role == 'VIEWER':
+            messages.error(
+                request,
+                "No tiene permisos para crear fichas familiares. Su rol es de solo lectura."
+            )
+            return redirect('familyCardIndex')
+
     if request.method == 'POST':
         family_card_form = FormFamilyCard(request.POST)
         person_form = FormPerson(request.POST)
@@ -410,7 +421,18 @@ def crear_persona(request, pk):
     """
     Vista para agregar un nuevo miembro a una ficha familiar existente.
     Incluye validaciones robustas y mensajes claros para el usuario.
+    Valida permisos de escritura (usuarios VIEWER no pueden crear).
     """
+    # Validar permisos de escritura
+    if not request.user.is_superuser:
+        user_role = getattr(request, 'user_role', None)
+        if user_role == 'VIEWER':
+            messages.error(
+                request,
+                "No tiene permisos para crear personas. Su rol es de solo lectura."
+            )
+            return redirect('familyCardIndex')
+
     # Validar que la ficha familiar existe y está activa
     try:
         familia = get_object_or_404(FamilyCard, pk=pk, state=True)
@@ -623,7 +645,7 @@ def detalle_ficha(request, pk):
         return redirect('familyCardIndex')
 
 
-class UpdateFamily(LoginRequiredMixin, OrganizationPermissionMixin,
+class UpdateFamily(LoginRequiredMixin, ReadOnlyPermissionMixin, OrganizationPermissionMixin,
                    OrganizationFilterMixin, OrganizationFormMixin, UpdateView):
     """
     Vista optimizada para actualizar fichas familiares.
@@ -631,6 +653,7 @@ class UpdateFamily(LoginRequiredMixin, OrganizationPermissionMixin,
     Incluye validaciones robustas y mensajes claros para el usuario.
 
     Mixins:
+    - ReadOnlyPermissionMixin: Bloquea acceso a usuarios VIEWER
     - OrganizationPermissionMixin: Valida que el usuario tenga permiso para editar la ficha
     - OrganizationFilterMixin: Filtra fichas por organización del usuario
     - OrganizationFormMixin: Limita opciones de organización/vereda en formularios
@@ -997,19 +1020,34 @@ def listar_personas(request):
 
         # Query optimizado con select_related para evitar N+1 queries
         personas = (Person.objects
-                    .select_related('document_type', 'gender', 'family_card', 'family_card__sidewalk_home')
-                    .filter(state=True)
-                    .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                    .select_related('document_type', 'gender', 'family_card', 'family_card__sidewalk_home',
+                                  'family_card__organization')
+                    .filter(state=True))
+
+        # Filtrar por organización del usuario (multi-tenancy)
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                personas = personas.filter(family_card__organization=user_organization)
+            else:
+                # Usuario sin organización, retornar vacío
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': 0,
+                    'recordsFiltered': 0,
+                    'data': []
+                })
+
+        personas = personas.values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
                             'identification_person', 'document_type__code_document_type', 'date_birth',
                             'family_card', 'family_head', 'family_card__family_card_number',
-                            'family_card__sidewalk_home__sidewalk_name')
-                    .annotate(
+                            'family_card__sidewalk_home__sidewalk_name').annotate(
                         gender=F('gender__gender'),
                         age=ExpressionWrapper(
                             now().year - F('date_birth__year'),
                             output_field=fields.IntegerField()
                         )
-                    ))
+                    )
 
         # Búsqueda optimizada con OR en múltiples campos
         if search_value:
@@ -1024,7 +1062,15 @@ def listar_personas(request):
             )
 
         # Total de registros antes de aplicar filtros (para DataTables)
-        total_records = Person.objects.filter(state=True).count()
+        # Respetar filtro de organización también en el total
+        total_queryset = Person.objects.filter(state=True)
+
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                total_queryset = total_queryset.filter(family_card__organization=user_organization)
+
+        total_records = total_queryset.count()
 
         # Total de registros después de aplicar filtros
         filtered_records = personas.count()
@@ -1071,12 +1117,13 @@ def view_persons(request):
 
 
 # Vista para editar una persona
-class UpdatePerson(LoginRequiredMixin, OrganizationPermissionMixin,
+class UpdatePerson(LoginRequiredMixin, ReadOnlyPermissionMixin, OrganizationPermissionMixin,
                    OrganizationFilterMixin, UpdateView):
     """
     Vista para editar una persona.
 
     Mixins:
+    - ReadOnlyPermissionMixin: Bloquea acceso a usuarios VIEWER
     - OrganizationPermissionMixin: Valida que el usuario tenga permiso para editar
     - OrganizationFilterMixin: Filtra personas por organización del usuario
     """

@@ -174,3 +174,51 @@ class OrganizationFormMixin:
 
         return form
 
+
+class ReadOnlyPermissionMixin:
+    """
+    Mixin que valida que el usuario tenga permisos de escritura.
+    Usuarios con rol VIEWER solo pueden ver, no crear/editar/eliminar.
+
+    Uso:
+        class UpdateFamily(ReadOnlyPermissionMixin, UpdateView):
+            # Valida que el usuario pueda editar
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Valida permisos antes de procesar la vista.
+        """
+        # Superusuarios siempre pueden
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+
+        # Obtener rol del usuario
+        user_role = getattr(request, 'user_role', None)
+
+        # Si es VIEWER, denegar acceso a vistas de creación/edición/eliminación
+        if user_role == 'VIEWER':
+            from django.contrib import messages
+            from django.shortcuts import redirect
+
+            logger.warning(
+                f"Usuario {request.user.username} con rol VIEWER intento acceder a {request.path}"
+            )
+
+            messages.error(
+                request,
+                "No tiene permisos para realizar esta acción. Su rol es de solo lectura."
+            )
+
+            # Redirigir según el tipo de vista
+            if 'family' in request.path.lower():
+                return redirect('familyCardIndex')
+            elif 'person' in request.path.lower():
+                return redirect('personas')
+            else:
+                return redirect('home')
+
+        return super().dispatch(request, *args, **kwargs)
+
+
+

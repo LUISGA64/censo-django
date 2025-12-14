@@ -357,10 +357,12 @@
                                     <i class="fas fa-users me-2"></i>
                                     Ver Personas
                                 </a>
+                                {% if user.is_superuser or request.user_role != 'VIEWER' %}
                                 <a href="{% url 'createFamilyCard' %}" class="btn btn-header-primary">
                                     <i class="fas fa-plus-circle me-2"></i>
                                     Nueva Ficha
                                 </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -444,6 +446,8 @@
         const VIEW_FAMILY_CARD_URL = "{% url 'detailFamilyCard' 0 %}";
         const NEW_PERSON_FAMILY = "{% url 'createPerson' 0 %}";
         const MATERIAL_CONSTRUCTION = "{% url 'material-construction' 0 %}";
+        const USER_ROLE = "{{ request.user_role|default:'' }}";
+        const IS_SUPERUSER = {{ user.is_superuser|yesno:"true,false" }};
     </script>
     <script src="{% static 'assets/js/censo/family-card/datatable-family-card.js' %}"></script>
 

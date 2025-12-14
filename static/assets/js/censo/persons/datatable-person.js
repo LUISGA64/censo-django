@@ -138,6 +138,11 @@ $(document).ready(function () {
                     const detailUrl = DETAIL_PERSON_URL.replace('0', row.id);
                     const personName = `${row.first_name_1} ${row.last_name_1}`.trim();
 
+                    // Verificar si el usuario es VIEWER (solo lectura)
+                    const isViewer = typeof USER_ROLE !== 'undefined' && USER_ROLE === 'VIEWER';
+                    const isSuperUser = typeof IS_SUPERUSER !== 'undefined' && IS_SUPERUSER;
+                    const canEdit = isSuperUser || !isViewer;
+
                     return `
                         <div class="dropdown dropdown-actions">
                             <button class="btn btn-actions dropdown-toggle" 
@@ -157,12 +162,14 @@ $(document).ready(function () {
                                         <span>Ver Detalle</span>
                                     </a>
                                 </li>
+                                ${canEdit ? `
                                 <li>
                                     <a class="dropdown-item" href="${editUrl}">
                                         <i class="fas fa-edit text-warning"></i>
                                         <span>Editar Persona</span>
                                     </a>
                                 </li>
+                                ` : ''}
                             </ul>
                         </div>`;
                 }

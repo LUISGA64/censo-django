@@ -114,6 +114,11 @@ $(document).ready(function () {
                     const materialConst = MATERIAL_CONSTRUCTION.replace('0', row.family_card_id);
                     const fichaNum = row.family_card__family_card_number;
 
+                    // Verificar si el usuario es VIEWER (solo lectura)
+                    const isViewer = typeof USER_ROLE !== 'undefined' && USER_ROLE === 'VIEWER';
+                    const isSuperUser = typeof IS_SUPERUSER !== 'undefined' && IS_SUPERUSER;
+                    const canEdit = isSuperUser || !isViewer;
+
                     return `
                         <div class="dropdown dropdown-actions">
                             <button class="btn btn-actions dropdown-toggle" 
@@ -133,6 +138,7 @@ $(document).ready(function () {
                                         <span>Ver Detalle</span>
                                     </a>
                                 </li>
+                                ${canEdit ? `
                                 <li>
                                     <a class="dropdown-item" href="${editUrl}">
                                         <i class="fas fa-edit text-warning"></i>
@@ -152,6 +158,7 @@ $(document).ready(function () {
                                         <span>Datos de Vivienda</span>
                                     </a>
                                 </li>
+                                ` : ''}
                             </ul>
                         </div>`;
                 }
