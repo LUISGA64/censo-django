@@ -12,7 +12,21 @@ class FormFamilyCard(forms.ModelForm):
 
     class Meta:
         model = FamilyCard
-        fields = ['sidewalk_home', 'latitude', 'longitude', 'zone', 'organization', 'family_card_number']
+        fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization', 'family_card_number']
+
+    address_home = forms.CharField(
+        label='Dirección de la Vivienda (Complemento)',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: Casa #5, Al lado del colegio (Opcional)'
+        }),
+        error_messages={
+            'max_length': 'La dirección no puede tener más de 50 caracteres.'
+        },
+        help_text='Información adicional opcional para ubicar la vivienda'
+    )
 
     sidewalk_home = forms.ModelChoiceField(
         queryset=Sidewalks.objects.all(),
@@ -87,13 +101,34 @@ class FormFamilyCard(forms.ModelForm):
         self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
         self.helper.label_class = 'control-label'
 
-        # Configurar family_card_number como readonly
-        self.fields['family_card_number'].required = False
-        self.fields['family_card_number'].widget.attrs.update({
-            'readonly': True,
-            'class': 'form-control bg-light',
-            'placeholder': 'Se asignará automáticamente'
-        })
+        # Configurar family_card_number: no editable en actualizaciones
+        if self.instance and self.instance.pk:
+            # Modo edición: excluir del formulario
+            self.fields.pop('family_card_number', None)
+
+            # Asegurar que los campos críticos mantengan sus valores
+            # Si no se reciben en POST, usar los valores actuales de la instancia
+            if not self.data:  # Solo en GET (cuando se carga el formulario)
+                # Los valores se cargarán automáticamente de la instancia
+                pass
+            else:  # En POST
+                # Si los campos no vienen en POST, usar valores de la instancia
+                data_copy = self.data.copy()
+                if not data_copy.get('sidewalk_home'):
+                    data_copy['sidewalk_home'] = self.instance.sidewalk_home_id
+                if not data_copy.get('zone'):
+                    data_copy['zone'] = self.instance.zone
+                if not data_copy.get('organization'):
+                    data_copy['organization'] = self.instance.organization_id
+                self.data = data_copy
+        else:
+            # Modo creación: readonly
+            self.fields['family_card_number'].required = False
+            self.fields['family_card_number'].widget.attrs.update({
+                'readonly': True,
+                'class': 'form-control bg-light',
+                'placeholder': 'Se asignará automáticamente'
+            })
 
     def clean_latitude(self):
         """Validar formato de latitud"""
@@ -335,12 +370,19 @@ class FormPerson(forms.ModelForm):
 
 
 class MaterialConstructionFamilyForm(forms.ModelForm):
+    """
+    Formulario optimizado para registrar características de la vivienda.
+    Incluye validaciones robustas y widgets personalizados.
+    """
     class Meta:
         model = MaterialConstructionFamilyCard
-        fields = ['material_roof', 'material_floor', 'material_wall', 'number_families', 'condition_roof',
-                  'condition_floor', 'condition_wall', 'number_families', 'number_people_bedrooms',
-                  'home_ownership', 'kitchen_location', 'cooking_fuel', 'home_smoke', 'number_bedrooms',
-                  'ventilation', 'lighting']
+        fields = [
+            'material_roof', 'material_floor', 'material_wall',
+            'number_families', 'number_people_bedrooms', 'number_bedrooms',
+            'condition_roof', 'condition_floor', 'condition_wall',
+            'home_ownership', 'kitchen_location', 'cooking_fuel',
+            'home_smoke', 'ventilation', 'lighting'
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -349,69 +391,244 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
         self.helper.form_class = 'form-inline'
         self.helper.label_class = 'control-label'
 
-    material_roof = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(roof=True),
-                                           empty_label="Seleccione el Material del Techo",
-                                           widget=forms.Select(attrs={'class': 'form-control'}),
-                                           label="Material del Techo")
+        # Configurar campos requeridos
+        required_fields = ['material_roof', 'material_floor', 'material_wall',
+                          'number_families', 'number_people_bedrooms',
+                          'home_ownership', 'kitchen_location', 'cooking_fuel']
 
-    material_floor = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(floor=True),
-                                            empty_label="Seleccione el Material del Piso",
-                                            widget=forms.Select(attrs={'class': 'form-control text-'}),
-                                            label="Material del Piso")
+        for field_name in required_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = True
 
-    material_wall = forms.ModelChoiceField(queryset=MaterialConstruction.objects.filter(wall=True),
-                                           empty_label="Seleccione el Material de la Pared",
-                                           widget=forms.Select(attrs={'class': 'form-control'}),
-                                           label="Material de la Pared")
+    # Materiales de construcción
+    material_roof = forms.ModelChoiceField(
+        queryset=MaterialConstruction.objects.filter(roof=True),
+        empty_label="Seleccione el Material del Techo",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label="Material del Techo",
+        error_messages={
+            'required': 'Debe seleccionar un material para el techo.',
+            'invalid_choice': 'Seleccione un material válido.'
+        }
+    )
 
-    number_families = forms.ChoiceField(label='Número de Familias',
-                                         choices=[(1, '1'), (2, '2'), (3, '3 o más')],
-                                         widget=forms.Select(attrs={'class': 'form-control',
-                                                                  'placeholder': 'Número de Familias'}),)
+    material_floor = forms.ModelChoiceField(
+        queryset=MaterialConstruction.objects.filter(floor=True),
+        empty_label="Seleccione el Material del Piso",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label="Material del Piso",
+        error_messages={
+            'required': 'Debe seleccionar un material para el piso.',
+            'invalid_choice': 'Seleccione un material válido.'
+        }
+    )
 
-    number_people_bedrooms = forms.ChoiceField(label='Número de Personas por Habitación',
-                                               choices=[(1, '1'), (2, '2'), (3, '3 o más')],
-                                               widget=forms.Select(attrs={'class': 'form-control',
-                                                                        'placeholder': 'Número de Personas por Habitación'}),)
+    material_wall = forms.ModelChoiceField(
+        queryset=MaterialConstruction.objects.filter(wall=True),
+        empty_label="Seleccione el Material de la Pared",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label="Material de la Pared",
+        error_messages={
+            'required': 'Debe seleccionar un material para la pared.',
+            'invalid_choice': 'Seleccione un material válido.'
+        }
+    )
 
-    condition_roof = forms.BooleanField(label="¿Techo Adecuado?", required=True,
-                                        widget=forms.CheckboxInput(
-                                            attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Estado del Techo'}),)
+    # Campos numéricos
+    number_families = forms.ChoiceField(
+        label='Número de Familias',
+        choices=[(1, '1'), (2, '2'), (3, '3 o más')],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar el número de familias.'
+        }
+    )
 
-    condition_floor = forms.BooleanField(label="¿Piso Adecuado?", required=True,
-                                         widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Estado del Piso'}),)
+    number_people_bedrooms = forms.ChoiceField(
+        label='Personas por Habitación',
+        choices=[(1, '1'), (2, '2'), (3, '3 o más')],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar el número de personas por habitación.'
+        }
+    )
 
-    condition_wall = forms.BooleanField(label="¿Paredes Adecuadas?", required=True,
-                                        widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Estado de la Pared'}),)
+    number_bedrooms = forms.IntegerField(
+        label='Número de Habitaciones',
+        required=True,
+        min_value=1,
+        max_value=10,
+        initial=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: 2',
+            'min': 1,
+            'max': 10,
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe indicar el número de habitaciones.',
+            'min_value': 'Debe ser al menos 1 habitación.',
+            'max_value': 'El número máximo es 10 habitaciones.'
+        }
+    )
 
-    home_ownership = forms.ModelChoiceField(queryset=HomeOwnership.objects.all(),
-                                            empty_label="Seleccione el Tipo de Propiedad",
-                                            widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Tipo de Propiedad'}),
-                                            label="Tipo de Propiedad")
+    # Condiciones (CharField en modelo)
+    condition_roof = forms.ChoiceField(
+        label="Estado del Techo",
+        choices=[('Bueno', 'Bueno'), ('Regular', 'Regular'), ('Malo', 'Malo')],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar el estado del techo.'
+        }
+    )
 
-    kitchen_location = forms.ChoiceField(label='Ubicación de la Cocina',
-                                         choices=[(1, 'Interior'), (2, 'Exterior')],
-                                         widget=forms.Select(attrs={'class': 'form-control',
-                                                                    'placeholder': 'Ubicación de la Cocina'}))
+    condition_floor = forms.ChoiceField(
+        label="Estado del Piso",
+        choices=[('Bueno', 'Bueno'), ('Regular', 'Regular'), ('Malo', 'Malo')],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar el estado del piso.'
+        }
+    )
 
-    cooking_fuel = forms.ModelChoiceField(queryset=CookingFuel.objects.all(),
-                                           empty_label="Cocina con",
-                                           widget=forms.Select(attrs={'class': 'form-control',
-                                                                      'placeholder': 'Combustible de Cocina'}),
-                                           label="Combustible de Cocina")
+    condition_wall = forms.ChoiceField(
+        label="Estado de las Paredes",
+        choices=[('Bueno', 'Bueno'), ('Regular', 'Regular'), ('Malo', 'Malo')],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar el estado de las paredes.'
+        }
+    )
 
-    home_smoke = forms.BooleanField(label="Humo en el Hogar", required=False,
-                                    widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Humo en el Hogar'}),)
+    # Tipo de propiedad
+    home_ownership = forms.ModelChoiceField(
+        queryset=HomeOwnership.objects.all(),
+        empty_label="Seleccione el Tipo de Propiedad",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label="Tipo de Propiedad",
+        error_messages={
+            'required': 'Debe seleccionar el tipo de propiedad.',
+            'invalid_choice': 'Seleccione un tipo de propiedad válido.'
+        }
+    )
 
-    number_bedrooms = forms.IntegerField(label='Número de Habitaciones', required=False, min_value=1, max_value=5,
-                                         widget=forms.NumberInput(
-                                             attrs={'class': 'form-control text-muted', 'placeholder': 'Número de Habitaciones'}),)
+    # Ubicación de cocina
+    kitchen_location = forms.ChoiceField(
+        label='Ubicación de la Cocina',
+        choices=[(1, 'Interior'), (2, 'Exterior')],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        error_messages={
+            'required': 'Debe seleccionar la ubicación de la cocina.'
+        }
+    )
 
-    ventilation = forms.BooleanField(label="Ventilación Adecuada?", required=False,
-                                     widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Ventilación Adecuada?'}),)
+    # Combustible
+    cooking_fuel = forms.ModelChoiceField(
+        queryset=CookingFuel.objects.all(),
+        empty_label="Seleccione el combustible",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label="Combustible de Cocina",
+        error_messages={
+            'required': 'Debe seleccionar el tipo de combustible.',
+            'invalid_choice': 'Seleccione un combustible válido.'
+        }
+    )
 
-    lighting = forms.BooleanField(label="Iluminación Adecuada?", required=False,
-                                  widget=forms.CheckboxInput(attrs={'class': 'form-check-input checkbox-vertical', 'placeholder': 'Iluminación Adecuada?'}),)
+    # Campos booleanos opcionales
+    home_smoke = forms.BooleanField(
+        label="¿Presencia de humo en el hogar?",
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'style': 'width: 20px; height: 20px; cursor: pointer;'
+        }),
+        help_text="Marque si la vivienda presenta problemas de humo."
+    )
+
+    ventilation = forms.BooleanField(
+        label="¿Ventilación adecuada?",
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'style': 'width: 20px; height: 20px; cursor: pointer;'
+        }),
+        help_text="Marque si la vivienda cuenta con ventilación adecuada."
+    )
+
+    lighting = forms.BooleanField(
+        label="¿Iluminación adecuada?",
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'style': 'width: 20px; height: 20px; cursor: pointer;'
+        }),
+        help_text="Marque si la vivienda cuenta con iluminación adecuada."
+    )
+
+    def clean_number_bedrooms(self):
+        """Validar que el número de habitaciones sea coherente"""
+        number_bedrooms = self.cleaned_data.get('number_bedrooms')
+        if number_bedrooms and number_bedrooms < 1:
+            raise forms.ValidationError('Debe haber al menos 1 habitación.')
+        return number_bedrooms
+
+    def clean(self):
+        """Validaciones cruzadas del formulario"""
+        cleaned_data = super().clean()
+
+        # Validar coherencia entre personas y habitaciones
+        number_people = cleaned_data.get('number_people_bedrooms')
+        number_bedrooms = cleaned_data.get('number_bedrooms')
+
+        if number_people and number_bedrooms:
+            try:
+                people = int(number_people)
+                bedrooms = int(number_bedrooms)
+
+                # Advertencia si hay hacinamiento
+                if people >= 3 and bedrooms == 1:
+                    self.add_error(
+                        'number_people_bedrooms',
+                        'Alto índice de hacinamiento detectado (3+ personas en 1 habitación).'
+                    )
+            except (ValueError, TypeError):
+                pass
+
+        return cleaned_data
 
 
 

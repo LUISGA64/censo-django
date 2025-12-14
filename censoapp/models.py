@@ -2,6 +2,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from .choices import zone
 from django.db.models import Max
+from simple_history.models import HistoricalRecords
+
 
 
 class Association(models.Model):
@@ -137,6 +139,9 @@ class FamilyCard(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Última Actualización")
 
+    # Auditoría de cambios
+    history = HistoricalRecords()
+
     class Meta:
         ordering = ['family_card_number']
 
@@ -195,6 +200,9 @@ class Person(models.Model):
 
     family_head = models.BooleanField(blank=False, null=False, default=False, verbose_name="Cabeza de Familia")
     state = models.BooleanField(blank=False, null=False, default=True, verbose_name="Vivo")
+
+    # Auditoría de cambios
+    history = HistoricalRecords()
 
     def __str__(self):
         return (f"{self.first_name_1} {self.first_name_2} {self.last_name_1} {self.last_name_2} - "
@@ -378,13 +386,35 @@ class WasteManagement(models.Model):
 
 
 class MaterialConstructionFamilyCard(models.Model):
-    family_card = models.ForeignKey(FamilyCard, on_delete=models.CASCADE, verbose_name="Ficha Familiar")
-    material_roof = models.ForeignKey(MaterialConstruction, on_delete=models.CASCADE, related_name='roof_materials',
-                                      verbose_name="Material de Techo")
-    material_wall = models.ForeignKey(MaterialConstruction, on_delete=models.CASCADE, related_name='wall_materials',
-                                      verbose_name="Material de Pared")
-    material_floor = models.ForeignKey(MaterialConstruction, on_delete=models.CASCADE, related_name='floor_materials',
-                                       verbose_name="Material de Piso")
+    """
+    Modelo optimizado para almacenar características de construcción y vivienda.
+    Solo puede existir un registro por ficha familiar.
+    """
+    family_card = models.OneToOneField(
+        FamilyCard,
+        on_delete=models.CASCADE,
+        verbose_name="Ficha Familiar",
+        unique=True,
+        related_name='material_construction'
+    )
+    material_roof = models.ForeignKey(
+        MaterialConstruction,
+        on_delete=models.CASCADE,
+        related_name='roof_materials',
+        verbose_name="Material de Techo"
+    )
+    material_wall = models.ForeignKey(
+        MaterialConstruction,
+        on_delete=models.CASCADE,
+        related_name='wall_materials',
+        verbose_name="Material de Pared"
+    )
+    material_floor = models.ForeignKey(
+        MaterialConstruction,
+        on_delete=models.CASCADE,
+        related_name='floor_materials',
+        verbose_name="Material de Piso"
+    )
     number_families = models.IntegerField(default=1, verbose_name="Número de Familias")
     number_people_bedrooms = models.IntegerField(default=1, verbose_name="Número de Personas por Habitación")
     condition_roof = models.CharField(max_length=50, blank=False, null=False, verbose_name="Condición del Techo")
@@ -392,15 +422,30 @@ class MaterialConstructionFamilyCard(models.Model):
     condition_floor = models.CharField(max_length=50, blank=False, null=False, verbose_name="Condición del Piso")
     home_ownership = models.ForeignKey(HomeOwnership, on_delete=models.CASCADE, verbose_name="Tipo de Propiedad")
     kitchen_location = models.IntegerField(default=1, verbose_name="Ubicación de la Cocina")
-    cooking_fuel = models.ForeignKey(CookingFuel, on_delete=models.CASCADE,
-                                     verbose_name="Tipo de Combustible de Cocina")
-    home_smoke = models.BooleanField(default=False, verbose_name="Humo en la Vivienda",
-                                     help_text="¿La vivienda tiene problemas de humo?")
+    cooking_fuel = models.ForeignKey(
+        CookingFuel,
+        on_delete=models.CASCADE,
+        verbose_name="Tipo de Combustible de Cocina"
+    )
+    home_smoke = models.BooleanField(
+        default=False,
+        verbose_name="Humo en la Vivienda",
+        help_text="¿La vivienda tiene problemas de humo?"
+    )
     number_bedrooms = models.IntegerField(default=1, verbose_name="Número de Habitaciones")
-    ventilation = models.BooleanField(default=False, verbose_name="Ventilación",
-                                      help_text="¿La vivienda cuenta con ventilación adecuada?")
-    lighting = models.BooleanField(default=False, verbose_name="Iluminación",
-                                   help_text="¿La vivienda cuenta con iluminación adecuada?")
+    ventilation = models.BooleanField(
+        default=False,
+        verbose_name="Ventilación",
+        help_text="¿La vivienda cuenta con ventilación adecuada?"
+    )
+    lighting = models.BooleanField(
+        default=False,
+        verbose_name="Iluminación",
+        help_text="¿La vivienda cuenta con iluminación adecuada?"
+    )
+
+    # Auditoría de cambios
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"Materiales de Construcción de la Vivienda {self.family_card.family_card_number}"
@@ -408,9 +453,10 @@ class MaterialConstructionFamilyCard(models.Model):
     class Meta:
         verbose_name = "Material de Construcción de Vivienda Familiar"
         verbose_name_plural = "Materiales de Construcción de Viviendas Familiares"
-        unique_together = ('family_card', 'material_roof', 'material_wall', 'material_floor')
+        db_table = 'censoapp_materialconstructionfamilycard'
 
     def clean(self):
+        """Validaciones a nivel de modelo"""
         if self.number_families <= 0:
             raise ValidationError("El número de familias debe ser mayor que cero.")
         if self.number_people_bedrooms <= 0:
@@ -420,14 +466,20 @@ class MaterialConstructionFamilyCard(models.Model):
         super().clean()
 
     def save(self, *args, **kwargs):
-        self.condition_roof = self.condition_roof.strip().lower().capitalize() if self.condition_roof else ''
-        self.condition_wall = self.condition_wall.strip().lower().capitalize() if self.condition_wall else ''
-        self.condition_floor = self.condition_floor.strip().lower().capitalize() if self.condition_floor else ''
+        """Normalizar campos de texto antes de guardar"""
+        self.condition_roof = self.condition_roof.strip().capitalize() if self.condition_roof else ''
+        self.condition_wall = self.condition_wall.strip().capitalize() if self.condition_wall else ''
+        self.condition_floor = self.condition_floor.strip().capitalize() if self.condition_floor else ''
+        self.full_clean()  # Ejecutar validaciones antes de guardar
         super().save(*args, **kwargs)
 
     @classmethod
     def get_materials_by_family_card(cls, family_card_id):
-        return cls.objects.filter(family_card_id=family_card_id).first()
+        """Obtener registro de materiales por ficha familiar (puede ser None)"""
+        try:
+            return cls.objects.get(family_card_id=family_card_id)
+        except cls.DoesNotExist:
+            return None
 
 
 class PublicServices(models.Model):

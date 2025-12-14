@@ -1151,7 +1151,7 @@ class UpdateFamilyCardTests(TestCase):
             sidewalk_home=self.sidewalk1,
             latitude='4.5',
             longitude='-74.5',
-            zone='U',
+            zone='Urbana',
             organization=self.org,
             family_card_number=100,
             state=True,
@@ -1177,7 +1177,8 @@ class UpdateFamilyCardTests(TestCase):
         url = reverse('update-family', kwargs={'pk': self.family.pk})
         response = self.client.get(url)
 
-        self.assertContains(response, 'Casa Original')
+        # El modelo normaliza el texto: 'Casa Original' -> 'Casa original'
+        self.assertContains(response, 'Casa original')
         self.assertContains(response, 'value="4.5"')
         self.assertContains(response, 'value="-74.5"')
 
@@ -1191,36 +1192,40 @@ class UpdateFamilyCardTests(TestCase):
             'sidewalk_home': self.sidewalk2.pk,
             'latitude': '5.0',
             'longitude': '-75.0',
-            'zone': 'R',
+            'zone': 'Rural',
             'organization': self.org.pk,
         }
 
         response = self.client.post(url, data)
+
         self.assertEqual(response.status_code, 302)
 
-        # Verificar que los datos se actualizaron
+        # Verificar que los datos se actualizaron correctamente
+        # El modelo normaliza: 'Casa Actualizada' -> 'Casa actualizada'
         self.family.refresh_from_db()
-        self.assertEqual(self.family.address_home, 'Casa Actualizada')
+        self.assertEqual(self.family.address_home, 'Casa actualizada')
         self.assertEqual(self.family.sidewalk_home, self.sidewalk2)
+        self.assertEqual(self.family.zone, 'Rural')
+        self.assertEqual(self.family.organization, self.org)
         self.assertEqual(str(self.family.latitude), '5.0')
         self.assertEqual(str(self.family.longitude), '-75.0')
-        self.assertEqual(self.family.zone, 'R')
 
     def test_update_family_invalid_data(self):
-        """Verificar manejo de datos inválidos"""
+        """Verificar manejo de datos inválidos - coordenadas fuera de rango"""
         self.client.force_login(self.user)
         url = reverse('update-family', kwargs={'pk': self.family.pk})
 
         data = {
-            'address_home': '',  # Campo requerido vacío
-            'sidewalk_home': self.sidewalk1.pk,
-            'zone': 'U',
-            'organization': self.org.pk,
+            'address_home': 'Casa de prueba',
+            'latitude': '95.0',  # Fuera de rango (-90 a 90)
+            'longitude': '-75.0',
         }
 
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)  # No redirige, muestra el formulario con errores
-        self.assertFormError(response, 'form', 'address_home', 'Este campo es obligatorio.')
+        # Verificar que hay un mensaje de error sobre la latitud
+        messages_list = list(response.context['messages'])
+        self.assertTrue(any('latitud' in str(msg).lower() for msg in messages_list))
 
     def test_update_family_nonexistent(self):
         """Verificar manejo de ficha inexistente"""

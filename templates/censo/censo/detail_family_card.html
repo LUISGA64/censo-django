@@ -256,6 +256,17 @@
                                     <span class="d-md-none">Servicios</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   data-bs-toggle="tab"
+                                   href="#tab-history"
+                                   role="tab"
+                                   aria-label="Historial de cambios">
+                                    <i class="fa-solid fa-clock-rotate-left me-2"></i>
+                                    <span class="d-none d-md-inline">Historial de Cambios</span>
+                                    <span class="d-md-none">Historial</span>
+                                </a>
+                            </li>
                         </ul>
 
                         <!-- Tab Content -->
@@ -438,6 +449,97 @@
                                         <!-- Aquí se pueden agregar los datos de servicios cuando estén disponibles -->
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Tab: Historial de Cambios -->
+                            <div class="tab-pane fade" id="tab-history" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h5 class="mb-4">
+                                            <i class="fas fa-clock-rotate-left text-primary me-2"></i>
+                                            Historial de Cambios de la Ficha Familiar
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                {% if family_card_obj.history.all %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="timeline">
+                                            {% for record in family_card_obj.history.all %}
+                                            <div class="timeline-item mb-4">
+                                                <div class="card border-start border-3
+                                                    {% if record.history_type == '+' %}border-success
+                                                    {% elif record.history_type == '~' %}border-warning
+                                                    {% elif record.history_type == '-' %}border-danger
+                                                    {% endif %}">
+                                                    <div class="card-body">
+                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                            <h6 class="mb-0">
+                                                                {% if record.history_type == '+' %}
+                                                                    <i class="fas fa-plus-circle text-success me-2"></i>
+                                                                    Ficha Creada
+                                                                {% elif record.history_type == '~' %}
+                                                                    <i class="fas fa-edit text-warning me-2"></i>
+                                                                    Ficha Actualizada
+                                                                {% elif record.history_type == '-' %}
+                                                                    <i class="fas fa-trash text-danger me-2"></i>
+                                                                    Ficha Eliminada
+                                                                {% endif %}
+                                                            </h6>
+                                                            <small class="text-muted">
+                                                                <i class="far fa-clock me-1"></i>
+                                                                {{ record.history_date|date:"d/m/Y H:i" }}
+                                                            </small>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <p class="mb-1">
+                                                                    <strong>Usuario:</strong>
+                                                                    {{ record.history_user|default:"Sistema" }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p class="mb-1">
+                                                                    <strong>N° Ficha:</strong>
+                                                                    {{ record.family_card_number }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p class="mb-1">
+                                                                    <strong>Zona:</strong>
+                                                                    {{ record.get_zone_display }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p class="mb-0">
+                                                                    <strong>Estado:</strong>
+                                                                    {% if record.state %}
+                                                                        <span class="badge bg-success">Activa</span>
+                                                                    {% else %}
+                                                                        <span class="badge bg-danger">Inactiva</span>
+                                                                    {% endif %}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="alert alert-info" role="alert">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            No hay historial de cambios disponible para esta ficha.
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

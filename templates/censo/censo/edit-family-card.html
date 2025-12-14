@@ -125,6 +125,31 @@
             border-radius: 2px;
         }
 
+        /* Campos de solo lectura */
+        .readonly-field-container {
+            position: relative;
+        }
+
+        .readonly-field-container .form-control[readonly],
+        .readonly-field-container .form-control[disabled],
+        .readonly-field-container select[disabled] {
+            background-color: #F8F9FA;
+            border-color: #DEE2E6;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .readonly-field-container small.text-muted {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.8rem;
+            color: #6C757D;
+        }
+
+        .readonly-field-container small.text-muted i {
+            font-size: 0.75rem;
+        }
+
         /* Botones */
         .btn-save {
             background: #4CAF50;
@@ -299,6 +324,19 @@
                                     {% endif %}
                                 </button>
                             </li>
+                            {% elif datos_vivienda == 'N' %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        id="tab-vivienda-disabled-btn"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-vivienda-disabled"
+                                        type="button"
+                                        role="tab">
+                                    <i class="fas fa-house"></i>
+                                    Datos de Vivienda
+                                    <span class="badge bg-secondary ms-2">Deshabilitado</span>
+                                </button>
+                            </li>
                             {% endif %}
                         </ul>
 
@@ -316,23 +354,28 @@
                                     </div>
 
                                     <div class="row g-3">
-                                        <div class="col-md-6">
+                                        <!-- Dirección complementaria (opcional) -->
+                                        <div class="col-md-12">
                                             {{ form.address_home|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-6">
+
+                                        <!-- Campos editables -->
+                                        <div class="col-md-4">
                                             {{ form.sidewalk_home|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-4">
-                                            {{ form.latitude|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-4">
-                                            {{ form.longitude|as_crispy_field }}
                                         </div>
                                         <div class="col-md-4">
                                             {{ form.zone|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-4">
                                             {{ form.organization|as_crispy_field }}
+                                        </div>
+
+                                        <!-- Coordenadas GPS (editables y opcionales) -->
+                                        <div class="col-md-6">
+                                            {{ form.latitude|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.longitude|as_crispy_field }}
                                         </div>
                                     </div>
 
@@ -374,33 +417,118 @@
                                         </div>
                                     {% endif %}
 
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
+                                    <!-- Materiales de Construcción -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-hammer me-2"></i>
+                                        Materiales de Construcción
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.material_roof|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.material_wall|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.material_floor|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-4">
+                                    </div>
+
+                                    <!-- Estado de Materiales -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-clipboard-check me-2"></i>
+                                        Estado de los Materiales
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.condition_roof|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.condition_wall|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.condition_floor|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Datos de Ocupación -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-users me-2"></i>
+                                        Datos de Ocupación
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.number_families|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-4">
-                                            {{ material_form.number_people_bedrooms|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.number_bedrooms|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.number_people_bedrooms|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Datos de Propiedad y Cocina -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-house-user me-2"></i>
+                                        Propiedad y Cocina
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.home_ownership|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.kitchen_location|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
                                             {{ material_form.cooking_fuel|as_crispy_field }}
                                         </div>
-                                        <div class="col-md-12">
-                                            {{ material_form.kitchen_location|as_crispy_field }}
+                                    </div>
+
+                                    <!-- Condiciones Adicionales -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Condiciones Adicionales
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="form-check">
+                                                {{ material_form.home_smoke }}
+                                                <label class="form-check-label ms-2" for="{{ material_form.home_smoke.id_for_label }}">
+                                                    {{ material_form.home_smoke.label }}
+                                                </label>
+                                                {% if material_form.home_smoke.help_text %}
+                                                    <small class="form-text text-muted d-block">
+                                                        {{ material_form.home_smoke.help_text }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="form-check">
+                                                {{ material_form.ventilation }}
+                                                <label class="form-check-label ms-2" for="{{ material_form.ventilation.id_for_label }}">
+                                                    {{ material_form.ventilation.label }}
+                                                </label>
+                                                {% if material_form.ventilation.help_text %}
+                                                    <small class="form-text text-muted d-block">
+                                                        {{ material_form.ventilation.help_text }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="form-check">
+                                                {{ material_form.lighting }}
+                                                <label class="form-check-label ms-2" for="{{ material_form.lighting.id_for_label }}">
+                                                    {{ material_form.lighting.label }}
+                                                </label>
+                                                {% if material_form.lighting.help_text %}
+                                                    <small class="form-text text-muted d-block">
+                                                        {{ material_form.lighting.help_text }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -419,6 +547,26 @@
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                            {% endif %}
+
+                            <!-- Tab 3: Vivienda Deshabilitada (cuando parámetro es 'N') -->
+                            {% if datos_vivienda == 'N' %}
+                            <div class="tab-pane fade"
+                                 id="tab-vivienda-disabled"
+                                 role="tabpanel">
+                                <div class="alert alert-warning" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-2">Funcionalidad Deshabilitada</h5>
+                                            <p class="mb-0">
+                                                La funcionalidad de registro de datos de vivienda está actualmente deshabilitada.
+                                                Contacte al administrador del sistema para habilitar esta opción.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             {% endif %}
                         </div>

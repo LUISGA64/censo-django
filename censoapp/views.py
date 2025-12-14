@@ -545,6 +545,7 @@ def detalle_ficha(request, pk):
         context = {
             'familia': familia,
             'family_card': family_card,
+            'family_card_obj': family_card,  # Para acceder al historial
             'total_miembros': total_miembros,
             'cabeza_familia': cabeza_familia,
             'promedio_edad': round(promedio_edad, 1) if promedio_edad else 0,
@@ -565,7 +566,7 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
     Incluye validaciones robustas y mensajes claros para el usuario.
     """
     model = FamilyCard
-    fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization']
+    form_class = FormFamilyCard
     template_name = 'censo/censo/edit-family-card.html'
     success_url = reverse_lazy('familyCardIndex')
 
@@ -663,27 +664,21 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
         return super().post(request, *args, **kwargs)
 
     def _handle_material_form(self, request):
-        """Procesar el formulario de materiales de vivienda"""
+        """Procesar el formulario de materiales de vivienda de manera optimizada"""
         try:
-            # Verificar si ya existe un registro para esta ficha
-            material_instance = None
-            try:
-                material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(
-                    self.object.pk
-                )
-            except Exception:
-                pass
+            # Obtener instancia existente o None
+            material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(
+                self.object.pk
+            )
 
-            # Crear formulario con instancia existente o nueva
-            if material_instance:
-                material_form = MaterialConstructionFamilyForm(
-                    request.POST,
-                    instance=material_instance
-                )
-                action = "actualizados"
-            else:
-                material_form = MaterialConstructionFamilyForm(request.POST)
-                action = "guardados"
+            # Determinar acción según si existe o no
+            action = "actualizados" if material_instance else "guardados"
+
+            # Crear formulario con instancia (existente o None)
+            material_form = MaterialConstructionFamilyForm(
+                request.POST,
+                instance=material_instance
+            )
 
             if material_form.is_valid():
                 try:
@@ -691,33 +686,39 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
                         instance = material_form.save(commit=False)
                         instance.family_card = self.object
                         instance.save()
-                        material_form.save_m2m()
+
+                        # Guardar relaciones many-to-many si existen
+                        if hasattr(material_form, 'save_m2m'):
+                            material_form.save_m2m()
 
                         messages.success(
                             request,
-                            f"Datos de vivienda {action} correctamente para la ficha #{self.object.family_card_number}."
+                            f"✓ Datos de vivienda {action} correctamente para la ficha #{self.object.family_card_number}."
                         )
 
                         # Redirigir y mantener la pestaña vivienda activa
                         url = reverse('update-family', kwargs={'pk': self.object.pk}) + '?tab=vivienda'
                         return redirect(url)
 
-                except IntegrityError:
+                except IntegrityError as e:
                     messages.error(
                         request,
-                        "Error: Ya existe un registro de vivienda para esta ficha. Use el formulario para actualizar."
+                        "Error de integridad: Ya existe un registro de vivienda para esta ficha."
                     )
-                except Exception:
+                except Exception as e:
                     messages.error(
                         request,
-                        "Ocurrió un error al guardar los datos de vivienda. Por favor, intente nuevamente."
+                        f"Error al guardar los datos de vivienda. Por favor, intente nuevamente."
                     )
             else:
-                # Mostrar errores específicos
+                # Mostrar errores específicos del formulario
                 for field, errors in material_form.errors.items():
                     for error in errors:
-                        field_name = material_form.fields[field].label if field in material_form.fields else field
-                        messages.error(request, f"Vivienda - {field_name}: {error}")
+                        if field == '__all__':
+                            messages.error(request, f"Error: {error}")
+                        else:
+                            field_name = material_form.fields.get(field).label if field in material_form.fields else field
+                            messages.error(request, f"Vivienda - {field_name}: {error}")
 
             # Renderizar con errores
             return self.render_to_response(
@@ -727,7 +728,7 @@ class UpdateFamily(LoginRequiredMixin, UpdateView):
                 )
             )
 
-        except Exception:
+        except Exception as e:
             messages.error(
                 request,
                 "Error inesperado al procesar el formulario de vivienda."
@@ -1137,13 +1138,19 @@ def delete_person_familyCard(request, person):
 # Consultar los parámetros y retornar un json
 @login_required
 def get_system_parameters(request):
+    """
+    Vista API que retorna los parametros del sistema en formato JSON.
+    Usa cache para mejorar el rendimiento.
+    """
+    from .utils import get_system_parameters_cached
+
     try:
-        params = SystemParameters.objects.all().values('key', 'value')
-        data = {param['key']: param['value'] for param in params}
+        # Usar cache con timeout de 1 hora
+        data = get_system_parameters_cached(timeout=3600)
         return JsonResponse(data)
     except Exception as e:
-        # logger.error(f"Error al obtener los parámetros del sistema: {e}")
-        return JsonResponse({'error': 'Error al obtener los parámetros del sistema'}, status=500)
+        logger.error(f"Error al obtener los parametros del sistema: {e}")
+        return JsonResponse({'error': 'Error al obtener los parametros del sistema'}, status=500)
 
 
 # Registro de Materiales de construcción
