@@ -813,6 +813,67 @@ class BoardPosition(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+    def is_valid_on_date(self, check_date):
+        """
+        Verifica si el cargo está vigente en una fecha específica.
+
+        Args:
+            check_date: Fecha a verificar (date object)
+
+        Returns:
+            bool: True si el cargo está vigente en esa fecha
+        """
+        # Debe estar marcado como activo
+        if not self.is_active:
+            return False
+
+        # La fecha debe ser >= fecha de inicio
+        if check_date < self.start_date:
+            return False
+
+        # Si hay fecha de fin, la fecha debe ser <= fecha de fin
+        if self.end_date and check_date > self.end_date:
+            return False
+
+        return True
+
+    @classmethod
+    def get_valid_positions_on_date(cls, organization, check_date):
+        """
+        Obtiene todos los cargos vigentes de una organización en una fecha específica.
+
+        Args:
+            organization: Organización
+            check_date: Fecha a verificar
+
+        Returns:
+            QuerySet de BoardPosition vigentes
+        """
+        positions = cls.objects.filter(
+            organization=organization,
+            is_active=True,
+            start_date__lte=check_date
+        ).filter(
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=check_date)
+        )
+        return positions
+
+    @classmethod
+    def get_signers_on_date(cls, organization, check_date):
+        """
+        Obtiene los cargos autorizados para firmar en una fecha específica.
+
+        Args:
+            organization: Organización
+            check_date: Fecha a verificar
+
+        Returns:
+            QuerySet de BoardPosition autorizados a firmar
+        """
+        return cls.get_valid_positions_on_date(organization, check_date).filter(
+            can_sign_documents=True
+        )
+
 
 class GeneratedDocument(models.Model):
     """
@@ -947,6 +1008,34 @@ class GeneratedDocument(models.Model):
                     f"El tipo de documento '{self.document_type.document_type_name}' requiere fecha de vencimiento."
                 )
 
+        # VALIDACIÓN CRÍTICA: Verificar que exista junta directiva vigente en la fecha de expedición
+        if self.issue_date and self.organization:
+            # Obtener cargos vigentes en la fecha de expedición
+            valid_positions = BoardPosition.get_valid_positions_on_date(
+                self.organization,
+                self.issue_date
+            )
+
+            if not valid_positions.exists():
+                raise ValidationError(
+                    f"No existe una junta directiva vigente para la organización '{self.organization.organization_name}' "
+                    f"en la fecha de expedición ({self.issue_date.strftime('%Y-%m-%d')}). "
+                    f"No se pueden generar documentos sin una junta directiva activa."
+                )
+
+            # Verificar que existan firmantes autorizados en esa fecha
+            valid_signers = BoardPosition.get_signers_on_date(
+                self.organization,
+                self.issue_date
+            )
+
+            if not valid_signers.exists():
+                raise ValidationError(
+                    f"No hay miembros de la junta directiva autorizados para firmar documentos "
+                    f"en la fecha de expedición ({self.issue_date.strftime('%Y-%m-%d')}). "
+                    f"Debe existir al menos un cargo con permiso para firmar."
+                )
+
         super().clean()
 
     def save(self, *args, **kwargs):
@@ -1001,3 +1090,43 @@ class GeneratedDocument(models.Model):
         from datetime import date
         delta = self.expiration_date - date.today()
         return delta.days if delta.days > 0 else 0
+
+    def validate_signers(self):
+        """
+        Valida que todos los firmantes asignados estén vigentes en la fecha de expedición.
+        Este método se debe llamar después de asignar los firmantes (ManyToMany).
+        """
+        if not self.issue_date:
+            return
+
+        invalid_signers = []
+        for signer in self.signers.all():
+            if not signer.is_valid_on_date(self.issue_date):
+                invalid_signers.append(signer)
+
+        if invalid_signers:
+            signer_names = ", ".join([
+                f"{s.get_position_name_display()} ({s.holder_person.full_name if s.holder_person else 'Sin asignar'})"
+                for s in invalid_signers
+            ])
+            raise ValidationError(
+                f"Los siguientes firmantes NO están vigentes en la fecha de expedición "
+                f"({self.issue_date.strftime('%Y-%m-%d')}): {signer_names}. "
+                f"Solo pueden firmar miembros de la junta directiva que estén en funciones en esa fecha."
+            )
+
+        # Validar que todos los firmantes puedan firmar documentos
+        unauthorized_signers = []
+        for signer in self.signers.all():
+            if not signer.can_sign_documents:
+                unauthorized_signers.append(signer)
+
+        if unauthorized_signers:
+            signer_names = ", ".join([
+                f"{s.get_position_name_display()}"
+                for s in unauthorized_signers
+            ])
+            raise ValidationError(
+                f"Los siguientes cargos NO están autorizados para firmar documentos: {signer_names}. "
+                f"Debe marcar el permiso 'Autorizado para Firmar' en el cargo."
+            )

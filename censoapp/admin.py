@@ -235,10 +235,25 @@ class GeneratedDocumentAdmin(SimpleHistoryAdmin):
     person_name.short_description = "Persona"
 
     def save_model(self, request, obj, form, change):
-        """Asignar usuario creador automáticamente"""
+        """Asignar usuario creador automáticamente y validar"""
         if not change:  # Solo en creación
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+    def save_related(self, request, form, formsets, change):
+        """Validar firmantes después de guardar relaciones ManyToMany"""
+        super().save_related(request, form, formsets, change)
+
+        # Validar que los firmantes estén vigentes en la fecha de expedición
+        try:
+            form.instance.validate_signers()
+        except Exception as e:
+            # Mostrar error al usuario
+            from django.contrib import messages
+            messages.error(
+                request,
+                f"Error en la validación de firmantes: {str(e)}"
+            )
 
     def get_queryset(self, request):
         """Filtrar por organización del usuario"""
