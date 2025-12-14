@@ -1483,7 +1483,7 @@ def export_persons_excel(request):
                 persona.last_name_1 or '',
                 persona.last_name_2 or '',
                 fecha_nac,
-                persona.eps.eps_name if persona.eps else '',
+                persona.eps.name_eps if persona.eps else '',  # Corregido: name_eps
                 persona.kinship.description_kinship if persona.kinship else '',
                 persona.gender.gender if persona.gender else '',
                 persona.civil_state.description_civil_state if persona.civil_state else '',
