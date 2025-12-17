@@ -50,6 +50,28 @@
             font-weight: 600;
         }
 
+        /* Botones de filtro */
+        .btn-group .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn-group .btn.active {
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-outline-primary.active {
+            background-color: #2196F3 !important;
+            border-color: #2196F3 !important;
+            color: white !important;
+        }
+
+        .btn-outline-success.active {
+            background-color: #82D616 !important;
+            border-color: #82D616 !important;
+            color: white !important;
+        }
+
         /* Badge de ficha */
         .badge-ficha-link {
             background: #2196F3;
@@ -377,10 +399,24 @@
             <div class="col-12">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white border-bottom py-3">
-                        <h5 class="mb-0 text-dark d-flex align-items-center">
-                            <i class="fas fa-table me-2 text-primary"></i>
-                            Listado de Comuneros
-                        </h5>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <h5 class="mb-0 text-dark d-flex align-items-center">
+                                <i class="fas fa-table me-2 text-primary"></i>
+                                Listado de Comuneros
+                            </h5>
+
+                            <!-- Botones de Filtro -->
+                            <div class="btn-group" role="group" aria-label="Filtros de personas">
+                                <button type="button" class="btn btn-sm btn-outline-primary active" id="filterAll">
+                                    <i class="fas fa-users me-1"></i>
+                                    Todos
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success" id="filterHeads">
+                                    <i class="fas fa-crown me-1"></i>
+                                    Solo Jefes
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card-body px-4 pt-3 pb-2">
@@ -504,25 +540,6 @@
 
             // Hacer la función global
             window.showNotification = showNotification;
-        });
-    </script>
-
-            $('#filterAll').on('click', function() {
-                currentFilter = 'all';
-                $('#person').DataTable().search('').draw();
-                updateFilterButtons(this);
-            });
-
-            $('#filterHeads').on('click', function() {
-                currentFilter = 'heads';
-                // Este filtro se implementará en el archivo JS principal
-                updateFilterButtons(this);
-            });
-
-            function updateFilterButtons(activeBtn) {
-                $('.btn-group button').removeClass('active');
-                $(activeBtn).addClass('active');
-            }
         });
     </script>
 {% endblock javascripts %}

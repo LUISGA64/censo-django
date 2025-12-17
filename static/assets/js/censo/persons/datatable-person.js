@@ -221,4 +221,62 @@ $(document).ready(function () {
 
     // Hacer la función global para uso en otros scripts
     window.showNotification = showNotification;
+
+    // ========================================
+    // FILTROS DE PERSONAS
+    // ========================================
+
+    let currentFilter = 'all';
+
+    // Filtro personalizado para DataTables
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+            // Solo aplicar al datatable de personas
+            if (settings.nTable.id !== 'person') {
+                return true;
+            }
+
+            // Si el filtro es 'all', mostrar todos
+            if (currentFilter === 'all') {
+                return true;
+            }
+
+            // Si el filtro es 'heads', solo mostrar jefes de familia
+            if (currentFilter === 'heads') {
+                const rowData = table.row(dataIndex).data();
+                return rowData && rowData.family_head === true;
+            }
+
+            return true;
+        }
+    );
+
+    // Botón "Todos"
+    $('#filterAll').on('click', function() {
+        currentFilter = 'all';
+        updateFilterButtons(this);
+        table.draw();
+
+        const totalRows = table.rows().count();
+        showNotification(`Mostrando todas las personas (${totalRows} registros)`, 'info');
+    });
+
+    // Botón "Solo Jefes"
+    $('#filterHeads').on('click', function() {
+        currentFilter = 'heads';
+        updateFilterButtons(this);
+        table.draw();
+
+        // Contar cuántos jefes hay después del filtro
+        setTimeout(() => {
+            const filteredRows = table.rows({search: 'applied'}).count();
+            showNotification(`Mostrando solo jefes de familia (${filteredRows} registros)`, 'success');
+        }, 100);
+    });
+
+    // Función para actualizar estado de botones
+    function updateFilterButtons(activeBtn) {
+        $('.btn-group button').removeClass('active');
+        $(activeBtn).addClass('active');
+    }
 });

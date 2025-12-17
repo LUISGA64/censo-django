@@ -249,8 +249,35 @@ class FamilyCard(models.Model):
     def __str__(self):
         return f"{self.id}"
 
+    def clean(self):
+        """Validar que el número de ficha sea válido"""
+        from django.core.exceptions import ValidationError
+
+        # Validar que el número de ficha no sea 0
+        if self.family_card_number == 0:
+            raise ValidationError({
+                'family_card_number': 'El número de ficha familiar no puede ser 0. Se asignará automáticamente.'
+            })
+
+        # Validar que no haya duplicados (excepto si es la misma instancia)
+        if self.family_card_number:
+            duplicates = FamilyCard.objects.filter(
+                family_card_number=self.family_card_number
+            ).exclude(pk=self.pk)
+
+            if duplicates.exists():
+                raise ValidationError({
+                    'family_card_number': f'El número de ficha {self.family_card_number} ya está en uso.'
+                })
+
     def save(self, *args, **kwargs):
+        # Normalizar dirección
         self.address_home = self.address_home.strip().lower().capitalize() if self.address_home else ''
+
+        # Validar y asignar número de ficha si es necesario
+        if not self.family_card_number or self.family_card_number == 0:
+            self.family_card_number = self.get_next_family_card_number()
+
         super().save(*args, **kwargs)
 
     @classmethod
@@ -636,8 +663,9 @@ class DocumentType(models.Model):
         max_length=100,
         blank=False,
         null=False,
-        unique=True,
-        verbose_name="Tipo de Documento"
+        unique=False,  # Temporal: remover unique para migración
+        verbose_name="Tipo de Documento",
+        default="Documento"  # Temporal para migración
     )
     description = models.TextField(
         blank=True,
@@ -660,8 +688,18 @@ class DocumentType(models.Model):
         default=True,
         verbose_name="Activo"
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha de Creación",
+        null=True,  # Temporal para migración
+        blank=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Última Actualización",
+        null=True,  # Temporal para migración
+        blank=True
+    )
 
     def __str__(self):
         return self.document_type_name
@@ -751,8 +789,18 @@ class BoardPosition(models.Model):
         verbose_name="Observaciones"
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha de Creación",
+        null=True,
+        blank=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Última Actualización",
+        null=True,
+        blank=True
+    )
 
     # Auditoría de cambios
     history = HistoricalRecords()
@@ -932,6 +980,16 @@ class GeneratedDocument(models.Model):
         help_text="Número consecutivo del documento"
     )
 
+    # Hash de verificación para código QR
+    verification_hash = models.CharField(
+        max_length=32,
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name="Hash de Verificación",
+        help_text="Hash único para verificar autenticidad del documento vía código QR"
+    )
+
     # Firmantes del documento (miembros de la junta directiva)
     signers = models.ManyToManyField(
         BoardPosition,
@@ -973,8 +1031,18 @@ class GeneratedDocument(models.Model):
     )
 
     # Auditoría
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha de Creación",
+        null=True,
+        blank=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Última Actualización",
+        null=True,
+        blank=True
+    )
 
     # Auditoría de cambios
     history = HistoricalRecords()

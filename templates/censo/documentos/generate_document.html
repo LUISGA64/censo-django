@@ -1,0 +1,296 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Generar Documento - {{ person.full_name }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    /* Estilo corporativo */
+    .card-header-custom {
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        border-radius: 8px 8px 0 0;
+        padding: 1.5rem;
+    }
+
+    .document-type-card {
+        border: 2px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .document-type-card:hover {
+        border-color: #2196F3;
+        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .document-type-card.selected {
+        border-color: #2196F3;
+        background: #E3F2FD;
+    }
+
+    .document-type-card input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+
+    .person-info-box {
+        background: #F3F4F6;
+        border-left: 4px solid #2196F3;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-warning-custom {
+        background: #FFF3CD;
+        border-left: 4px solid #FFC107;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+
+    .btn-generate {
+        background: #82D616;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-generate:hover {
+        background: #6BB012;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(130, 214, 22, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'personas' %}"><i class="fas fa-users"></i> Personas</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'detail-person' person.id %}">{{ person.full_name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-file-alt"></i> Generar Documento
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <!-- Header -->
+                <div class="card-header-custom">
+                    <h4 class="mb-2">
+                        <i class="fas fa-file-signature me-2"></i>
+                        Generar Documento Oficial
+                    </h4>
+                    <p class="mb-0" style="opacity: 0.9;">
+                        Seleccione el tipo de documento a generar para {{ person.full_name }}
+                    </p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Información de la persona -->
+                    <div class="person-info-box">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Nombre:</strong> {{ person.full_name }}</p>
+                                <p class="mb-1"><strong>Identificación:</strong> {{ person.document_type.document_type }} {{ person.identification_person }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Vereda:</strong> {{ person.family_card.sidewalk_home.sidewalk_name }}</p>
+                                <p class="mb-1"><strong>Organización:</strong> {{ organization.organization_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advertencias -->
+                    {% if not has_board %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>No hay junta directiva registrada</strong><br>
+                        Para generar documentos oficiales, primero debe registrar la junta directiva de la organización.
+                    </div>
+                    {% elif not has_signers %}
+                    <div class="alert-warning-custom">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>No hay firmantes autorizados</strong><br>
+                        La junta directiva actual no tiene cargos autorizados para firmar documentos.
+                    </div>
+                    {% endif %}
+
+                    {% if has_signers %}
+                    <!-- Información de la junta directiva -->
+                    <div class="mb-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Junta Directiva Vigente:</strong>
+                            Esta organización cuenta con {{ signers.count }} miembro(s) autorizado(s) para firmar documentos.
+                            <a href="{% url 'organization-detail' organization.id %}" class="alert-link ms-2">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                Ver junta directiva completa
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Formulario de generación -->
+                    <form method="post" id="documentForm">
+                        {% csrf_token %}
+
+                        <h5 class="mb-3">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            Seleccione el Tipo de Documento
+                        </h5>
+
+                        {% if document_types %}
+                        <div class="row">
+                            {% for doc_type in document_types %}
+                            <div class="col-md-6">
+                                <label class="document-type-card" for="doc_type_{{ doc_type.id }}">
+                                    <div class="d-flex align-items-start">
+                                        <input
+                                            type="radio"
+                                            name="document_type"
+                                            id="doc_type_{{ doc_type.id }}"
+                                            value="{{ doc_type.id }}"
+                                            required
+                                        >
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-2">
+                                                <i class="fas fa-file-alt text-primary me-2"></i>
+                                                {{ doc_type.document_type_name }}
+                                            </h6>
+                                            {% if doc_type.description %}
+                                            <p class="mb-2 text-muted small">{{ doc_type.description }}</p>
+                                            {% endif %}
+                                            <p class="mb-0 small">
+                                                {% if doc_type.requires_expiration %}
+                                                <i class="fas fa-calendar-check text-success me-1"></i>
+                                                Con fecha de vencimiento
+                                                {% else %}
+                                                <i class="fas fa-infinity text-info me-1"></i>
+                                                Sin vencimiento
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Vigencia del documento -->
+                        <div class="mt-4">
+                            <h6 class="mb-3">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Vigencia del Documento
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="expiration_days" class="form-label">Días de vigencia:</label>
+                                    <select name="expiration_days" id="expiration_days" class="form-control">
+                                        <option value="30">30 días (1 mes)</option>
+                                        <option value="90">90 días (3 meses)</option>
+                                        <option value="180">180 días (6 meses)</option>
+                                        <option value="365" selected>365 días (1 año)</option>
+                                        <option value="730">730 días (2 años)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a href="{% url 'detail-person' person.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-generate" id="generateBtn">
+                                <i class="fas fa-file-signature me-2"></i>
+                                Generar Documento
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No hay tipos de documentos configurados. Por favor, contacte al administrador.
+                        </div>
+                        {% endif %}
+                    </form>
+                    {% else %}
+                    <div class="d-flex justify-content-center mt-4">
+                        <a href="{% url 'detail-person' person.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Volver
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Manejar selección de tarjetas
+        const cards = document.querySelectorAll('.document-type-card');
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remover selección anterior
+                cards.forEach(c => c.classList.remove('selected'));
+                // Agregar selección actual
+                this.classList.add('selected');
+                // Marcar radio button
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                }
+            });
+        });
+
+        // Validación del formulario
+        const form = document.getElementById('documentForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const radioChecked = document.querySelector('input[name="document_type"]:checked');
+                if (!radioChecked) {
+                    e.preventDefault();
+                    alert('Por favor seleccione un tipo de documento');
+                    return false;
+                }
+
+                // Deshabilitar botón y mostrar spinner
+                const btn = document.getElementById('generateBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando...';
+            });
+        }
+    });
+</script>
+{% endblock %}
+

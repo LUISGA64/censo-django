@@ -8,7 +8,10 @@ from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
-                    delete_person_familyCard, get_system_parameters, MaterialConstructionView, export_persons_excel)
+                    delete_person_familyCard, get_system_parameters, MaterialConstructionView, export_persons_excel,
+                    organization_detail)
+from .document_views import (generate_document_view, view_document, list_person_documents, download_document_pdf,
+                            organization_documents_stats, preview_document_pdf)
 
 
 urlpatterns = [
@@ -17,6 +20,9 @@ urlpatterns = [
     path('accounts/profile/', profile, name='profile'),
     path('association', association, name='association'),
     path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
+
+    # Organizaciones
+    path('organizacion/<int:pk>/', login_required(organization_detail), name='organization-detail'),
 
     # ----- FICHAS FAMILIARES -----
     path('familyCard/create', login_required(create_family_card), name='createFamilyCard'),
@@ -53,8 +59,14 @@ urlpatterns = [
     # ----- EXPORTACIONES -----
     path('export/personas/excel/', login_required(export_persons_excel), name='export-persons-excel'),
 
+    # ----- DOCUMENTOS -----
+    path('documento/generar/<int:person_id>/', login_required(generate_document_view), name='generate-document'),
+    path('documento/ver/<int:document_id>/', login_required(view_document), name='view-document'),
+    path('documento/preview/<int:document_id>/', login_required(preview_document_pdf), name='preview-document-pdf'),
+    path('documento/persona/<int:person_id>/', login_required(list_person_documents), name='list-person-documents'),
+    path('documento/descargar/<int:document_id>/', login_required(download_document_pdf), name='download-document-pdf'),
 
-    # Document Aval
-    # path('aval/')
-
+    # Estadísticas de documentos
+    path('documentos/estadisticas/', login_required(organization_documents_stats), name='documents-stats'),
+    path('documentos/estadisticas/<int:organization_id>/', login_required(organization_documents_stats), name='documents-stats-org'),
 ]

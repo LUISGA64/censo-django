@@ -303,13 +303,21 @@
 
                         <!-- Botones de acción -->
                         <div class="col-auto">
-                            {% if can_edit %}
-                            <a href="{% url 'updated-person' persona.id %}"
-                               class="btn btn-action">
-                                <i class="fas fa-edit me-2"></i>
-                                Editar Persona
-                            </a>
-                            {% endif %}
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'generate-document' persona.id %}"
+                                   class="btn btn-success me-2"
+                                   title="Generar documento oficial">
+                                    <i class="fas fa-file-signature me-2"></i>
+                                    Generar Documento
+                                </a>
+                                {% if can_edit %}
+                                <a href="{% url 'updated-person' persona.id %}"
+                                   class="btn btn-action">
+                                    <i class="fas fa-edit me-2"></i>
+                                    Editar Persona
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>

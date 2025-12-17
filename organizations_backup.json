@@ -1,0 +1,49 @@
+[
+{
+  "model": "censoapp.organizations",
+  "pk": 1,
+  "fields": {
+    "organization_name": "Resguardo Indígena Puracé",
+    "organization_identification": "22345677",
+    "organization_type_identification": "NIT",
+    "organization_territory": "Pueblo Kokonuko",
+    "organization_email": "resguardo_purace@email.com",
+    "organization_mobile_phone": "3114445566",
+    "organization_phone": "6028477041",
+    "organization_address": "Kilómetro 3 Vía al Huila",
+    "organization_logo": "Images/logo-1933884_1280.webp",
+    "association_id": 1
+  }
+},
+{
+  "model": "censoapp.organizations",
+  "pk": 2,
+  "fields": {
+    "organization_name": "Resguardo Indigena de Prueba",
+    "organization_identification": "4552123",
+    "organization_type_identification": "NIT",
+    "organization_territory": "Territorio",
+    "organization_email": "prueba@ermail.com",
+    "organization_mobile_phone": "3112223322",
+    "organization_phone": "6028444444",
+    "organization_address": "Dirección de Prueba",
+    "organization_logo": "Images/IN_LOGO_Dark.png",
+    "association_id": 1
+  }
+},
+{
+  "model": "censoapp.association",
+  "pk": 1,
+  "fields": {
+    "association_name": "GENARO SANCHEZ",
+    "association_identification": "1234567",
+    "association_type_document": "NIT",
+    "association_phone_mobile": "3112223365",
+    "association_phone": "6028223322",
+    "association_address": "Carrera 2 calle 1Norte",
+    "association_departament": "Cauca",
+    "association_email": "asociacion@email.com.co",
+    "association_logo": "Association/2.png"
+  }
+}
+]

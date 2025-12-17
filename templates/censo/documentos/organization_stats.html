@@ -1,0 +1,651 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas de Documentos - {{ organization.organization_name }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #2196F3;
+    }
+
+    .stat-label {
+        color: #6B7280;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .chart-container canvas {
+        max-height: 400px !important;
+    }
+
+    /* Estilos para DataTables - Profesional y Sobrio */
+    #documentsTable {
+        font-size: 0.9rem;
+        border-collapse: collapse;
+    }
+
+    #documentsTable thead th {
+        background: #2196F3;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 12px 8px;
+    }
+
+    #documentsTable tbody tr {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    #documentsTable tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    #documentsTable tbody td {
+        padding: 10px 8px;
+        vertical-align: middle;
+    }
+
+    /* Badges con colores más discretos */
+    #documentsTable .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+        font-size: 0.85rem;
+    }
+
+    #documentsTable .badge.bg-secondary {
+        background-color: #6c757d !important;
+        color: white;
+    }
+
+    #documentsTable .badge.bg-success {
+        background-color: #28a745 !important;
+    }
+
+    #documentsTable .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    #documentsTable .badge.bg-danger {
+        background-color: #e04234 !important;
+        color: white;
+    }
+
+    #documentsTable .badge.bg-dark {
+        background-color: #343a40 !important;
+    }
+
+    /* Botones de acción - Colores de relleno discretos */
+    #documentsTable .btn-group .btn {
+        border: none;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+        min-width: 36px;
+    }
+
+    #documentsTable .btn-action-view {
+        background-color: #2196F3;
+        color: white;
+    }
+
+    #documentsTable .btn-action-view:hover {
+        background-color: #1976D2;
+        color: white;
+    }
+
+    #documentsTable .btn-action-details {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    #documentsTable .btn-action-details:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+
+    #documentsTable .btn-action-download {
+        background-color: #28a745;
+        color: white;
+    }
+
+    #documentsTable .btn-action-download:hover {
+        background-color: #218838;
+        color: white;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 0.375rem 2rem 0.375rem 0.75rem;
+    }
+
+    /* Estilos para filas */
+    #documentsTable .text-sm {
+        font-size: 0.875rem;
+    }
+
+    #documentsTable .align-middle {
+        vertical-align: middle;
+    }
+
+    /* Estilos del wrapper del DataTable */
+    .dataTables_wrapper .row {
+        margin-bottom: 0.75rem;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-2">
+                                <i class="fas fa-chart-bar text-primary me-2"></i>
+                                Estadísticas de Documentos
+                            </h3>
+                            <p class="text-muted mb-0">{{ organization.organization_name }}</p>
+                        </div>
+                        <a href="{% url 'organization-detail' organization.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-building me-2"></i>
+                            Ver Organización
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-label">Total Documentos</div>
+                <div class="stat-number">{{ stats.total|default:0 }}</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-label">Documentos Emitidos</div>
+                <div class="stat-number text-success">{{ stats.emitidos|default:0 }}</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-label">Documentos Vencidos</div>
+                <div class="stat-number text-warning">{{ stats.vencidos|default:0 }}</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-label">Documentos Anulados</div>
+                <div class="stat-number text-danger">{{ stats.anulados|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico y Tabla -->
+    <div class="row">
+        <!-- Gráfico de documentos por tipo -->
+        <div class="col-lg-8">
+            <div class="chart-container">
+                <h5 class="mb-4">
+                    <i class="fas fa-chart-pie text-primary me-2"></i>
+                    Documentos por Tipo
+                </h5>
+                <div style="max-width: 500px; max-height: 500px; margin: 0 auto;">
+                    <canvas id="chartDocumentsByType"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de estadísticas por tipo -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Resumen por Tipo
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Emitidos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stats_by_type %}
+                                <tr>
+                                    <td>{{ item.document_type__document_type_name }}</td>
+                                    <td class="text-center"><strong>{{ item.total }}</strong></td>
+                                    <td class="text-center"><span class="badge bg-success">{{ item.emitidos }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">
+                                        No hay documentos generados
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de evolución temporal -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="mb-4">
+                    <i class="fas fa-chart-line text-primary me-2"></i>
+                    Documentos Generados por Mes (Últimos 6 meses)
+                </h5>
+                <canvas id="chartDocumentsByMonth" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado Completo de Documentos con DataTable -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            Listado Completo de Documentos
+                        </h5>
+                        <span class="badge bg-primary" id="total-documents-badge">
+                            Total: {{ stats.total|default:0 }} documentos
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="documentsTable" class="table table-striped table-hover w-100">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Tipo</th>
+                                    <th>Persona</th>
+                                    <th>Identificación</th>
+                                    <th>Fecha Expedición</th>
+                                    <th>Válido Hasta</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in all_documents %}
+                                <tr>
+                                    <td><strong>{{ doc.document_number }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-secondary text-white">
+                                            {{ doc.document_type.document_type_name }}
+                                        </span>
+                                    </td>
+                                    <td>{{ doc.person.full_name }}</td>
+                                    <td>{{ doc.person.identification_person }}</td>
+                                    <td data-order="{{ doc.issue_date|date:'Y-m-d' }}">
+                                        {{ doc.issue_date|date:"d/m/Y" }}
+                                    </td>
+                                    <td data-order="{% if doc.expiration_date %}{{ doc.expiration_date|date:'Y-m-d' }}{% else %}9999-12-31{% endif %}">
+                                        {% if doc.expiration_date %}
+                                            {{ doc.expiration_date|date:"d/m/Y" }}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doc.status == 'ISSUED' %}
+                                        <span class="badge bg-success">Expedido</span>
+                                        {% elif doc.status == 'DRAFT' %}
+                                        <span class="badge bg-warning text-dark">Borrador</span>
+                                        {% elif doc.status == 'EXPIRED' %}
+                                        <span class="badge bg-danger">Vencido</span>
+                                        {% elif doc.status == 'REVOKED' %}
+                                        <span class="badge bg-dark">Revocado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'preview-document-pdf' doc.id %}"
+                                               class="btn btn-action-view"
+                                               title="Vista Previa PDF"
+                                               target="_blank">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'view-document' doc.id %}"
+                                               class="btn btn-action-details"
+                                               title="Ver Detalles">
+                                                <i class="fas fa-file-alt"></i>
+                                            </a>
+                                            <a href="{% url 'download-document-pdf' doc.id %}?download=true"
+                                               class="btn btn-action-download"
+                                               title="Descargar PDF">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                        No hay documentos generados para esta organización
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+
+<!-- jQuery (requerido por DataTables) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+<script>
+
+    // Inicializar DataTable y Gráficos cuando el DOM esté listo
+    $(document).ready(function() {
+        // ===== DATATABLE =====
+        const table = $('#documentsTable').DataTable({
+            responsive: true,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+                processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>',
+                paginate: {
+                    first: '«',
+                    previous: '‹',
+                    next: '›',
+                    last: '»'
+                }
+            },
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            order: [[4, 'desc']], // Ordenar por fecha de expedición descendente
+            pagingType: 'full_numbers',
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            createdRow: function (row, data, dataIndex) {
+                $(row).addClass('text-sm align-middle');
+                $('td', row).addClass('py-3');
+            },
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy me-1"></i> Copiar',
+                    className: 'btn btn-secondary'
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                    className: 'btn btn-success',
+                    title: 'Documentos - {{ organization.organization_name }}',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                    className: 'btn btn-primary',
+                    title: 'Documentos - {{ organization.organization_name }}',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                    className: 'btn btn-secondary',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                }
+            ],
+            initComplete: function() {
+                // Actualizar badge con total filtrado
+                this.api().on('search.dt', function() {
+                    const info = table.page.info();
+                    $('#total-documents-badge').html(
+                        `Total: ${info.recordsDisplay} de ${info.recordsTotal} documentos`
+                    );
+                });
+            }
+        });
+
+        // ===== GRÁFICO DE DOCUMENTOS POR TIPO =====
+        const typeLabels = [
+            {% for item in stats_by_type %}
+            "{{ item.document_type__document_type_name }}",
+            {% endfor %}
+        ];
+
+        const typeData = [
+            {% for item in stats_by_type %}
+            {{ item.total }},
+            {% endfor %}
+        ];
+
+        // Verificar que el canvas existe
+        const chartTypeCanvas = document.getElementById('chartDocumentsByType');
+        if (chartTypeCanvas && typeLabels.length > 0) {
+            const ctxType = chartTypeCanvas.getContext('2d');
+            new Chart(ctxType, {
+                type: 'doughnut',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        label: 'Documentos',
+                        data: typeData,
+                        backgroundColor: [
+                            '#2196F3',
+                            '#82D616',
+                            '#FF9800',
+                            '#F44336',
+                            '#9C27B0',
+                            '#00BCD4'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1.5,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn('No hay datos para el gráfico de tipos de documentos');
+        }
+
+        // ===== GRÁFICO DE DOCUMENTOS POR MES =====
+        const monthLabels = [
+            {% for item in docs_by_month %}
+            "{{ item.month }}",
+            {% endfor %}
+        ];
+
+        const monthData = [
+            {% for item in docs_by_month %}
+            {{ item.total }},
+            {% endfor %}
+        ];
+
+        // Verificar que el canvas existe
+        const chartMonthCanvas = document.getElementById('chartDocumentsByMonth');
+        if (chartMonthCanvas && monthLabels.length > 0) {
+            const ctxMonth = chartMonthCanvas.getContext('2d');
+            new Chart(ctxMonth, {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Documentos Generados',
+                        data: monthData,
+                        backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                        borderColor: '#2196F3',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return `Mes: ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `Documentos: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Cantidad de Documentos'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Mes'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn('No hay datos para el gráfico de documentos por mes');
+        }
+    });
+</script>
+{% endblock %}
+

@@ -29,6 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# URL del sitio (para códigos QR y verificación de documentos)
+SITE_URL = 'http://127.0.0.1:8000'  # Cambiar en producción
+
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 
 SITE_ID = 1

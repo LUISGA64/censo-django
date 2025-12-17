@@ -12,13 +12,14 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
-from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard
+from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard, Organizations
 from .forms import FormFamilyCard, FormPerson, MaterialConstructionFamilyForm
 from django.views.decorators.csrf import csrf_protect
 from .mixins import OrganizationFilterMixin, OrganizationPermissionMixin, OrganizationFormMixin, ReadOnlyPermissionMixin
+import logging
 
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -145,6 +146,59 @@ class CreateAssociation(CreateView):
         return super(CreateAssociation, self).form_valid(form)
 
 
+@login_required
+def organization_detail(request, pk):
+    """
+    Vista detallada de una organización que muestra:
+    - Información de la organización
+    - Junta directiva vigente
+    - Estadísticas
+    """
+    from censoapp.models import BoardPosition
+    from datetime import date
+
+    organization = get_object_or_404(Organizations, pk=pk)
+
+    # Verificar permisos
+    if not request.user.is_superuser:
+        user_profile = getattr(request, 'user_profile', None)
+        if user_profile and user_profile.organization != organization:
+            messages.error(request, "No tiene permisos para ver esta organización.")
+            return redirect('home')
+
+    # Obtener junta directiva vigente
+    today = date.today()
+    current_board = BoardPosition.get_valid_positions_on_date(organization, today)
+    signers = BoardPosition.get_signers_on_date(organization, today)
+
+    # Obtener historial de juntas directivas
+    all_boards = BoardPosition.objects.filter(
+        organization=organization
+    ).select_related('holder_person', 'alternate_person').order_by('-start_date', 'position_name')
+
+    # Estadísticas de la organización
+    total_fichas = FamilyCard.objects.filter(organization=organization, state=True).count()
+    total_personas = Person.objects.filter(
+        family_card__organization=organization,
+        state=True
+    ).count()
+    total_veredas = Sidewalks.objects.filter(organization_id=organization).count()
+
+    context = {
+        'organization': organization,
+        'current_board': current_board,
+        'signers': signers,
+        'all_boards': all_boards,
+        'has_active_board': current_board.exists(),
+        'total_fichas': total_fichas,
+        'total_personas': total_personas,
+        'total_veredas': total_veredas,
+        'segment': 'organization'
+    }
+
+    return render(request, 'censo/organizacion/organization_detail.html', context)
+
+
 def family_card_index(request):
     return render(request, 'censo/censo/familyCardIndex.html',
                   {'segment': 'family_card'})
@@ -187,13 +241,29 @@ def get_family_cards(request):
                                   'family_card__organization', 'document_type')
                     .filter(family_head=True, state=True, family_card__state=True))
 
+        # Log para debugging
+        logger.info(f"FamilyCards - Usuario: {request.user.username}, is_superuser: {request.user.is_superuser}")
+        logger.info(f"FamilyCards - can_view_all: {getattr(request, 'can_view_all', False)}")
+
         # Filtrar por organización del usuario (multi-tenancy)
-        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+        # IMPORTANTE: Superusers y usuarios con can_view_all ven TODOS los datos
+        if request.user.is_superuser:
+            # Superuser ve TODO sin filtros
+            logger.info("FamilyCards - Superuser detectado - mostrando todos los datos")
+            pass  # No aplicar filtros
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            logger.info("FamilyCards - Usuario con can_view_all - mostrando todos los datos")
+            pass  # No aplicar filtros
+        else:
+            # Usuario normal: filtrar por organización
             user_organization = getattr(request, 'user_organization', None)
             if user_organization:
+                logger.info(f"FamilyCards - Filtrando por organización: {user_organization.organization_name}")
                 queryset = queryset.filter(family_card__organization=user_organization)
             else:
                 # Usuario sin organización, retornar vacío
+                logger.warning(f"FamilyCards - Usuario {request.user.username} sin organización asignada")
                 return JsonResponse({
                     'draw': draw,
                     'recordsTotal': 0,
@@ -234,7 +304,14 @@ def get_family_cards(request):
         )
 
         # Aplicar filtro de organización al total también
-        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+        if request.user.is_superuser:
+            # Superuser ve TODO
+            pass
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            pass
+        else:
+            # Usuario normal: filtrar por organización
             user_organization = getattr(request, 'user_organization', None)
             if user_organization:
                 total_queryset = total_queryset.filter(family_card__organization=user_organization)
@@ -1024,13 +1101,30 @@ def listar_personas(request):
                                   'family_card__organization')
                     .filter(state=True))
 
+        # Log para debugging
+        logger.info(f"Usuario: {request.user.username}, is_superuser: {request.user.is_superuser}")
+        logger.info(f"can_view_all: {getattr(request, 'can_view_all', False)}")
+        logger.info(f"user_organization: {getattr(request, 'user_organization', None)}")
+
         # Filtrar por organización del usuario (multi-tenancy)
-        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+        # IMPORTANTE: Superusers y usuarios con can_view_all ven TODOS los datos
+        if request.user.is_superuser:
+            # Superuser ve TODO sin filtros
+            logger.info("Superuser detectado - mostrando todos los datos")
+            pass  # No aplicar filtros
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            logger.info("Usuario con can_view_all - mostrando todos los datos")
+            pass  # No aplicar filtros
+        else:
+            # Usuario normal: filtrar por organización
             user_organization = getattr(request, 'user_organization', None)
             if user_organization:
+                logger.info(f"Filtrando por organización: {user_organization.organization_name}")
                 personas = personas.filter(family_card__organization=user_organization)
             else:
                 # Usuario sin organización, retornar vacío
+                logger.warning(f"Usuario {request.user.username} sin organización asignada")
                 return JsonResponse({
                     'draw': draw,
                     'recordsTotal': 0,
@@ -1065,7 +1159,15 @@ def listar_personas(request):
         # Respetar filtro de organización también en el total
         total_queryset = Person.objects.filter(state=True)
 
-        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+        # Aplicar el mismo filtro de organización
+        if request.user.is_superuser:
+            # Superuser ve TODO
+            pass
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            pass
+        else:
+            # Usuario normal: filtrar por organización
             user_organization = getattr(request, 'user_organization', None)
             if user_organization:
                 total_queryset = total_queryset.filter(family_card__organization=user_organization)

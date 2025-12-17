@@ -1,0 +1,178 @@
+[
+{
+  "model": "censoapp.familycard",
+  "pk": 1,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 1,
+    "state": true,
+    "created_at": "2024-10-27T22:30:04.522Z",
+    "updated_at": "2025-12-14T02:18:10.044Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 6,
+  "fields": {
+    "address_home": "prueba",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 2,
+    "state": true,
+    "created_at": "2024-10-27T23:19:00.980Z",
+    "updated_at": "2024-10-27T23:19:00.980Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 7,
+  "fields": {
+    "address_home": "Prueba",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Urbana",
+    "organization": 1,
+    "family_card_number": 3,
+    "state": true,
+    "created_at": "2024-10-27T23:20:43.145Z",
+    "updated_at": "2025-12-14T02:43:26.558Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 9,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 4,
+    "state": true,
+    "created_at": "2025-01-11T15:45:27.467Z",
+    "updated_at": "2025-06-22T16:05:31.410Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 10,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 5,
+    "state": true,
+    "created_at": "2025-06-22T15:08:08.900Z",
+    "updated_at": "2025-06-22T15:08:08.900Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 11,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 6,
+    "state": true,
+    "created_at": "2025-06-22T16:06:43.881Z",
+    "updated_at": "2025-06-22T16:06:43.881Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 12,
+  "fields": {
+    "address_home": "Prueba",
+    "sidewalk_home": 2,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Urbana",
+    "organization": 1,
+    "family_card_number": 7,
+    "state": true,
+    "created_at": "2025-06-29T21:47:00.686Z",
+    "updated_at": "2025-06-29T21:47:00.686Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 13,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 0,
+    "state": false,
+    "created_at": "2025-06-29T22:37:45.406Z",
+    "updated_at": "2025-06-30T00:19:07.037Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 14,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 9,
+    "state": true,
+    "created_at": "2025-06-29T23:24:42.687Z",
+    "updated_at": "2025-06-29T23:24:42.687Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 15,
+  "fields": {
+    "address_home": "",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "Rural",
+    "organization": 1,
+    "family_card_number": 10,
+    "state": true,
+    "created_at": "2025-12-13T01:28:18.633Z",
+    "updated_at": "2025-12-13T03:11:27.741Z"
+  }
+},
+{
+  "model": "censoapp.familycard",
+  "pk": 16,
+  "fields": {
+    "address_home": "Test auditoria actualizada",
+    "sidewalk_home": 1,
+    "latitude": "0",
+    "longitude": "0",
+    "zone": "U",
+    "organization": 1,
+    "family_card_number": 11,
+    "state": true,
+    "created_at": "2025-12-14T15:14:58.868Z",
+    "updated_at": "2025-12-14T15:14:59.813Z"
+  }
+}
+]
