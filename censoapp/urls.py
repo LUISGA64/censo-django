@@ -11,7 +11,7 @@ from .views import (home, profile, association, CreateAssociation, family_card_i
                     delete_person_familyCard, get_system_parameters, MaterialConstructionView, export_persons_excel,
                     organization_detail)
 from .document_views import (generate_document_view, view_document, list_person_documents, download_document_pdf,
-                            organization_documents_stats, preview_document_pdf)
+                            organization_documents_stats, preview_document_pdf, verify_document)
 
 
 urlpatterns = [
@@ -65,6 +65,9 @@ urlpatterns = [
     path('documento/preview/<int:document_id>/', login_required(preview_document_pdf), name='preview-document-pdf'),
     path('documento/persona/<int:person_id>/', login_required(list_person_documents), name='list-person-documents'),
     path('documento/descargar/<int:document_id>/', login_required(download_document_pdf), name='download-document-pdf'),
+
+    # Verificación de documentos (acceso público para terceros)
+    path('documento/verificar/<str:hash>/', verify_document, name='verify-document'),
 
     # Estadísticas de documentos
     path('documentos/estadisticas/', login_required(organization_documents_stats), name='documents-stats'),

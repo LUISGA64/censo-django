@@ -141,6 +141,18 @@ def generate_document_view(request, person_id):
             # Agregar firmantes
             generated_doc.signers.set(signers)
 
+            # Generar y guardar hash de verificación inmediatamente
+            verification_data = f"{generated_doc.id}|{generated_doc.document_number}|{generated_doc.issue_date.isoformat()}"
+            verification_hash = hashlib.sha256(verification_data.encode()).hexdigest()[:16]
+            generated_doc.verification_hash = verification_hash
+            generated_doc.save(update_fields=['verification_hash'])
+
+            logger.info(
+                f"Documento creado: {generated_doc.document_number} - "
+                f"Hash: {verification_hash} - "
+                f"Persona: {person.full_name}"
+            )
+
             messages.success(
                 request,
                 f"Documento '{document_type.document_type_name}' generado exitosamente. "
@@ -544,10 +556,15 @@ def generate_document_qr(document):
     verification_data = f"{document.id}|{document.document_number}|{document.issue_date.isoformat()}"
     doc_hash = hashlib.sha256(verification_data.encode()).hexdigest()[:16]
 
-    # Guardar hash en el documento si no existe
-    if not hasattr(document, 'verification_hash'):
+    # Guardar hash en el documento si no existe o está vacío
+    if not document.verification_hash:
         document.verification_hash = doc_hash
         document.save(update_fields=['verification_hash'])
+        logger.info(f"Hash de verificación generado y guardado para documento {document.document_number}: {doc_hash}")
+    else:
+        # Usar el hash existente
+        doc_hash = document.verification_hash
+        logger.debug(f"Usando hash de verificación existente para documento {document.document_number}: {doc_hash}")
 
     # URL de verificación (ajustar según tu dominio en producción)
     site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
@@ -826,3 +843,126 @@ def download_document_pdf(request, document_id):
         messages.error(request, f"Error al generar el PDF: {str(e)}")
         return redirect('view-document', document_id=document_id)
 
+
+def verify_document(request, hash):
+    """
+    Verifica la autenticidad de un documento mediante su hash de verificación.
+    Esta vista es de acceso público para permitir verificación por terceros.
+
+    Args:
+        request: HttpRequest
+        hash: Hash de verificación del documento (extraído del código QR)
+
+    Returns:
+        render: Página de verificación con resultado (válido/vencido/inválido)
+    """
+    try:
+        # Buscar documento por hash de verificación
+        document = GeneratedDocument.objects.select_related(
+            'document_type', 'person', 'person__document_type',
+            'person__family_card', 'person__family_card__sidewalk_home',
+            'organization'
+        ).get(verification_hash=hash)
+
+        # Determinar estado del documento
+        today = date.today()
+        is_issued = document.status == 'ISSUED'
+        is_expired = document.expiration_date and document.expiration_date < today
+        is_revoked = document.status == 'REVOKED'
+
+        # Calcular estado de verificación
+        if is_revoked:
+            verification_status = 'REVOCADO'
+            status_class = 'danger'
+            status_icon = 'fa-ban'
+        elif is_expired:
+            verification_status = 'VENCIDO'
+            status_class = 'warning'
+            status_icon = 'fa-clock'
+        elif is_issued:
+            verification_status = 'VÁLIDO'
+            status_class = 'success'
+            status_icon = 'fa-check-circle'
+        else:
+            verification_status = 'INVÁLIDO'
+            status_class = 'danger'
+            status_icon = 'fa-times-circle'
+
+        # Determinar si el usuario está autenticado para mostrar información completa o limitada
+        is_authenticated = request.user.is_authenticated
+
+        # Información básica (siempre visible para todos)
+        basic_info = {
+            'document_type': document.document_type.document_type_name,
+            'document_number': document.document_number,
+            'issue_date': document.issue_date,
+            'expiration_date': document.expiration_date,
+            'organization_name': document.organization.organization_name,
+            'status': verification_status,
+        }
+
+        # Información sensible (solo para usuarios autenticados)
+        sensitive_info = {
+            'person_full_name': document.person.full_name,
+            'person_identification': document.person.identification_person,
+            'person_document_type': document.person.document_type.document_type,
+            'organization_nit': getattr(document.organization, 'nit', None),
+            'verification_hash': document.verification_hash,
+        } if is_authenticated else {}
+
+        # Preparar contexto
+        context = {
+            'found': True,
+            'document': document,
+            'person': document.person if is_authenticated else None,
+            'organization': document.organization,
+            'verification_status': verification_status,
+            'status_class': status_class,
+            'status_icon': status_icon,
+            'is_valid': is_issued and not is_expired and not is_revoked,
+            'is_expired': is_expired,
+            'is_revoked': is_revoked,
+            'is_authenticated': is_authenticated,
+            'basic_info': basic_info,
+            'sensitive_info': sensitive_info,
+            'segment': 'verificacion'
+        }
+
+        # Logging diferenciado
+        if is_authenticated:
+            logger.info(
+                f"Verificación autenticada de documento {document.document_number} - "
+                f"Hash: {hash} - Usuario: {request.user.username}"
+            )
+        else:
+            logger.info(
+                f"Verificación pública de documento {document.document_number} - "
+                f"Hash: {hash} - IP: {request.META.get('REMOTE_ADDR', 'desconocida')}"
+            )
+
+    except GeneratedDocument.DoesNotExist:
+        # Documento no encontrado - hash inválido o documento falsificado
+        context = {
+            'found': False,
+            'verification_status': 'NO ENCONTRADO',
+            'status_class': 'danger',
+            'status_icon': 'fa-exclamation-triangle',
+            'error_message': 'El código QR escaneado no corresponde a ningún documento registrado en el sistema.',
+            'segment': 'verificacion'
+        }
+
+        logger.warning(f"Intento de verificación con hash inválido: {hash}")
+
+    except Exception as e:
+        # Error inesperado
+        logger.error(f"Error al verificar documento con hash {hash}: {e}")
+        context = {
+            'found': False,
+            'verification_status': 'ERROR',
+            'status_class': 'danger',
+            'status_icon': 'fa-exclamation-circle',
+            'error_message': 'Ocurrió un error al verificar el documento. Por favor, intente nuevamente.',
+            'segment': 'verificacion'
+        }
+
+    return render(request, 'censo/documentos/verify_document.html', context)

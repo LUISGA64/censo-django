@@ -59,13 +59,17 @@
     {% block stylesheets %}{% endblock stylesheets %}
 
 </head>
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show bg-gray-100 {% if not user.is_authenticated and segment == 'verificacion' %}no-sidebar{% endif %}">
 
-{% include "includes/sidebar.html" %}
+{% if user.is_authenticated or segment != 'verificacion' %}
+    {% include "includes/sidebar.html" %}
+{% endif %}
 
-<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg {% if not user.is_authenticated and segment == 'verificacion' %}full-width{% endif %}">
 
-    {% include "includes/navigation.html" %}
+    {% if user.is_authenticated or segment != 'verificacion' %}
+        {% include "includes/navigation.html" %}
+    {% endif %}
 
     {% block content %}{% endblock content %}
     {% include "includes/footer.html" %}

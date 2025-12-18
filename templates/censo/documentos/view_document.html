@@ -55,19 +55,6 @@
         color: #6B7280;
     }
 
-    .btn-download {
-        background: #2196F3;
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        border-radius: 6px;
-    }
-
-    .btn-download:hover {
-        background: #1976D2;
-        color: white;
-    }
 
     @media print {
         .no-print {
@@ -109,18 +96,26 @@
                     <i class="fas fa-arrow-left me-2"></i>
                     Volver
                 </a>
-                <div>
-                    <button onclick="window.print()" class="btn btn-outline-primary me-2">
-                        <i class="fas fa-print me-2"></i>
-                        Imprimir
-                    </button>
-                    <button onclick="previewPDF()" class="btn btn-info me-2">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'preview-document-pdf' document.id %}"
+                       class="btn btn-primary me-2"
+                       target="_blank"
+                       title="Abrir vista previa del PDF con navegador de páginas">
                         <i class="fas fa-eye me-2"></i>
                         Vista Previa PDF
-                    </button>
-                    <button onclick="downloadPDF()" class="btn btn-download">
+                    </a>
+                    <a href="{% url 'download-document-pdf' document.id %}?download=true"
+                       class="btn btn-success me-2"
+                       download
+                       title="Descargar el documento PDF">
                         <i class="fas fa-download me-2"></i>
                         Descargar PDF
+                    </a>
+                    <button onclick="printDocument()"
+                            class="btn btn-outline-primary"
+                            title="Imprimir el documento PDF">
+                        <i class="fas fa-print me-2"></i>
+                        Imprimir PDF
                     </button>
                 </div>
             </div>
@@ -217,23 +212,24 @@
 </div>
 
 <script>
-    // Función para abrir PDF en nueva ventana (previsualización)
-    function previewPDF() {
-        const url = "{% url 'download-document-pdf' document.id %}";
-        window.open(url, '_blank', 'width=900,height=700,menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes');
-    }
+    /**
+     * Función estandarizada para imprimir el documento PDF
+     * Abre la vista previa dedicada y ejecuta la impresión automáticamente
+     */
+    function printDocument() {
+        const url = "{% url 'preview-document-pdf' document.id %}";
+        const printWindow = window.open(url, '_blank', 'width=1000,height=800');
 
-    // Función para forzar descarga del PDF
-    function downloadPDF() {
-        const url = "{% url 'download-document-pdf' document.id %}";
-
-        // Crear un link temporal para forzar descarga
-        const link = document.createElement('a');
-        link.href = url + '?download=true';
-        link.download = 'documento_{{ document.document_number }}.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Esperar a que la ventana cargue completamente antes de imprimir
+        if (printWindow) {
+            printWindow.addEventListener('load', function() {
+                setTimeout(() => {
+                    printWindow.print();
+                }, 1500); // Dar tiempo a que PDF.js renderice el documento
+            });
+        } else {
+            alert('Por favor, habilite las ventanas emergentes para imprimir el documento.');
+        }
     }
 </script>
 {% endblock %}

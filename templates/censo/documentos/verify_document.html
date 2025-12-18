@@ -1,0 +1,502 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Verificación de Documento{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    /* Estilos para vista sin sidebar (usuarios no autenticados) */
+    body.no-sidebar .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    body.no-sidebar .container-fluid {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .main-content.full-width {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Estilos profesionales para verificación */
+    .verification-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin: 2rem auto;
+        max-width: 800px;
+    }
+
+    .verification-header {
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+    }
+
+    .verification-header.success {
+        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    }
+
+    .verification-header.warning {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    }
+
+    .verification-header.danger {
+        background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+    }
+
+    .verification-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .verification-status {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .verification-body {
+        padding: 2rem;
+    }
+
+    .info-section {
+        background: #F9FAFB;
+        border-left: 4px solid #2196F3;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 4px;
+    }
+
+    .info-section h5 {
+        color: #2196F3;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #6B7280;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: #1F2937;
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .alert-box {
+        background: #FFF3CD;
+        border-left: 4px solid #FFC107;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        border-radius: 4px;
+    }
+
+    .alert-box.danger {
+        background: #F8D7DA;
+        border-left-color: #DC3545;
+    }
+
+    .alert-box.success {
+        background: #D1ECF1;
+        border-left-color: #17A2B8;
+    }
+
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #E3F2FD;
+        color: #1976D2;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-verify-action {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .verification-container {
+            margin: 1rem;
+        }
+
+        .verification-header {
+            padding: 1.5rem;
+        }
+
+        .verification-icon {
+            font-size: 3rem;
+        }
+
+        .verification-status {
+            font-size: 1.5rem;
+        }
+
+        .info-row {
+            flex-direction: column;
+        }
+
+        .info-value {
+            text-align: left;
+            margin-top: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    {% if not user.is_authenticated %}
+    <!-- Header simple para usuarios no autenticados -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);">
+                <div class="card-body text-center py-4">
+                    <h3 class="text-white mb-2">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Sistema de Verificación de Documentos
+                    </h3>
+                    <p class="text-white mb-0" style="opacity: 0.9;">
+                        Verificación de autenticidad mediante código QR
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Breadcrumb para usuarios autenticados -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-shield-alt"></i> Verificación de Documento
+            </li>
+        </ol>
+    </nav>
+    {% endif %}
+
+    <!-- Contenedor de Verificación -->
+    <div class="verification-container">
+        <!-- Header según estado -->
+        {% if found %}
+            <div class="verification-header {{ status_class }}">
+                <div class="verification-icon">
+                    <i class="fas {{ status_icon }}"></i>
+                </div>
+                <h1 class="verification-status">{{ verification_status }}</h1>
+                <p class="mb-0" style="opacity: 0.9;">
+                    {% if is_valid %}
+                        Este documento es auténtico y está vigente
+                    {% elif is_expired %}
+                        Este documento ya no está vigente
+                    {% elif is_revoked %}
+                        Este documento ha sido revocado
+                    {% else %}
+                        Este documento no es válido
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Cuerpo con información del documento -->
+            <div class="verification-body">
+                {% if is_valid %}
+                    <div class="alert-box success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Verificación Exitosa:</strong> Este documento fue emitido por
+                        <strong>{{ organization.organization_name }}</strong> y es completamente válido.
+                    </div>
+                {% elif is_expired %}
+                    <div class="alert-box">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Documento Vencido:</strong> Este documento expiró el
+                        <strong>{{ document.expiration_date|date:"d/m/Y" }}</strong> y ya no es válido.
+                    </div>
+                {% elif is_revoked %}
+                    <div class="alert-box danger">
+                        <i class="fas fa-ban me-2"></i>
+                        <strong>Documento Revocado:</strong> Este documento ha sido anulado por la organización emisora.
+                    </div>
+                {% endif %}
+
+                <!-- Información del Documento (SIEMPRE VISIBLE) -->
+                <div class="info-section">
+                    <h5><i class="fas fa-file-alt me-2"></i>Información del Documento</h5>
+                    <div class="info-row">
+                        <span class="info-label">Tipo de Documento:</span>
+                        <span class="info-value">{{ basic_info.document_type }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Número:</span>
+                        <span class="info-value">{{ basic_info.document_number }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Fecha de Expedición:</span>
+                        <span class="info-value">{{ basic_info.issue_date|date:"d/m/Y" }}</span>
+                    </div>
+                    {% if basic_info.expiration_date %}
+                    <div class="info-row">
+                        <span class="info-label">Fecha de Vencimiento:</span>
+                        <span class="info-value">{{ basic_info.expiration_date|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">Estado:</span>
+                        <span class="info-value">
+                            <span class="badge bg-{{ status_class }}">{{ basic_info.status }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Información de la Organización (SIEMPRE VISIBLE) -->
+                <div class="info-section">
+                    <h5><i class="fas fa-building me-2"></i>Organización Emisora</h5>
+                    <div class="info-row">
+                        <span class="info-label">Nombre:</span>
+                        <span class="info-value">{{ basic_info.organization_name }}</span>
+                    </div>
+                    {% if is_authenticated and sensitive_info.organization_nit %}
+                    <div class="info-row">
+                        <span class="info-label">NIT:</span>
+                        <span class="info-value">{{ sensitive_info.organization_nit }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if is_authenticated %}
+                    <!-- Información del Beneficiario (SOLO USUARIOS AUTENTICADOS) -->
+                    <div class="info-section">
+                        <h5><i class="fas fa-user me-2"></i>Beneficiario</h5>
+                        <div class="info-row">
+                            <span class="info-label">Nombre Completo:</span>
+                            <span class="info-value">{{ sensitive_info.person_full_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Identificación:</span>
+                            <span class="info-value">{{ sensitive_info.person_document_type }} {{ sensitive_info.person_identification }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Sello de Seguridad (SOLO USUARIOS AUTENTICADOS) -->
+                    <div class="text-center mt-4">
+                        <div class="security-badge">
+                            <i class="fas fa-lock"></i>
+                            Hash de verificación: {{ sensitive_info.verification_hash }}
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Aviso de información limitada (SOLO USUARIOS NO AUTENTICADOS) -->
+                    <div class="alert-box">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Información Limitada:</strong> Por motivos de privacidad y protección de datos personales,
+                        la información mostrada es limitada. Si necesita verificar datos adicionales del beneficiario,
+                        por favor contacte directamente a la organización emisora o
+                        <a href="{% url 'profile' %}" class="text-primary"><strong>inicie sesión</strong></a>
+                        si es un usuario autorizado del sistema.
+                    </div>
+
+                    <!-- Mensaje de autenticidad básica -->
+                    <div class="info-section">
+                        <h5><i class="fas fa-shield-alt me-2"></i>Verificación de Autenticidad</h5>
+                        <p class="mb-0">
+                            ✅ Este código QR es auténtico y corresponde a un documento real emitido por
+                            <strong>{{ basic_info.organization_name }}</strong>.
+                        </p>
+                        <p class="mb-0 mt-2">
+                            ℹ️ Para obtener información completa del beneficiario,
+                            contacte a la organización emisora.
+                        </p>
+                    </div>
+                {% endif %}
+
+                <!-- Botones de Acción -->
+                <div class="action-buttons">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-verify-action">
+                            <i class="fas fa-arrow-left me-2"></i>Volver al Inicio
+                        </a>
+                    {% endif %}
+
+                    {% if is_valid %}
+                        <button onclick="window.print()" class="btn btn-primary btn-verify-action">
+                            <i class="fas fa-print me-2"></i>Imprimir Verificación
+                        </button>
+                    {% endif %}
+
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-verify-action">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Documento no encontrado -->
+            <div class="verification-header {{ status_class }}">
+                <div class="verification-icon">
+                    <i class="fas {{ status_icon }}"></i>
+                </div>
+                <h1 class="verification-status">{{ verification_status }}</h1>
+            </div>
+
+            <div class="verification-body">
+                <div class="alert-box danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>{{ error_message }}</strong>
+                </div>
+
+                <div class="info-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Posibles Causas</h5>
+                    <ul class="mb-0">
+                        <li>El código QR está dañado o alterado</li>
+                        <li>El documento puede ser falsificado</li>
+                        <li>El hash de verificación es inválido</li>
+                        <li>El documento fue eliminado del sistema</li>
+                    </ul>
+                </div>
+
+                <div class="alert-box">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Recomendación:</strong> Si recibió este documento de una fuente oficial,
+                    contacte directamente a la organización emisora para verificar su autenticidad.
+                </div>
+
+                <div class="action-buttons">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'home' %}" class="btn btn-primary btn-verify-action">
+                            <i class="fas fa-arrow-left me-2"></i>Volver al Inicio
+                        </a>
+                    {% else %}
+                        <a href="{% url 'profile' %}" class="btn btn-primary btn-verify-action">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Información adicional de seguridad -->
+    <div class="row mt-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-primary"><i class="fas fa-info-circle me-2"></i>Acerca de la Verificación</h6>
+                    <p class="text-sm mb-3">
+                        Este sistema de verificación utiliza códigos QR con hash criptográfico para garantizar
+                        la autenticidad de los documentos. Cada documento generado tiene un hash único que no
+                        puede ser duplicado o falsificado. Al escanear el código QR, puede verificar
+                        instantáneamente la validez del documento.
+                    </p>
+
+                    {% if not is_authenticated %}
+                    <div class="alert alert-info mb-0">
+                        <h6 class="alert-heading"><i class="fas fa-shield-alt me-2"></i>Protección de Datos Personales</h6>
+                        <p class="mb-2 text-sm">
+                            Por cumplimiento de normativas de protección de datos personales (Ley 1581 de 2012 - Colombia),
+                            <strong>la información del beneficiario no se muestra públicamente</strong>.
+                        </p>
+                        <hr>
+                        <p class="mb-2 text-sm">
+                            <strong>Lo que puede verificar sin autenticación:</strong>
+                        </p>
+                        <ul class="mb-2 text-sm">
+                            <li>✅ Autenticidad del documento (válido/vencido/revocado)</li>
+                            <li>✅ Tipo y número de documento</li>
+                            <li>✅ Organización emisora</li>
+                            <li>✅ Fechas de expedición y vencimiento</li>
+                        </ul>
+                        <p class="mb-0 text-sm">
+                            <strong>Si necesita información del beneficiario:</strong> Contacte a la organización emisora
+                            o <a href="{% url 'profile' %}" class="alert-link">inicie sesión</a> si es usuario autorizado.
+                        </p>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success mb-0">
+                        <h6 class="alert-heading"><i class="fas fa-user-check me-2"></i>Acceso Autorizado</h6>
+                        <p class="mb-0 text-sm">
+                            Como usuario autenticado del sistema, tiene acceso a la información completa del documento,
+                            incluyendo datos del beneficiario. Esta información es confidencial y está protegida por
+                            normativas de protección de datos personales.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script>
+    // Animación de entrada
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.querySelector('.verification-container');
+        if (container) {
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                container.style.transition = 'all 0.5s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        }
+    });
+</script>
+{% endblock %}
+
