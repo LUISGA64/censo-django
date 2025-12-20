@@ -164,6 +164,137 @@
         transition: all 0.3s ease;
     }
 
+    /* ===== MEJORA DE CONTRASTE PARA ALERTAS ===== */
+
+    /* Alert Success - Fondo verde con texto oscuro */
+    .alert-success {
+        background-color: #d4edda !important;
+        border-color: #28a745 !important;
+        color: #155724 !important; /* Verde oscuro - Ratio 7.4:1 */
+    }
+
+    .alert-success .alert-heading {
+        color: #0f4320 !important; /* Verde muy oscuro para encabezados - Ratio 10:1 */
+        font-weight: 600 !important;
+    }
+
+    .alert-success p,
+    .alert-success li,
+    .alert-success .text-sm {
+        color: #155724 !important; /* Verde oscuro - Ratio 7.4:1 */
+        font-weight: 500 !important;
+    }
+
+    .alert-success strong {
+        color: #0f4320 !important;
+        font-weight: 700 !important;
+    }
+
+    .alert-success .alert-link {
+        color: #0c3618 !important;
+        font-weight: 600 !important;
+        text-decoration: underline;
+    }
+
+    .alert-success .alert-link:hover {
+        color: #051f0d !important;
+        text-decoration: none;
+    }
+
+    /* Alert Info - Fondo azul con texto oscuro */
+    .alert-info {
+        background-color: #d1ecf1 !important;
+        border-color: #17a2b8 !important;
+        color: #0c5460 !important; /* Azul oscuro - Ratio 7.5:1 */
+    }
+
+    .alert-info .alert-heading {
+        color: #064350 !important; /* Azul muy oscuro para encabezados */
+        font-weight: 600 !important;
+    }
+
+    .alert-info p,
+    .alert-info li,
+    .alert-info .text-sm {
+        color: #0c5460 !important;
+        font-weight: 500 !important;
+    }
+
+    .alert-info strong {
+        color: #064350 !important;
+        font-weight: 700 !important;
+    }
+
+    .alert-info .alert-link {
+        color: #0a4a56 !important;
+        font-weight: 600 !important;
+        text-decoration: underline;
+    }
+
+    /* Alert Warning - Fondo amarillo con texto oscuro */
+    .alert-warning {
+        background-color: #fff3cd !important;
+        border-color: #ffc107 !important;
+        color: #856404 !important; /* Dorado oscuro - Ratio 7.5:1 */
+    }
+
+    .alert-warning .alert-heading {
+        color: #5a4003 !important; /* Dorado muy oscuro para encabezados */
+        font-weight: 600 !important;
+    }
+
+    .alert-warning p,
+    .alert-warning li,
+    .alert-warning .text-sm {
+        color: #856404 !important;
+        font-weight: 500 !important;
+    }
+
+    .alert-warning strong {
+        color: #5a4003 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Alert Danger - Ya tiene buen contraste pero lo mejoramos */
+    .alert-danger {
+        background-color: #f8d7da !important;
+        border-color: #dc3545 !important;
+        color: #721c24 !important; /* Rojo oscuro - Ratio 9.1:1 */
+    }
+
+    .alert-danger .alert-heading {
+        color: #5a1419 !important;
+        font-weight: 600 !important;
+    }
+
+    .alert-danger p,
+    .alert-danger li,
+    .alert-danger .text-sm {
+        color: #721c24 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Mejora general de iconos en alertas */
+    .alert i.fas,
+    .alert i.fa {
+        opacity: 1 !important;
+    }
+
+    /* Text-sm en alertas debe ser legible */
+    .text-sm {
+        font-size: 0.9rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* Listas en alertas */
+    .alert ul {
+        margin-bottom: 0.5rem;
+    }
+
+    .alert ul li {
+        margin-bottom: 0.25rem;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .verification-container {

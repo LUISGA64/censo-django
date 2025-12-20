@@ -25,63 +25,204 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 @login_required
 def home(request):
-    personas = Person.objects.values(
-        'gender__gender',
-        'date_birth',
-        'family_card_id',
-        'family_card__sidewalk_home__sidewalk_name'
-    ).annotate(
-        total=Count('id')
-    )
+    """
+    Dashboard mejorado con estadísticas completas y filtrado por organización.
+    Incluye: personas, familias, documentos, distribución por edad, género, etc.
+    """
+    from datetime import date
+    from django.db.models import Q
 
-    # Obtener la cantidad de personas por vereda
-    personas_veredas = Person.objects.values('family_card__sidewalk_home__sidewalk_name').annotate(
-        total_personas=Count('id')
-    ).order_by('family_card__sidewalk_home__sidewalk_name')
+    # Importar modelo de documentos
+    try:
+        from censoapp.models import GeneratedDocument
+        documentos_disponibles = True
+    except ImportError:
+        documentos_disponibles = False
 
-    # Crear un diccionario para almacenar los totales por vereda
-    veredas_totales = {}
-    for vereda in personas_veredas:
-        vereda_nombre = vereda['family_card__sidewalk_home__sidewalk_name']
-        veredas_totales[vereda_nombre] = vereda['total_personas']
+    # Filtrar por organización del usuario
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_profile = request.user.userprofile
+            user_organization = user_profile.organization
+        except AttributeError:
+            pass
 
-    veredas_totales = dict(sorted(veredas_totales.items(), key=lambda item: item[0],  reverse=True))
+    # Queries base con filtrado por organización
+    if user_organization:
+        personas_qs = Person.objects.filter(
+            family_card__organization=user_organization,
+            state=True
+        )
+        fichas_qs = FamilyCard.objects.filter(
+            organization=user_organization,
+            state=True
+        )
+    else:
+        # Superusuario ve todo
+        personas_qs = Person.objects.filter(state=True)
+        fichas_qs = FamilyCard.objects.filter(state=True)
 
-
-    total_personas = Person.objects.count()
-    total_fichas = FamilyCard.objects.count()
+    # === ESTADÍSTICAS GENERALES ===
+    total_personas = personas_qs.count()
+    total_fichas = fichas_qs.count()
     total_veredas = Sidewalks.objects.count()
 
-    # Obtener el total de personas por género y por año de nacimiento
-    personas_por_genero = Person.objects.values('gender__gender', 'date_birth').annotate(personas=Count('id'))
+    # Personas por género
+    total_mujeres = personas_qs.filter(gender__gender='Femenino').count()
+    total_hombres = personas_qs.filter(gender__gender='Masculino').count()
 
-    mujeres = {}
-    hombres = {}
+    # Cabezas de familia
+    total_cabezas = personas_qs.filter(family_head=True).count()
 
-    for genero in personas_por_genero:
-        if genero['gender__gender'] == 'Femenino':
-            anio = genero['date_birth'].year
-            mujeres[anio] = mujeres.get(anio, 0) + genero['personas']
-        elif genero['gender__gender'] == 'Masculino':
-            anio = genero['date_birth'].year
-            hombres[anio] = hombres.get(anio, 0) + genero['personas']
+    # Documentos generados
+    total_documentos = 0
+    documentos_vigentes = 0
+    documentos_vencidos = 0
+    if documentos_disponibles:
+        if user_organization:
+            docs_qs = GeneratedDocument.objects.filter(organization=user_organization)
+        else:
+            docs_qs = GeneratedDocument.objects.all()
 
-    # Crear un diccionario para almacenar los datos de los años
-    anios = sorted(set(list(mujeres.keys()) + list(hombres.keys())))
-    mujeres_list = [mujeres.get(anio, 0) for anio in anios]
-    hombres_list = [hombres.get(anio, 0) for anio in anios]
+        total_documentos = docs_qs.count()
+        documentos_vigentes = docs_qs.filter(
+            status='ISSUED',
+            expiration_date__gte=date.today()
+        ).count()
+        documentos_vencidos = docs_qs.filter(status='EXPIRED').count()
 
+    # === DISTRIBUCIÓN POR EDAD ===
+    today = date.today()
+
+    # Rangos de edad
+    edad_0_5 = 0
+    edad_6_12 = 0
+    edad_13_17 = 0
+    edad_18_29 = 0
+    edad_30_59 = 0
+    edad_60_mas = 0
+
+    for persona in personas_qs.only('date_birth'):
+        edad = today.year - persona.date_birth.year
+        if today.month < persona.date_birth.month or (
+            today.month == persona.date_birth.month and today.day < persona.date_birth.day
+        ):
+            edad -= 1
+
+        if edad <= 5:
+            edad_0_5 += 1
+        elif edad <= 12:
+            edad_6_12 += 1
+        elif edad <= 17:
+            edad_13_17 += 1
+        elif edad <= 29:
+            edad_18_29 += 1
+        elif edad <= 59:
+            edad_30_59 += 1
+        else:
+            edad_60_mas += 1
+
+    edades_labels = ['0-5', '6-12', '13-17', '18-29', '30-59', '60+']
+    edades_data = [edad_0_5, edad_6_12, edad_13_17, edad_18_29, edad_30_59, edad_60_mas]
+
+    # === PERSONAS POR VEREDA ===
+    personas_veredas = personas_qs.values(
+        'family_card__sidewalk_home__sidewalk_name'
+    ).annotate(
+        total_personas=Count('id')
+    ).order_by('-total_personas')[:10]  # Top 10 veredas
+
+    veredas_nombres = [v['family_card__sidewalk_home__sidewalk_name'] or 'Sin vereda'
+                       for v in personas_veredas]
+    veredas_valores = [v['total_personas'] for v in personas_veredas]
+
+    # === PIRÁMIDE POBLACIONAL (Grupos Quinquenales) ===
+    # Definir rangos quinquenales estándar en demografía
+    rangos_quinquenales = [
+        (0, 4, '0-4'), (5, 9, '5-9'), (10, 14, '10-14'), (15, 19, '15-19'),
+        (20, 24, '20-24'), (25, 29, '25-29'), (30, 34, '30-34'), (35, 39, '35-39'),
+        (40, 44, '40-44'), (45, 49, '45-49'), (50, 54, '50-54'), (55, 59, '55-59'),
+        (60, 64, '60-64'), (65, 69, '65-69'), (70, 74, '70-74'), (75, 150, '75+')
+    ]
+
+    # Inicializar diccionarios para cada rango
+    piramide_hombres = {label: 0 for _, _, label in rangos_quinquenales}
+    piramide_mujeres = {label: 0 for _, _, label in rangos_quinquenales}
+
+    # Calcular edades y clasificar por rango y género
+    for persona in personas_qs.select_related('gender').only('date_birth', 'gender__gender'):
+        edad = today.year - persona.date_birth.year
+        if today.month < persona.date_birth.month or (
+            today.month == persona.date_birth.month and today.day < persona.date_birth.day
+        ):
+            edad -= 1
+
+        # Encontrar el rango correspondiente
+        for min_edad, max_edad, label in rangos_quinquenales:
+            if min_edad <= edad <= max_edad:
+                if persona.gender.gender == 'Masculino':
+                    piramide_hombres[label] += 1
+                elif persona.gender.gender == 'Femenino':
+                    piramide_mujeres[label] += 1
+                break
+
+    # Preparar datos para Chart.js (invertir orden para que empiece de mayor a menor)
+    piramide_labels = [label for _, _, label in rangos_quinquenales]
+    piramide_labels.reverse()  # Invertir para que 75+ esté arriba
+
+    # Los valores de hombres serán negativos para el efecto visual de pirámide
+    piramide_hombres_values = [-piramide_hombres[label] for label in piramide_labels]
+    piramide_mujeres_values = [piramide_mujeres[label] for label in piramide_labels]
+
+    # === ESTADÍSTICAS POR ORGANIZACIÓN (para superusuarios) ===
+    organizaciones_stats = []
+    if request.user.is_superuser:
+        from censoapp.models import Organizations
+        orgs = Organizations.objects.all()
+        for org in orgs[:5]:  # Top 5 organizaciones
+            org_personas = Person.objects.filter(
+                family_card__organization=org,
+                state=True
+            ).count()
+            org_fichas = FamilyCard.objects.filter(
+                organization=org,
+                state=True
+            ).count()
+            organizaciones_stats.append({
+                'nombre': org.organization_name,
+                'personas': org_personas,
+                'fichas': org_fichas
+            })
 
     context = {
         'segment': 'dashboard',
+        # Totales generales
         'total_personas': total_personas,
         'total_fichas': total_fichas,
         'total_veredas': total_veredas,
-        'hombres_list': hombres_list,
-        'mujeres_list': mujeres_list,
-        'anios': anios,
-        'veredas_totales': veredas_totales,
+        'total_mujeres': total_mujeres,
+        'total_hombres': total_hombres,
+        'total_cabezas': total_cabezas,
+        # Documentos
+        'total_documentos': total_documentos,
+        'documentos_vigentes': documentos_vigentes,
+        'documentos_vencidos': documentos_vencidos,
+        # Distribución por edad
+        'edades_labels': edades_labels,
+        'edades_data': edades_data,
+        # Veredas
+        'veredas_nombres': veredas_nombres,
+        'veredas_valores': veredas_valores,
+        # Pirámide poblacional (reemplaza género por año)
+        'piramide_labels': piramide_labels,
+        'piramide_hombres': piramide_hombres_values,
+        'piramide_mujeres': piramide_mujeres_values,
+        # Organización del usuario
+        'user_organization': user_organization,
+        'organizaciones_stats': organizaciones_stats,
     }
+
     return render(request, 'censo/dashboard.html', context)
 
 

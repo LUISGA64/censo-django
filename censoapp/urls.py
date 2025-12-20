@@ -12,6 +12,9 @@ from .views import (home, profile, association, CreateAssociation, family_card_i
                     organization_detail)
 from .document_views import (generate_document_view, view_document, list_person_documents, download_document_pdf,
                             organization_documents_stats, preview_document_pdf, verify_document)
+from .template_views import (template_dashboard, template_create, template_edit, template_duplicate, template_delete,
+                            template_toggle_active, template_set_default, variable_manager, variable_create,
+                            variable_update, variable_delete, get_available_variables, get_model_fields)
 
 
 urlpatterns = [
@@ -72,4 +75,23 @@ urlpatterns = [
     # Estadísticas de documentos
     path('documentos/estadisticas/', login_required(organization_documents_stats), name='documents-stats'),
     path('documentos/estadisticas/<int:organization_id>/', login_required(organization_documents_stats), name='documents-stats-org'),
+
+    # ----- GESTIÓN DE PLANTILLAS -----
+    path('plantillas/', login_required(template_dashboard), name='template-dashboard'),
+    path('plantillas/crear/', login_required(template_create), name='template-create'),
+    path('plantillas/editar/<int:pk>/', login_required(template_edit), name='template-edit'),
+    path('plantillas/duplicar/<int:pk>/', login_required(template_duplicate), name='template-duplicate'),
+    path('plantillas/eliminar/<int:pk>/', login_required(template_delete), name='template-delete'),
+
+    # AJAX endpoints para plantillas
+    path('plantillas/toggle-active/<int:pk>/', login_required(template_toggle_active), name='template-toggle-active'),
+    path('plantillas/set-default/<int:pk>/', login_required(template_set_default), name='template-set-default'),
+
+    # Variables personalizadas
+    path('variables/', login_required(variable_manager), name='variable-manager'),
+    path('variables/crear/', login_required(variable_create), name='variable-create'),
+    path('variables/actualizar/<int:pk>/', login_required(variable_update), name='variable-update'),
+    path('variables/eliminar/<int:pk>/', login_required(variable_delete), name='variable-delete'),
+    path('variables/disponibles/', login_required(get_available_variables), name='available-variables'),
+    path('variables/campos-modelo/', login_required(get_model_fields), name='model-fields'),
 ]

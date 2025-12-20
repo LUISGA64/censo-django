@@ -12,7 +12,7 @@ class FormFamilyCard(forms.ModelForm):
 
     class Meta:
         model = FamilyCard
-        fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization', 'family_card_number']
+        fields = ['address_home', 'sidewalk_home', 'latitude', 'longitude', 'zone', 'organization']
 
     address_home = forms.CharField(
         label='Dirección de la Vivienda (Complemento)',
@@ -101,17 +101,15 @@ class FormFamilyCard(forms.ModelForm):
         self.helper.form_class = 'pl-6 pr-6 pb-6 pt-6'
         self.helper.label_class = 'control-label'
 
-        # Configurar family_card_number: no editable en actualizaciones
-        if self.instance and self.instance.pk:
-            # Modo edición: excluir del formulario
-            self.fields.pop('family_card_number', None)
+        # Excluir family_card_number del formulario tanto en creación como en edición
+        # En creación se asignará automáticamente en la vista
+        # En edición no debe ser modificable
+        self.fields.pop('family_card_number', None)
 
-            # Asegurar que los campos críticos mantengan sus valores
-            # Si no se reciben en POST, usar los valores actuales de la instancia
-            if not self.data:  # Solo en GET (cuando se carga el formulario)
-                # Los valores se cargarán automáticamente de la instancia
-                pass
-            else:  # En POST
+        # Configurar comportamiento según modo (creación vs edición)
+        if self.instance and self.instance.pk:
+            # Modo edición: asegurar que los campos críticos mantengan sus valores
+            if self.data:  # En POST
                 # Si los campos no vienen en POST, usar valores de la instancia
                 data_copy = self.data.copy()
                 if not data_copy.get('sidewalk_home'):
@@ -121,14 +119,6 @@ class FormFamilyCard(forms.ModelForm):
                 if not data_copy.get('organization'):
                     data_copy['organization'] = self.instance.organization_id
                 self.data = data_copy
-        else:
-            # Modo creación: readonly
-            self.fields['family_card_number'].required = False
-            self.fields['family_card_number'].widget.attrs.update({
-                'readonly': True,
-                'class': 'form-control bg-light',
-                'placeholder': 'Se asignará automáticamente'
-            })
 
     def clean_latitude(self):
         """Validar formato de latitud"""

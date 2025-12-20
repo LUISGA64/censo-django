@@ -184,6 +184,23 @@
     .btn-group .btn {
         margin: 0 2px;
     }
+
+    /* Mejora de contraste para mensaje de tabla vacía */
+    #documentsTable .text-muted {
+        color: #495057 !important; /* Color gris oscuro con mejor contraste (antes: #6c757d) */
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    #documentsTable .text-muted i {
+        color: #6c757d; /* Icono un poco más claro para jerarquía visual */
+    }
+
+    /* Mejora general de contraste para elementos text-muted en tablas */
+    .dataTables_empty {
+        color: #495057 !important;
+        font-weight: 500;
+    }
 </style>
 {% endblock %}
 
@@ -439,70 +456,84 @@
     // Inicializar DataTable y Gráficos cuando el DOM esté listo
     $(document).ready(function() {
         // ===== DATATABLE =====
-        const table = $('#documentsTable').DataTable({
-            responsive: true,
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
-                processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>',
-                paginate: {
-                    first: '«',
-                    previous: '‹',
-                    next: '›',
-                    last: '»'
+        // Verificar si hay documentos antes de inicializar DataTables
+        const hasDocuments = {{ all_documents|length|default:0 }} > 0;
+
+        if (hasDocuments) {
+            // Solo inicializar DataTables si hay documentos
+            const table = $('#documentsTable').DataTable({
+                responsive: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+                    processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>',
+                    emptyTable: '<div style="color: #495057; font-weight: 500; padding: 20px;"><i class="fas fa-inbox" style="color: #6c757d; font-size: 2rem; display: block; margin-bottom: 10px;"></i>No hay documentos generados para esta organización</div>',
+                    zeroRecords: '<div style="color: #495057; font-weight: 500; padding: 20px;"><i class="fas fa-search" style="color: #6c757d; font-size: 2rem; display: block; margin-bottom: 10px;"></i>No se encontraron documentos que coincidan con la búsqueda</div>',
+                    info: '<span style="color: #495057;">Mostrando _START_ a _END_ de _TOTAL_ documentos</span>',
+                    infoEmpty: '<span style="color: #495057;">Mostrando 0 a 0 de 0 documentos</span>',
+                    infoFiltered: '<span style="color: #6c757d;">(filtrado de _MAX_ documentos totales)</span>',
+                    paginate: {
+                        first: '«',
+                        previous: '‹',
+                        next: '›',
+                        last: '»'
+                    }
+                },
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                order: [[4, 'desc']], // Ordenar por fecha de expedición descendente
+                pagingType: 'full_numbers',
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass('text-sm align-middle');
+                    $('td', row).addClass('py-3');
+                },
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: '<i class="fas fa-copy me-1"></i> Copiar',
+                        className: 'btn btn-secondary'
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                        className: 'btn btn-success',
+                        title: 'Documentos - {{ organization.organization_name }}',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                        className: 'btn btn-primary',
+                        title: 'Documentos - {{ organization.organization_name }}',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print me-1"></i> Imprimir',
+                        className: 'btn btn-secondary',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        }
+                    }
+                ],
+                initComplete: function() {
+                    // Actualizar badge con total filtrado
+                    this.api().on('search.dt', function() {
+                        const info = table.page.info();
+                        $('#total-documents-badge').html(
+                            `Total: ${info.recordsDisplay} de ${info.recordsTotal} documentos`
+                        );
+                    });
                 }
-            },
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            order: [[4, 'desc']], // Ordenar por fecha de expedición descendente
-            pagingType: 'full_numbers',
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            createdRow: function (row, data, dataIndex) {
-                $(row).addClass('text-sm align-middle');
-                $('td', row).addClass('py-3');
-            },
-            buttons: [
-                {
-                    extend: 'copy',
-                    text: '<i class="fas fa-copy me-1"></i> Copiar',
-                    className: 'btn btn-secondary'
-                },
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                    className: 'btn btn-success',
-                    title: 'Documentos - {{ organization.organization_name }}',
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                    className: 'btn btn-primary',
-                    title: 'Documentos - {{ organization.organization_name }}',
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print me-1"></i> Imprimir',
-                    className: 'btn btn-secondary',
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                }
-            ],
-            initComplete: function() {
-                // Actualizar badge con total filtrado
-                this.api().on('search.dt', function() {
-                    const info = table.page.info();
-                    $('#total-documents-badge').html(
-                        `Total: ${info.recordsDisplay} de ${info.recordsTotal} documentos`
-                    );
-                });
-            }
-        });
+            });
+        } else {
+            // Si no hay documentos, mostrar mensaje informativo en consola
+            console.info('DataTables no inicializado: No hay documentos para mostrar');
+        }
 
         // ===== GRÁFICO DE DOCUMENTOS POR TIPO =====
         const typeLabels = [

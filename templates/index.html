@@ -18,6 +18,30 @@
             <link href="{% static 'home/css/datatable/style.min.css' %}" rel="stylesheet"/>
             <link href="{% static 'home/css/styles.css' %}" rel="stylesheet"/>
             <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+            <!-- Estilos personalizados para SweetAlert2 -->
+            <style>
+                /* Mejora de contraste para notificaciones info (azul) */
+                .swal2-icon.swal2-info {
+                    border-color: #0056b3 !important;
+                    color: #0056b3 !important;
+                }
+
+                .swal2-popup.swal2-toast .swal2-icon.swal2-info {
+                    background-color: #0056b3 !important;
+                }
+
+                /* Mejora del título para mejor legibilidad */
+                .swal2-title {
+                    color: #2c3e50 !important;
+                    font-weight: 600 !important;
+                }
+
+                /* Personalización del ícono info con mejor contraste */
+                .swal2-icon.swal2-info [class^='swal2-icon-content'] {
+                    color: #0056b3 !important;
+                }
+            </style>
         {% endblock stylesheets %}
     {% endblock head %}
 </head>

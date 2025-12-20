@@ -1,0 +1,677 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Variables Personalizadas - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .variables-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .variable-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .variable-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .variable-name {
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2196f3;
+        background: #e3f2fd;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    .variable-value {
+        color: #374151;
+        margin: 0.75rem 0;
+    }
+
+    .variable-description {
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-style: italic;
+    }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #059669;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        border: 1px solid #2196f3;
+        border-left: 4px solid #2196f3;
+        color: #0d47a1;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box strong {
+        color: #0d47a1;
+    }
+
+    .info-box code {
+        background: rgba(33, 150, 243, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        color: #1565c0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-1">
+                        <i class="fas fa-code me-2 text-primary"></i>
+                        Variables Personalizadas
+                    </h3>
+                    <p class="text-muted mb-0">
+                        Define variables personalizadas para usar en tus plantillas
+                        {% if organization %}
+                            <span class="badge bg-primary ms-2">{{ organization.organization_name }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'template-dashboard' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver a Plantillas
+                    </a>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createVariableModal">
+                        <i class="fas fa-plus me-2"></i>
+                        Nueva Variable
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+        <i class="fas fa-info-circle me-2" style="color: #2196f3;"></i>
+        <strong>¿Cómo usar las variables?</strong><br>
+        Las variables personalizadas te permiten reutilizar información en tus plantillas.
+        Por ejemplo, si creas una variable llamada <code>gobernador</code> con valor "Juan Pérez",
+        puedes usar <code>{gobernador}</code> en tus plantillas y se reemplazará automáticamente.
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="search" class="form-control"
+                       placeholder="Nombre, valor o descripción..."
+                       value="{{ filters.search }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select name="is_active" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="1" {% if filters.is_active == '1' %}selected{% endif %}>Activas</option>
+                    <option value="0" {% if filters.is_active == '0' %}selected{% endif %}>Inactivas</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search me-2"></i>Filtrar
+                </button>
+                <a href="{% url 'variable-manager' %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Variables -->
+    {% if page_obj %}
+        <div class="variables-container">
+            {% for variable in page_obj %}
+                <div class="variable-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <span class="variable-name">{{ '{' }}{{ variable.variable_name }}{{ '}' }}</span>
+                                <span class="badge bg-info text-white" style="font-size: 0.75rem;">
+                                    <i class="fas fa-layer-group me-1"></i>{{ variable.get_variable_type_display }}
+                                </span>
+                                {% if variable.is_active %}
+                                    <span class="badge-active">
+                                        <i class="fas fa-check-circle me-1"></i>Activa
+                                    </span>
+                                {% else %}
+                                    <span class="badge-inactive">
+                                        <i class="fas fa-times-circle me-1"></i>Inactiva
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="variable-value">
+                                <strong>Campo del Modelo:</strong>
+                                <code style="background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 4px; color: #1f2937;">
+                                    {{ variable.variable_value }}
+                                </code>
+                            </div>
+
+                            {% if variable.description %}
+                                <div class="variable-description">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ variable.description }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    onclick="editVariable({{ variable.id }}, '{{ variable.variable_name }}', '{{ variable.variable_value|escapejs }}', '{{ variable.description|escapejs }}', {{ variable.is_active|lower }}, '{{ variable.variable_type }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteVariable({{ variable.id }}, '{{ variable.variable_name }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-code"></i>
+            <h4>No hay variables personalizadas</h4>
+            <p class="text-muted">Crea tu primera variable personalizada para usar en tus plantillas</p>
+            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#createVariableModal">
+                <i class="fas fa-plus me-2"></i>
+                Crear Primera Variable
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal Crear Variable -->
+<div class="modal fade" id="createVariableModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Nueva Variable Personalizada
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" style="background-color: #e3f2fd; border: 1px solid #2196f3; color: #0d47a1;">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Consejo:</strong> Selecciona el tipo de variable y luego elige el campo del modelo. El sistema validará que no existan variables duplicadas.
+                </div>
+                <form id="createVariableForm">
+                    {% csrf_token %}
+
+                    <!-- NOMBRE VARIABLE -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-tag me-1"></i>
+                            Nombre de la Variable *
+                        </label>
+                        <input type="text" name="variable_name" id="create_variable_name" class="form-control" required
+                               placeholder="territorio">
+                        <small class="text-muted">Nombre único para identificar esta variable (sin llaves {})</small>
+                    </div>
+
+                    <!-- TIPO VARIABLE -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-layer-group me-1"></i>
+                            Tipo de Variable *
+                        </label>
+                        <select name="variable_type" id="create_variable_type" class="form-select" required onchange="loadFieldOptions()">
+                            <option value="">Seleccione el tipo...</option>
+                            <option value="person">Dato de Persona</option>
+                            <option value="family_card">Dato de Ficha Familiar</option>
+                            <option value="association">Dato de Asociación</option>
+                            <option value="organization">Dato de Organización</option>
+                        </select>
+                        <small class="text-muted">Selecciona de qué modelo proviene el dato</small>
+                    </div>
+
+                    <!-- VALOR (Campo del Modelo) -->
+                    <div class="mb-3" id="value-selector-container" style="display: none;">
+                        <label class="form-label">
+                            <i class="fas fa-database me-1"></i>
+                            Campo del Modelo *
+                        </label>
+                        <select id="field-selector" name="variable_value" class="form-select" required onchange="updateFieldHelp()">
+                            <option value="">Seleccione un campo...</option>
+                        </select>
+                        <small class="text-muted" id="field-help">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <span id="field-help-text">Selecciona un campo de la lista</span>
+                        </small>
+                    </div>
+
+                    <!-- DESCRIPCIÓN -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-align-left me-1"></i>
+                            Descripción
+                        </label>
+                        <textarea name="description" class="form-control" rows="2"
+                                  placeholder="Describe para qué sirve esta variable (opcional)"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="createVariable()">
+                    <i class="fas fa-save me-2"></i>Guardar Variable
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Variable -->
+<div class="modal fade" id="editVariableModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>
+                    Editar Variable
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editVariableForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_variable_id">
+
+                    <!-- NOMBRE VARIABLE -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-tag me-1"></i>
+                            Nombre de la Variable *
+                        </label>
+                        <input type="text" id="edit_variable_name" name="variable_name" class="form-control" required>
+                        <small class="text-muted">Nombre único para identificar esta variable (sin llaves {})</small>
+                    </div>
+
+                    <!-- TIPO VARIABLE -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-layer-group me-1"></i>
+                            Tipo de Variable *
+                        </label>
+                        <select name="variable_type" id="edit_variable_type" class="form-select" required onchange="loadEditFieldOptions()">
+                            <option value="">Seleccione el tipo...</option>
+                            <option value="person">Dato de Persona</option>
+                            <option value="family_card">Dato de Ficha Familiar</option>
+                            <option value="association">Dato de Asociación</option>
+                            <option value="organization">Dato de Organización</option>
+                        </select>
+                    </div>
+
+                    <!-- VALOR (Campo del Modelo) -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-database me-1"></i>
+                            Campo del Modelo *
+                        </label>
+                        <select id="edit_field_selector" name="variable_value" class="form-select" required>
+                            <option value="">Seleccione un campo...</option>
+                        </select>
+                    </div>
+
+                    <!-- DESCRIPCIÓN -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-align-left me-1"></i>
+                            Descripción
+                        </label>
+                        <textarea id="edit_description" name="description" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <!-- ESTADO ACTIVO -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="edit_is_active">
+                            <label class="form-check-label" for="edit_is_active">
+                                <i class="fas fa-toggle-on me-1"></i>
+                                Variable Activa
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="updateVariable()">
+                    <i class="fas fa-save me-2"></i>Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Cargar campos disponibles según el tipo seleccionado
+function loadFieldOptions() {
+    const type = document.getElementById('create_variable_type').value;
+    const container = document.getElementById('value-selector-container');
+    const fieldSelector = document.getElementById('field-selector');
+
+    if (!type) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+
+    // Cargar campos del modelo
+    fetch(`/variables/campos-modelo/?type=${type}`)
+        .then(response => response.json())
+        .then(data => {
+            fieldSelector.innerHTML = '<option value="">Seleccione un campo...</option>';
+
+            data.fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field.value;
+                option.textContent = `${field.label} (${field.value})`;
+                option.dataset.type = field.type;
+                fieldSelector.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error cargando campos:', error);
+            alert('Error al cargar los campos disponibles');
+        });
+}
+
+// Actualizar ayuda del campo seleccionado
+function updateFieldHelp() {
+    const selector = document.getElementById('field-selector');
+    const helpText = document.getElementById('field-help-text');
+
+    const selectedOption = selector.options[selector.selectedIndex];
+    if (selectedOption.value) {
+        const fieldType = selectedOption.dataset.type;
+        const typeDescriptions = {
+            'text': 'Campo de texto',
+            'relation': 'Campo relacionado (usa punto para acceder a relaciones)',
+            'date': 'Campo de fecha',
+            'number': 'Campo numérico',
+            'method': 'Método del modelo (se calcula automáticamente)'
+        };
+
+        helpText.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i>${typeDescriptions[fieldType] || 'Campo del modelo'}`;
+    } else {
+        helpText.innerHTML = 'Selecciona un campo de la lista';
+    }
+}
+
+// Crear nueva variable
+function createVariable() {
+    const form = document.getElementById('createVariableForm');
+    const formData = new FormData(form);
+
+    // Validar campos requeridos
+    const variableName = formData.get('variable_name').trim();
+    const variableType = formData.get('variable_type');
+    const variableValue = formData.get('variable_value');
+
+    if (!variableName) {
+        alert('El nombre de la variable es obligatorio');
+        return;
+    }
+
+    if (!variableType) {
+        alert('Selecciona el tipo de variable');
+        return;
+    }
+
+    if (!variableValue) {
+        alert('Selecciona un campo del modelo');
+        return;
+    }
+
+    fetch('{% url "variable-create" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'No se pudo crear la variable'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear la variable');
+    });
+}
+
+// Editar variable existente
+function editVariable(id, name, value, description, isActive, variableType) {
+    document.getElementById('edit_variable_id').value = id;
+    document.getElementById('edit_variable_name').value = name;
+    document.getElementById('edit_description').value = description || '';
+    document.getElementById('edit_is_active').checked = isActive;
+
+    // Establecer el tipo de variable
+    document.getElementById('edit_variable_type').value = variableType || 'person';
+
+    // Cargar campos y luego seleccionar el valor actual
+    loadEditFieldOptions(value);
+
+    const modal = new bootstrap.Modal(document.getElementById('editVariableModal'));
+    modal.show();
+}
+
+// Cargar campos para edición
+function loadEditFieldOptions(currentValue) {
+    const type = document.getElementById('edit_variable_type').value;
+    const fieldSelector = document.getElementById('edit_field_selector');
+
+    if (!type) {
+        return;
+    }
+
+    // Cargar campos del modelo
+    fetch(`/variables/campos-modelo/?type=${type}`)
+        .then(response => response.json())
+        .then(data => {
+            fieldSelector.innerHTML = '<option value="">Seleccione un campo...</option>';
+
+            data.fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field.value;
+                option.textContent = `${field.label} (${field.value})`;
+                option.dataset.type = field.type;
+
+                // Seleccionar el valor actual
+                if (field.value === currentValue) {
+                    option.selected = true;
+                }
+
+                fieldSelector.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error cargando campos:', error);
+        });
+}
+
+// Actualizar variable
+function updateVariable() {
+    const id = document.getElementById('edit_variable_id').value;
+    const formData = new FormData(document.getElementById('editVariableForm'));
+    formData.append('is_active', document.getElementById('edit_is_active').checked);
+
+    fetch(`/variables/actualizar/${id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'No se pudo actualizar la variable'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al actualizar la variable');
+    });
+}
+
+// Eliminar variable
+function deleteVariable(id, name) {
+    if (confirm(`¿Estás seguro de eliminar la variable {${name}}?\n\nEsta acción no se puede deshacer.`)) {
+        fetch(`/variables/eliminar/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'No se pudo eliminar la variable'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar la variable');
+        });
+    }
+}
+</script>
+{% endblock %}
+

@@ -15,8 +15,16 @@ from censoapp.models import (
 )
 import logging
 import hashlib
-import qrcode
 from io import BytesIO
+
+# Importar qrcode de forma segura
+try:
+    import qrcode
+    from qrcode.image.pil import PilImage
+    QRCODE_AVAILABLE = True
+except ImportError:
+    QRCODE_AVAILABLE = False
+    logger.warning("Módulo qrcode no disponible. Instalar con: pip install qrcode[pil]")
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
@@ -185,7 +193,7 @@ def generate_document_view(request, person_id):
 
 def generate_document_content(document_type, person, organization, issue_date, expiration_date):
     """
-    Genera el contenido del documento basado en la plantilla.
+    Genera el contenido del documento basado en la plantilla personalizada.
 
     Args:
         document_type: Tipo de documento
@@ -197,7 +205,26 @@ def generate_document_content(document_type, person, organization, issue_date, e
     Returns:
         str: Contenido del documento con variables reemplazadas
     """
-    # Obtener plantilla o usar plantilla por defecto
+    from censoapp.models import DocumentTemplate, TemplateVariable
+
+    # ========================================
+    # BUSCAR PLANTILLA PERSONALIZADA
+    # ========================================
+    # Intentar obtener plantilla personalizada de la organización
+    custom_template = DocumentTemplate.objects.filter(
+        organization=organization,
+        document_type=document_type,
+        is_active=True
+    ).order_by('-is_default', '-updated_at').first()
+
+    if custom_template:
+        # Usar plantilla personalizada
+        return render_custom_template(custom_template, person, organization, issue_date, expiration_date)
+
+    # ========================================
+    # FALLBACK: PLANTILLA POR DEFECTO (legacy)
+    # ========================================
+    # Si no hay plantilla personalizada, usar el sistema antiguo
     template = document_type.template_content
 
     if not template:
@@ -219,7 +246,7 @@ def generate_document_content(document_type, person, organization, issue_date, e
         '{segundo_apellido}': person.last_name_2 or '',
         '{identificacion}': person.identification_person,
         '{tipo_documento}': person.document_type.document_type,
-        '{edad}': person.calcular_anios,
+        '{edad}': str(person.calcular_anios),
         '{fecha_nacimiento}': person.date_birth.strftime('%d/%m/%Y'),
 
         # Datos de ubicación
@@ -229,7 +256,7 @@ def generate_document_content(document_type, person, organization, issue_date, e
 
         # Datos de la organización
         '{organizacion}': organization.organization_name,
-        '{nit_organizacion}': getattr(organization, 'nit', 'No especificado'),
+        '{nit_organizacion}': getattr(organization, 'organization_identification', 'No especificado'),
 
         # Fechas
         '{fecha_expedicion}': issue_date.strftime('%d de %B de %Y'),
@@ -245,6 +272,245 @@ def generate_document_content(document_type, person, organization, issue_date, e
         content = content.replace(variable, str(value))
 
     return content
+
+
+def render_custom_template(template, person, organization, issue_date, expiration_date):
+    """
+    Renderiza una plantilla personalizada con todos sus bloques y estilos.
+
+    Args:
+        template: Instancia de DocumentTemplate
+        person: Persona beneficiaria
+        organization: Organización que expide
+        issue_date: Fecha de expedición
+        expiration_date: Fecha de vencimiento
+
+    Returns:
+        str: HTML del documento renderizado
+    """
+    from censoapp.models import TemplateVariable
+
+    # ========================================
+    # PREPARAR VARIABLES
+    # ========================================
+    variables = {
+        # Datos de la persona
+        '{nombre_completo}': person.full_name,
+        '{primer_nombre}': person.first_name_1,
+        '{segundo_nombre}': person.first_name_2 or '',
+        '{primer_apellido}': person.last_name_1,
+        '{segundo_apellido}': person.last_name_2 or '',
+        '{identificacion}': person.identification_person,
+        '{tipo_documento}': person.document_type.document_type,
+        '{edad}': str(person.calcular_anios),
+        '{fecha_nacimiento}': person.date_birth.strftime('%d/%m/%Y'),
+        '{genero}': person.gender.gender if person.gender else '',
+        '{estado_civil}': person.civil_state.state_civil if person.civil_state else '',
+
+        # Datos de ubicación
+        '{vereda}': person.family_card.sidewalk_home.sidewalk_name,
+        '{zona}': person.family_card.zone,
+        '{direccion}': person.family_card.address_home or 'No especificada',
+        '{municipio}': getattr(person.family_card.sidewalk_home, 'municipio', 'Popayán'),
+        '{departamento}': getattr(person.family_card.sidewalk_home, 'departamento', 'Cauca'),
+
+        # Datos de la organización
+        '{organizacion}': organization.organization_name,
+        '{nit_organizacion}': getattr(organization, 'organization_identification', 'No especificado'),
+        '{direccion_organizacion}': getattr(organization, 'organization_address', ''),
+        '{telefono_organizacion}': getattr(organization, 'organization_mobile_phone', ''),
+        '{email_organizacion}': getattr(organization, 'organization_email', ''),
+
+        # Fechas
+        '{fecha_expedicion}': issue_date.strftime('%d de %B de %Y'),
+        '{fecha_vencimiento}': expiration_date.strftime('%d de %B de %Y') if expiration_date else 'No aplica',
+        '{año}': str(issue_date.year),
+        '{mes}': issue_date.strftime('%B'),
+        '{dia}': str(issue_date.day),
+
+        # Documento
+        '{tipo_documento_generado}': template.document_type.document_type_name,
+    }
+
+    # Agregar variables personalizadas de la organización
+    # Ahora soporta variables dinámicas que traen datos de modelos relacionados
+    custom_vars = TemplateVariable.objects.filter(
+        organization=organization,
+        is_active=True
+    )
+    for var in custom_vars:
+        # Usar el método get_value() que procesa variables estáticas y dinámicas
+        variables[f'{{{var.variable_name}}}'] = var.get_value(
+            person=person,
+            organization=organization,
+            family_card=person.family_card if person else None
+        )
+
+    # ========================================
+    # CONSTRUIR HTML DEL DOCUMENTO
+    # ========================================
+    html_parts = []
+
+    # Estilos CSS
+    html_parts.append(f'''
+    <style>
+        body {{
+            font-family: {template.font_family};
+            font-size: {template.font_size}pt;
+            color: {template.text_color};
+            margin: {template.margin_top}mm {template.margin_right}mm {template.margin_bottom}mm {template.margin_left}mm;
+        }}
+        .document-title {{
+            text-align: {template.title_alignment};
+            font-size: {template.font_size + 4}pt;
+            font-weight: bold;
+            color: {template.primary_color};
+            margin-bottom: 20px;
+        }}
+        .introduction {{
+            text-align: center;
+            margin-bottom: 15px;
+            {f"font-weight: bold;" if template.introduction_bold else ""}
+        }}
+        .content-block {{
+            margin-bottom: 10px;
+        }}
+        .closing {{
+            margin-top: 20px;
+        }}
+        {template.custom_css or ''}
+    </style>
+    ''')
+
+    # Logo y encabezado de organización
+    if template.logo_position != 'none' or template.show_organization_info:
+        html_parts.append('<div style="margin-bottom: 30px;">')
+
+        if template.logo_position != 'none' and organization.organization_logo:
+            position_style = {
+                'top-left': 'float: left;',
+                'top-right': 'float: right;',
+                'top-center': 'text-align: center;'
+            }.get(template.logo_position, '')
+
+            html_parts.append(f'''
+            <div style="{position_style} width: {template.logo_width}px;">
+                <img src="{organization.organization_logo.url}" width="{template.logo_width}" />
+            </div>
+            ''')
+
+        if template.show_organization_info:
+            info_align = {
+                'top-left': 'left',
+                'top-center': 'center',
+                'top-right': 'right'
+            }.get(template.organization_info_position, 'right')
+
+            html_parts.append(f'''
+            <div style="text-align: {info_align};">
+                <strong>{organization.organization_name}</strong><br>
+                NIT: {getattr(organization, 'organization_identification', '')}<br>
+                {getattr(organization, 'organization_address', '')}<br>
+                Tel: {getattr(organization, 'organization_mobile_phone', '')}
+            </div>
+            ''')
+
+        if template.header_custom_text:
+            html_parts.append(replace_variables(template.header_custom_text, variables))
+
+        html_parts.append('<div style="clear: both;"></div>')
+        html_parts.append('</div>')
+
+    # Título del documento
+    title = replace_variables(template.document_title, variables)
+    html_parts.append(f'<div class="document-title">{title}</div>')
+
+    # Introducción
+    if template.introduction_text:
+        intro = replace_variables(template.introduction_text, variables)
+        html_parts.append(f'<div class="introduction">{intro}</div>')
+
+    # ========================================
+    # BLOQUES DE CONTENIDO
+    # ========================================
+    if template.content_blocks:
+        import json
+        try:
+            blocks = template.content_blocks if isinstance(template.content_blocks, list) else json.loads(template.content_blocks)
+
+            for block in sorted(blocks, key=lambda x: x.get('order', 0)):
+                content = replace_variables(block.get('content', ''), variables)
+
+                # Construir estilos del bloque
+                styles = []
+                styles.append(f"text-align: {block.get('alignment', 'justify')};")
+
+                if block.get('is_bold'):
+                    styles.append('font-weight: bold;')
+                if block.get('is_italic'):
+                    styles.append('font-style: italic;')
+                if block.get('is_underline'):
+                    styles.append('text-decoration: underline;')
+
+                modifier = block.get('font_size_modifier', 0)
+                if modifier != 0:
+                    styles.append(f'font-size: {template.font_size + modifier}pt;')
+
+                if block.get('custom_style'):
+                    styles.append(block.get('custom_style'))
+
+                style_str = ' '.join(styles)
+                html_parts.append(f'<div class="content-block" style="{style_str}">{content}</div>')
+
+        except Exception as e:
+            # Si hay error procesando bloques, continuar sin ellos
+            print(f"Error procesando bloques: {e}")
+
+    # Texto de cierre
+    if template.closing_text:
+        closing = replace_variables(template.closing_text, variables)
+        html_parts.append(f'<div class="closing">{closing}</div>')
+
+    # Firmas
+    if template.show_signatures:
+        html_parts.append('<div style="margin-top: 40px;">')
+        # Aquí se podrían agregar las firmas de la junta directiva
+        # Por ahora dejamos espacio para firmas
+        html_parts.append('<div style="margin-top: 60px; text-align: center;">')
+        html_parts.append('<div style="display: inline-block; margin: 0 30px;">')
+        html_parts.append('_________________________<br>')
+        html_parts.append('Firma Autorizada')
+        html_parts.append('</div>')
+        html_parts.append('</div>')
+        html_parts.append('</div>')
+
+    # Pie de página
+    if template.footer_text:
+        footer = replace_variables(template.footer_text, variables)
+        html_parts.append(f'<div style="margin-top: 20px; font-size: {template.font_size - 2}pt; text-align: center;">{footer}</div>')
+
+    # HTML personalizado
+    if template.custom_html:
+        html_parts.append(replace_variables(template.custom_html, variables))
+
+    return '\n'.join(html_parts)
+
+
+def replace_variables(text, variables):
+    """
+    Reemplaza todas las variables en el texto.
+
+    Args:
+        text: Texto con variables
+        variables: Diccionario de variables y sus valores
+
+    Returns:
+        str: Texto con variables reemplazadas
+    """
+    result = text
+    for var, value in variables.items():
+        result = result.replace(var, str(value))
+    return result
 
 
 def get_default_aval_template():
@@ -317,7 +583,16 @@ def view_document(request, document_id):
     """
     Vista para visualizar un documento generado.
     """
-    document = get_object_or_404(GeneratedDocument, pk=document_id)
+    # Verificar si el documento existe
+    try:
+        document = GeneratedDocument.objects.get(pk=document_id)
+    except GeneratedDocument.DoesNotExist:
+        messages.error(
+            request,
+            f"El documento con ID {document_id} no existe. "
+            f"Es posible que haya sido eliminado o que el enlace sea incorrecto."
+        )
+        return redirect('documents-stats')
 
     # VALIDACIÓN: Verificar permisos (solo organización propietaria o admin)
     if not request.user.is_superuser:
@@ -386,7 +661,17 @@ def preview_document_pdf(request, document_id):
     Vista previa del PDF en una página dedicada con PDF.js
     Permite visualizar, descargar e imprimir el documento.
     """
-    document = get_object_or_404(GeneratedDocument, pk=document_id)
+    # Verificar si el documento existe
+    try:
+        document = GeneratedDocument.objects.get(pk=document_id)
+    except GeneratedDocument.DoesNotExist:
+        messages.error(
+            request,
+            f"El documento con ID {document_id} no existe. "
+            f"Es posible que haya sido eliminado o que el enlace sea incorrecto."
+        )
+        # Redirigir a estadísticas de documentos
+        return redirect('documents-stats')
 
     # VALIDACIÓN: Verificar permisos por organización
     if not request.user.is_superuser:
@@ -550,7 +835,7 @@ def generate_document_qr(document):
         document: Instancia de GeneratedDocument
 
     Returns:
-        BytesIO: Buffer con la imagen del código QR
+        BytesIO: Buffer con la imagen del código QR o una imagen placeholder
     """
     # Crear hash único del documento para verificación
     verification_data = f"{document.id}|{document.document_number}|{document.issue_date.isoformat()}"
@@ -570,23 +855,81 @@ def generate_document_qr(document):
     site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
     verification_url = f"{site_url}/documento/verificar/{doc_hash}/"
 
-    # Generar código QR
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=10,
-        border=2
-    )
-    qr.add_data(verification_url)
-    qr.make(fit=True)
+    try:
+        # Verificar que qrcode esté disponible
+        if not QRCODE_AVAILABLE:
+            raise ImportError("Módulo qrcode no disponible")
 
-    # Crear imagen
-    img = qr.make_image(fill_color="black", back_color="white")
+        # Generar código QR usando la API correcta
+        import qrcode
 
-    # Guardar en buffer
-    buffer = BytesIO()
-    img.save(buffer, format='PNG')
-    buffer.seek(0)
+        # Crear instancia de QRCode
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=2
+        )
+        qr.add_data(verification_url)
+        qr.make(fit=True)
+
+        # Crear imagen
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Guardar en buffer
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
+
+        logger.debug(f"QR generado exitosamente para documento {document.document_number}")
+        return buffer
+
+    except Exception as e:
+        logger.error(f"Error al generar QR para documento {document.document_number}: {e}")
+
+        # Crear una imagen placeholder simple con PIL
+        try:
+            from PIL import Image, ImageDraw, ImageFont
+
+            # Crear imagen placeholder
+            img = Image.new('RGB', (300, 300), color='white')
+            draw = ImageDraw.Draw(img)
+
+            # Dibujar borde
+            draw.rectangle([(10, 10), (290, 290)], outline='black', width=2)
+
+            # Texto placeholder
+            text_lines = [
+                "QR Code",
+                f"Doc: {document.document_number}",
+                f"Hash: {doc_hash[:8]}...",
+                "Verificar manualmente"
+            ]
+
+            y = 80
+            for line in text_lines:
+                # Calcular posición centrada aproximada
+                text_width = len(line) * 7
+                x = (300 - text_width) // 2
+                draw.text((x, y), line, fill='black')
+                y += 40
+
+            # Guardar en buffer
+            buffer = BytesIO()
+            img.save(buffer, format='PNG')
+            buffer.seek(0)
+
+            logger.warning(f"Usando imagen placeholder para QR de documento {document.document_number}")
+            return buffer
+
+        except Exception as pil_error:
+            logger.error(f"Error al crear imagen placeholder: {pil_error}")
+
+            # Último recurso: buffer vacío
+            buffer = BytesIO()
+            buffer.write(b'')
+            buffer.seek(0)
+            return buffer
 
     return buffer
 
@@ -594,10 +937,24 @@ def generate_document_qr(document):
 @login_required
 def download_document_pdf(request, document_id):
     """
-    Genera y muestra un documento en formato PDF con código QR.
+    Genera y muestra un documento en formato PDF usando WeasyPrint.
+    Convierte HTML a PDF correctamente respetando todos los estilos y etiquetas.
     El PDF se muestra en el navegador (inline) para previsualización.
     """
-    document = get_object_or_404(GeneratedDocument, pk=document_id)
+    from weasyprint import HTML
+    from django.template.loader import render_to_string
+    import base64
+    
+    # Verificar si el documento existe
+    try:
+        document = GeneratedDocument.objects.get(pk=document_id)
+    except GeneratedDocument.DoesNotExist:
+        messages.error(
+            request,
+            f"El documento con ID {document_id} no existe. "
+            f"Es posible que haya sido eliminado o que el enlace sea incorrecto."
+        )
+        return redirect('documents-stats')
 
     # VALIDACIÓN: Verificar permisos por organización
     if not request.user.is_superuser:
@@ -614,234 +971,60 @@ def download_document_pdf(request, document_id):
             return JsonResponse({'error': 'No tiene un perfil de usuario configurado'}, status=403)
 
     try:
-        # Crear buffer para el PDF
-        buffer = BytesIO()
-
-        # Crear documento PDF
-        doc = SimpleDocTemplate(
-            buffer,
-            pagesize=letter,
-            rightMargin=72,
-            leftMargin=72,
-            topMargin=72,
-            bottomMargin=72
-        )
-
-        # Contenedor para los elementos del PDF
-        elements = []
-
-        # Estilos
-        styles = getSampleStyleSheet()
-
-        # Estilo para el título
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=16,
-            textColor=colors.HexColor('#2196F3'),
-            spaceAfter=30,
-            alignment=TA_CENTER,
-            fontName='Helvetica-Bold'
-        )
-
-        # Estilo para subtítulos
-        subtitle_style = ParagraphStyle(
-            'CustomSubtitle',
-            parent=styles['Heading2'],
-            fontSize=12,
-            textColor=colors.HexColor('#424242'),
-            spaceAfter=12,
-            alignment=TA_CENTER,
-            fontName='Helvetica-Bold'
-        )
-
-        # Estilo para el contenido
-        content_style = ParagraphStyle(
-            'CustomContent',
-            parent=styles['BodyText'],
-            fontSize=11,
-            textColor=colors.black,
-            spaceAfter=12,
-            alignment=TA_JUSTIFY,
-            fontName='Helvetica',
-            leading=16
-        )
-
-        # Estilo para información adicional
-        info_style = ParagraphStyle(
-            'InfoStyle',
-            parent=styles['Normal'],
-            fontSize=9,
-            textColor=colors.HexColor('#666666'),
-            alignment=TA_LEFT,
-            fontName='Helvetica'
-        )
-
-        # Encabezado con nombre de la organización
-        org_name = Paragraph(
-            f"<b>{sanitize_text_for_pdf(document.organization.organization_name.upper())}</b>",
-            title_style
-        )
-        elements.append(org_name)
-        elements.append(Spacer(1, 12))
-
-        # Tipo de documento
-        doc_type = Paragraph(
-            f"<b>{sanitize_text_for_pdf(document.document_type.document_type_name.upper())}</b>",
-            subtitle_style
-        )
-        elements.append(doc_type)
-        elements.append(Spacer(1, 20))
-
-        # Número de documento
-        doc_number = Paragraph(
-            f"<b>Documento No: {sanitize_text_for_pdf(document.document_number)}</b>",
-            info_style
-        )
-        elements.append(doc_number)
-        elements.append(Spacer(1, 20))
-
-        # Contenido del documento
-        content_lines = document.document_content.split('\n')
-        for line in content_lines:
-            if line.strip():
-                sanitized_line = sanitize_text_for_pdf(line)
-                p = Paragraph(sanitized_line, content_style)
-                elements.append(p)
-
-        elements.append(Spacer(1, 30))
-
-        # Información de fechas
-        date_info = [
-            ['<b>Fecha de Expedición:</b>', document.issue_date.strftime('%d de %B de %Y')],
-        ]
-
-        if document.expiration_date:
-            date_info.append(
-                ['<b>Válido hasta:</b>', document.expiration_date.strftime('%d de %B de %Y')]
-            )
-
-        date_table = Table(date_info, colWidths=[2*inch, 3*inch])
-        date_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#424242')),
-            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]))
-        elements.append(date_table)
-        elements.append(Spacer(1, 30))
-
-        # Firmas
-        if document.signers.exists():
-            elements.append(Spacer(1, 20))
-            firma_title = Paragraph("<b>FIRMAS AUTORIZADAS</b>", subtitle_style)
-            elements.append(firma_title)
-            elements.append(Spacer(1, 20))
-
-            signer_data = []
-            for signer in document.signers.all():
-                # Usar holder_person ya que BoardPosition tiene holder_person, no person
-                if signer.holder_person:
-                    signer_data.append([
-                        f"_______________________________",
-                        f"_______________________________"
-                    ])
-                    signer_data.append([
-                        f"<b>{sanitize_text_for_pdf(signer.holder_person.full_name)}</b>",
-                        f"<b>C.C. {sanitize_text_for_pdf(signer.holder_person.identification_person)}</b>"
-                    ])
-                    signer_data.append([
-                        f"{sanitize_text_for_pdf(signer.get_position_name_display())}",
-                        ""
-                    ])
-                    signer_data.append(['', ''])  # Espacio entre firmantes
-
-            signer_table = Table(signer_data, colWidths=[3*inch, 3*inch])
-            signer_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#424242')),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-            elements.append(signer_table)
-
-        # Generar código QR
+        # Generar código QR y convertirlo a base64
         qr_buffer = generate_document_qr(document)
-        qr_img = Image(qr_buffer, width=1.5*inch, height=1.5*inch)
-
-        # Tabla para QR y texto de verificación
-        verification_hash = document.verification_hash if hasattr(document, 'verification_hash') else 'N/A'
-        qr_data = [
-            [qr_img, Paragraph(
-                f"<b>Código de Verificación</b><br/>"
-                f"Escanea este código QR para verificar la autenticidad del documento.<br/>"
-                f"<b>Hash:</b> {sanitize_text_for_pdf(verification_hash)}",
-                info_style
-            )]
-        ]
-
-        qr_table = Table(qr_data, colWidths=[2*inch, 4*inch])
-        qr_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#CCCCCC')),
-            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F5F5F5')),
-            ('PADDING', (0, 0), (-1, -1), 10),
-        ]))
-
-        elements.append(Spacer(1, 30))
-        elements.append(qr_table)
-
-        # Pie de página con información adicional
-        elements.append(Spacer(1, 20))
-        footer_text = Paragraph(
-            f"<i>Este documento fue generado electrónicamente por el sistema de censo de {sanitize_text_for_pdf(document.organization.organization_name)}. "
-            f"Para verificar su autenticidad, escanee el código QR o visite nuestro portal de verificación.</i>",
-            info_style
-        )
-        elements.append(footer_text)
-
-        # Construir PDF
-        doc.build(elements)
-
-        # Obtener el PDF del buffer
-        pdf = buffer.getvalue()
-        buffer.close()
-
+        qr_buffer.seek(0)
+        qr_base64 = base64.b64encode(qr_buffer.read()).decode()
+        
+        # Preparar contexto para el template HTML
+        context = {
+            'document': document,
+            'organization': document.organization,
+            'person': document.person,
+            'signers': document.signers.all(),
+            'qr_code': qr_base64,
+            'issue_date_formatted': document.issue_date.strftime('%d de %B de %Y'),
+            'expiration_date_formatted': document.expiration_date.strftime('%d de %B de %Y') if document.expiration_date else None,
+        }
+        
+        # Renderizar HTML del documento usando el template
+        html_string = render_to_string('censo/documentos/pdf_template.html', context)
+        
+        # Generar PDF con WeasyPrint
+        pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
+        pdf_bytes = pdf_file.write_pdf()
+        
         # Determinar si es descarga o previsualización
         is_download = request.GET.get('download', 'false').lower() == 'true'
-
-        # Retornar PDF
-        response = HttpResponse(pdf, content_type='application/pdf')
-
-        # Agregar cabeceras necesarias para PDF.js
-        response['Content-Length'] = len(pdf)
+        
+        # Crear respuesta HTTP con el PDF
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Length'] = len(pdf_bytes)
         response['Accept-Ranges'] = 'bytes'
-
+        
         # Cabeceras CORS para permitir la carga desde PDF.js
         response['Access-Control-Allow-Origin'] = '*'
         response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
         response['Access-Control-Allow-Headers'] = 'X-Requested-With, Content-Type'
-
+        
         if is_download:
             # Forzar descarga
-            response['Content-Disposition'] = f'attachment; filename="documento_{document.document_number}.pdf"'
+            response['Content-Disposition'] = f'attachment; filename="Documento_{document.document_number}.pdf"'
         else:
             # Previsualización en navegador
-            response['Content-Disposition'] = f'inline; filename="documento_{document.document_number}.pdf"'
+            response['Content-Disposition'] = f'inline; filename="Documento_{document.document_number}.pdf"'
             # Cache control para previsualización
             response['Cache-Control'] = 'public, max-age=3600'
-
+        
         return response
-
+        
     except Exception as e:
-        logger.error(f"Error al generar PDF: {e}")
+        logger.error(f"Error al generar PDF con WeasyPrint: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
         messages.error(request, f"Error al generar el PDF: {str(e)}")
         return redirect('view-document', document_id=document_id)
+
 
 
 def verify_document(request, hash):

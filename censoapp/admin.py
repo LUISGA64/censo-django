@@ -1,9 +1,12 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import (Association, Organizations, Sidewalks, IdentificationDocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
-                     EducationLevel, SecuritySocial, Handicap, Charge, SystemParameters, MaterialConstruction,
-                     WaterTreatment, LightingType, WaterSource, CookingFuel, HomeOwnership, FamilyCard, Person,
-                     MaterialConstructionFamilyCard, UserProfile, DocumentType, BoardPosition, GeneratedDocument)
+from .models import (
+    Association, Organizations, Sidewalks, IdentificationDocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
+    EducationLevel, SecuritySocial, Handicap, Charge, SystemParameters, MaterialConstruction,
+    WaterTreatment, LightingType, WaterSource, CookingFuel, HomeOwnership, FamilyCard, Person,
+    MaterialConstructionFamilyCard, UserProfile, DocumentType, BoardPosition, GeneratedDocument,
+    DocumentTemplate, TemplateBlock, TemplateVariable
+)
 from .utils import invalidate_system_parameters_cache
 
 # Register your models here.
@@ -117,6 +120,277 @@ class UserProfileAdmin(admin.ModelAdmin):
             return qs.filter(organization=request.user.profile.organization)
 
         return qs.none()
+
+
+# ========================================
+# ADMINISTRACIÓN DE PLANTILLAS DE DOCUMENTOS
+# ========================================
+
+
+
+@admin.register(DocumentTemplate)
+class DocumentTemplateAdmin(admin.ModelAdmin):
+    """
+    Administración de plantillas de documentos.
+    Permite configurar plantillas personalizadas por organización.
+    """
+    list_display = [
+        'name',
+        'organization',
+        'document_type',
+        'version',
+        'is_active',
+        'is_default',
+        'updated_at'
+    ]
+    list_filter = [
+        'organization',
+        'document_type',
+        'is_active',
+        'is_default',
+        'created_at'
+    ]
+    search_fields = [
+        'name',
+        'description',
+        'organization__organization_name',
+        'document_type__document_type_name'
+    ]
+    readonly_fields = [
+        'created_at',
+        'updated_at',
+        'created_by',
+        'last_modified_by'
+    ]
+    list_per_page = 20
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        ('Información General', {
+            'fields': (
+                'organization',
+                'document_type',
+                'name',
+                'description',
+                'version'
+            )
+        }),
+        ('Estado', {
+            'fields': (
+                'is_active',
+                'is_default'
+            )
+        }),
+        ('Configuración de Diseño', {
+            'fields': (
+                'logo_position',
+                'logo_width',
+                'show_organization_info',
+                'organization_info_position',
+                'header_custom_text',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Contenido del Documento', {
+            'fields': (
+                'document_title',
+                'title_alignment',
+                'introduction_text',
+                'introduction_bold',
+                'content_blocks',
+                'closing_text',
+            )
+        }),
+        ('Firmas y Pie de Página', {
+            'fields': (
+                'show_signatures',
+                'signature_layout',
+                'show_qr_code',
+                'qr_position',
+                'footer_text',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Estilos y Colores', {
+            'fields': (
+                'primary_color',
+                'secondary_color',
+                'text_color',
+                'font_family',
+                'font_size',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Configuración de Página', {
+            'fields': (
+                'margin_top',
+                'margin_bottom',
+                'margin_left',
+                'margin_right',
+                'page_size',
+                'page_orientation',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Personalización Avanzada', {
+            'fields': (
+                'custom_css',
+                'custom_html',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Auditoría', {
+            'fields': (
+                'created_at',
+                'updated_at',
+                'created_by',
+                'last_modified_by',
+            ),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        """Guardar usuario que crea/modifica la plantilla"""
+        if not change:  # Nuevo objeto
+            obj.created_by = request.user
+        obj.last_modified_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        """Filtrar plantillas por organización del usuario"""
+        qs = super().get_queryset(request)
+
+        if request.user.is_superuser:
+            return qs
+
+        if hasattr(request.user, 'userprofile'):
+            return qs.filter(organization=request.user.userprofile.organization)
+
+        return qs.none()
+
+
+@admin.register(TemplateBlock)
+class TemplateBlockAdmin(admin.ModelAdmin):
+    """Administración de bloques de contenido de plantillas"""
+    list_display = [
+        'template',
+        'block_type',
+        'order',
+        'alignment',
+        'is_bold'
+    ]
+    list_filter = [
+        'template',
+        'block_type',
+        'alignment',
+        'is_bold'
+    ]
+    search_fields = [
+        'template__name',
+        'content'
+    ]
+    ordering = ['template', 'order']
+    list_per_page = 50
+
+    fieldsets = (
+        ('Información del Bloque', {
+            'fields': (
+                'template',
+                'block_type',
+                'order',
+                'content',
+            )
+        }),
+        ('Estilos del Bloque', {
+            'fields': (
+                'is_bold',
+                'is_italic',
+                'is_underline',
+                'alignment',
+                'font_size_modifier',
+                'custom_style',
+            )
+        }),
+        ('Configuración Adicional', {
+            'fields': (
+                'config',
+            ),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(TemplateVariable)
+class TemplateVariableAdmin(admin.ModelAdmin):
+    """Administración de variables personalizadas"""
+    list_display = [
+        'organization',
+        'variable_name',
+        'variable_type',
+        'variable_value_preview',
+        'is_active'
+    ]
+    list_filter = [
+        'organization',
+        'variable_type',
+        'is_active'
+    ]
+    search_fields = [
+        'variable_name',
+        'variable_value',
+        'organization__organization_name'
+    ]
+    list_per_page = 30
+
+    fieldsets = (
+        ('Variable', {
+            'fields': (
+                'organization',
+                'variable_name',
+                'variable_type',
+                'variable_value',
+                'description',
+            ),
+            'description': '''
+                <div style="background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin-bottom: 15px;">
+                    <h4 style="color: #0d47a1; margin-top: 0;">💡 Tipos de Variables:</h4>
+                    <ul style="color: #1565c0;">
+                        <li><strong>Valor Estático:</strong> Texto fijo (ej: "Juan Pérez")</li>
+                        <li><strong>Dato de Organización:</strong> Campo del modelo Organizations (ej: "organization_territory", "organization_mobile_phone")</li>
+                        <li><strong>Dato de Persona:</strong> Campo del modelo Person (ej: "full_name", "identification_person")</li>
+                        <li><strong>Dato de Ficha Familiar:</strong> Campo del modelo FamilyCard (ej: "family_card_number", "address_home", "sidewalk_home.sidewalk_name")</li>
+                    </ul>
+                    <p style="color: #0d47a1;"><strong>Nota:</strong> Para relaciones, usa punto (ej: "sidewalk_home.sidewalk_name")</p>
+                </div>
+            '''
+        }),
+        ('Estado', {
+            'fields': (
+                'is_active',
+            )
+        }),
+    )
+
+    def variable_value_preview(self, obj):
+        """Mostrar preview del valor (máximo 50 caracteres)"""
+        if len(obj.variable_value) > 50:
+            return f"{obj.variable_value[:50]}..."
+        return obj.variable_value
+    variable_value_preview.short_description = 'Valor'
+
+    def get_queryset(self, request):
+        """Filtrar variables por organización del usuario"""
+        qs = super().get_queryset(request)
+
+        if request.user.is_superuser:
+            return qs
+
+        if hasattr(request.user, 'userprofile'):
+            return qs.filter(organization=request.user.userprofile.organization)
+
+        return qs.none()
+
 
 
 # ============================================================================
