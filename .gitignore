@@ -11,6 +11,29 @@ media
 
 # Backup files #
 *.bak
+backup*.json
+*_backup.json
+backups/*.json
+
+# Test files #
+test_*.py
+*_test.py
+test*.py
+debug*.py
+
+# Utility scripts (temporary) #
+crear_*.py
+activar_*.py
+corregir_*.py
+generar_*.py
+verificar_*.py
+ver_*.py
+diagnostico_*.py
+nueva_*.py
+reemplazar_*.py
+eliminar_*.py
+check_*.py
+add_*.py
 
 # If you are using PyCharm #
 # User-specific stuff
