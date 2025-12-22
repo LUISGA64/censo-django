@@ -44,4 +44,7 @@ django-simple-history==3.4.0
 WeasyPrint==60.1
 cssselect2==0.7.0
 tinycss2==1.2.1
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+python-decouple==3.8
 
