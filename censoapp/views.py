@@ -1980,3 +1980,280 @@ def global_search_api(request):
     return JsonResponse({'results': results})
 
 
+# ==================== IMPORTACIÓN MASIVA ====================
+
+@login_required
+def importacion_masiva_inicio(request):
+    """Vista principal de importación masiva."""
+    context = {
+        'segment': 'importacion',
+    }
+
+    # Si es superusuario, pasar lista de organizaciones
+    if request.user.is_superuser:
+        context['organizations'] = Organizations.objects.all()
+
+    return render(request, 'censo/importacion_masiva.html', context)
+
+
+@login_required
+def descargar_template_importacion(request):
+    """Genera y descarga el template Excel para importación."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from django.http import HttpResponse
+
+    # Crear workbook
+    wb = Workbook()
+
+    # === HOJA DE FICHAS ===
+    ws_fichas = wb.active
+    ws_fichas.title = "Fichas"
+
+    # Headers de fichas
+    headers_fichas = [
+        'numero_ficha', 'vereda', 'zona', 'direccion',
+        'tipo_vivienda', 'material_paredes', 'material_piso', 'material_techo'
+    ]
+
+    # Estilo de headers
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+
+    for col_num, header in enumerate(headers_fichas, 1):
+        cell = ws_fichas.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Datos de ejemplo
+    ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Propia', 'Ladrillo', 'Cemento', 'Zinc'])
+    ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Arrendada', 'Madera', 'Tierra', 'Teja'])
+
+    # === HOJA DE PERSONAS ===
+    ws_personas = wb.create_sheet("Personas")
+
+    headers_personas = [
+        'numero_ficha', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+        'identificacion', 'tipo_documento', 'fecha_nacimiento', 'genero', 'parentesco', 'cabeza_familia',
+        'celular', 'email', 'nivel_educativo', 'ocupacion'
+    ]
+
+    for col_num, header in enumerate(headers_personas, 1):
+        cell = ws_personas.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Datos de ejemplo
+    ws_personas.append([
+        1, 'Juan', 'Carlos', 'García', 'López', '123456789', 'CC', '1980-05-15',
+        'Masculino', 'Jefe de Hogar', 'SI', '3001234567', 'juan@email.com', 'Bachiller', 'Agricultor'
+    ])
+    ws_personas.append([
+        1, 'María', 'Elena', 'García', 'Pérez', '987654321', 'CC', '1985-08-20',
+        'Femenino', 'Cónyuge', 'NO', '3009876543', 'maria@email.com', 'Técnico', 'Ama de Casa'
+    ])
+    ws_personas.append([
+        1, 'Pedro', '', 'García', 'García', '456789123', 'TI', '2010-03-10',
+        'Masculino', 'Hijo', 'NO', '', '', 'Primaria', 'Estudiante'
+    ])
+
+    # === HOJA DE INSTRUCCIONES ===
+    ws_instrucciones = wb.create_sheet("Instrucciones")
+    ws_instrucciones.column_dimensions['A'].width = 50
+
+    instrucciones = [
+        "INSTRUCCIONES PARA IMPORTACIÓN MASIVA",
+        "",
+        "1. HOJA 'Fichas':",
+        "   - numero_ficha: Número único de la ficha familiar",
+        "   - vereda: Nombre de la vereda",
+        "   - zona: U (Urbana) o R (Rural)",
+        "   - direccion: Dirección de la vivienda",
+        "   - tipo_vivienda: Propia, Arrendada, Familiar, etc.",
+        "",
+        "2. HOJA 'Personas':",
+        "   - numero_ficha: Debe coincidir con una ficha existente",
+        "   - primer_nombre: Obligatorio",
+        "   - primer_apellido: Obligatorio",
+        "   - identificacion: Debe ser única (sin repetir)",
+        "   - tipo_documento: CC, TI, RC, CE, etc.",
+        "   - fecha_nacimiento: Formato YYYY-MM-DD (ej: 1990-01-15)",
+        "   - genero: Masculino o Femenino",
+        "   - cabeza_familia: SI o NO",
+        "",
+        "3. NOTAS IMPORTANTES:",
+        "   - No eliminar las columnas del encabezado",
+        "   - Cada ficha debe tener al menos una persona",
+        "   - Solo puede haber un cabeza de familia por ficha",
+        "   - Las identificaciones no pueden estar duplicadas",
+        "   - Los campos marcados como obligatorios no pueden estar vacíos",
+        "",
+        "4. PROCESO:",
+        "   1. Llenar los datos en las hojas Fichas y Personas",
+        "   2. Guardar el archivo",
+        "   3. Subir el archivo en la plataforma",
+        "   4. Revisar el preview y corregir errores si los hay",
+        "   5. Confirmar la importación",
+        "",
+        "5. VALORES PERMITIDOS:",
+        "   - zona: U, R, URBANA, RURAL",
+        "   - genero: Masculino, Femenino",
+        "   - cabeza_familia: SI, NO, SÍ, S, N",
+        "   - tipo_documento: CC, TI, RC, CE, PA",
+    ]
+
+    for row_num, texto in enumerate(instrucciones, 1):
+        cell = ws_instrucciones.cell(row=row_num, column=1)
+        cell.value = texto
+        if "INSTRUCCIONES" in texto or texto.startswith(tuple('12345')):
+            cell.font = Font(bold=True, size=12)
+
+    # Crear response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=template_importacion_censo.xlsx'
+
+    wb.save(response)
+    return response
+
+
+@login_required
+def validar_archivo_importacion(request):
+    """Valida el archivo Excel y muestra preview."""
+    if request.method != 'POST':
+        return redirect('importacion-masiva')
+
+    if 'archivo' not in request.FILES:
+        messages.error(request, "No se ha seleccionado ningún archivo")
+        return redirect('importacion-masiva')
+
+    archivo = request.FILES['archivo']
+
+    # Validar extensión
+    if not archivo.name.endswith(('.xlsx', '.xls')):
+        messages.error(request, "El archivo debe ser formato Excel (.xlsx o .xls)")
+        return redirect('importacion-masiva')
+
+    # Obtener organización del usuario
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_organization = request.user.userprofile.organization
+        except AttributeError:
+            messages.error(request, "Tu usuario no tiene una organización asignada")
+            return redirect('importacion-masiva')
+    else:
+        # Superusuario debe seleccionar organización
+        org_id = request.POST.get('organization_id')
+        if not org_id:
+            messages.error(request, "Debes seleccionar una organización")
+            return redirect('importacion-masiva')
+        user_organization = Organizations.objects.get(id=org_id)
+
+    # Guardar archivo temporalmente
+    import os
+    from django.conf import settings
+    from censoapp.importador_masivo import ImportadorMasivo
+
+    temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', archivo.name)
+    os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+
+    with open(temp_path, 'wb+') as destination:
+        for chunk in archivo.chunks():
+            destination.write(chunk)
+
+    # Validar archivo
+    importador = ImportadorMasivo(temp_path, user_organization)
+
+    if importador.validar_todo():
+        # Guardar ruta en sesión para importación posterior
+        request.session['archivo_importacion'] = temp_path
+        request.session['organization_id'] = user_organization.id
+
+        # Extraer preview
+        fichas_preview = importador.extraer_datos_fichas()[:10]
+        personas_preview = importador.extraer_datos_personas()[:10]
+
+        context = {
+            'segment': 'importacion',
+            'archivo_valido': True,
+            'fichas_preview': fichas_preview,
+            'personas_preview': personas_preview,
+            'total_fichas': len(importador.extraer_datos_fichas()),
+            'total_personas': len(importador.extraer_datos_personas()),
+            'advertencias': importador.advertencias,
+        }
+
+        return render(request, 'censo/importacion_preview.html', context)
+    else:
+        # Eliminar archivo temporal
+        os.remove(temp_path)
+
+        context = {
+            'segment': 'importacion',
+            'archivo_valido': False,
+            'errores': importador.errores,
+            'advertencias': importador.advertencias,
+        }
+
+        return render(request, 'censo/importacion_preview.html', context)
+
+
+@login_required
+def confirmar_importacion(request):
+    """Ejecuta la importación definitiva."""
+    if request.method != 'POST':
+        return redirect('importacion-masiva')
+
+    archivo_path = request.session.get('archivo_importacion')
+    org_id = request.session.get('organization_id')
+
+    if not archivo_path or not org_id:
+        messages.error(request, "No hay archivo para importar")
+        return redirect('importacion-masiva')
+
+    try:
+        organization = Organizations.objects.get(id=org_id)
+
+        from censoapp.importador_masivo import ImportadorMasivo
+        importador = ImportadorMasivo(archivo_path, organization)
+
+        resultado = importador.importar()
+
+        # Eliminar archivo temporal
+        import os
+        os.remove(archivo_path)
+
+        # Limpiar sesión
+        del request.session['archivo_importacion']
+        del request.session['organization_id']
+
+        if resultado['exito']:
+            messages.success(
+                request,
+                f"✅ Importación completada exitosamente: "
+                f"{resultado['fichas_creadas']} fichas y "
+                f"{resultado['personas_creadas']} personas creadas"
+            )
+
+            if resultado.get('advertencias'):
+                for adv in resultado['advertencias'][:5]:  # Máximo 5 advertencias
+                    messages.warning(request, adv)
+        else:
+            messages.error(request, "❌ Error en la importación:")
+            for error in resultado.get('errores', [])[:10]:  # Máximo 10 errores
+                messages.error(request, error)
+
+        return redirect('familyCardIndex')
+
+    except Exception as e:
+        messages.error(request, f"Error inesperado: {str(e)}")
+        return redirect('importacion-masiva')
+
+
+

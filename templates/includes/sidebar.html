@@ -94,10 +94,21 @@
                             </g>
                         </svg>
                     </div>
-                    <span class="nav-link-text ms-1">Ficha Familiar</span>
+                    <span class="nav-link-text ms-1">Personas</span>
                 </a>
             </li>
-{#            <li class="nav-item">#}
+
+            <!-- Importación Masiva -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'importacion' in segment %} active {% endif %}" href="{% url 'importacion-masiva' %}">
+                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-file-upload text-dark text-lg opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Importación Masiva</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
 {#            <a class="nav-link nav-sidebar {% if 'personas' in segment %} active {% endif %}"#}
 {#               href="{% url 'personas' %}">#}
 {#                <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">#}
