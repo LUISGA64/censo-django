@@ -17,7 +17,7 @@
 
 ## 🗑️ ARCHIVOS ELIMINADOS DEL REPOSITORIO
 
-### Total: 60+ archivos
+### Total: 66+ archivos
 
 #### 1. Test Files (14 archivos)
 ```
@@ -92,6 +92,25 @@
 - RESUMEN_FINAL_VARIABLES.md
 ```
 
+#### 5. Bases de Datos (4 archivos) 🆕
+```
+- db.censo_Web.backup
+- db.censo_Web.old
+- db.censo_Web_OLD
+- identifier.sqlite (ya estaba excluido)
+```
+
+#### 6. Archivos PDF de Test (1 archivo) 🆕
+```
+- test_documento.pdf
+```
+
+#### 7. Scripts Temporales Adicionales (2 archivos) 🆕
+```
+- migrate_data.py
+- recreate_db.ps1
+```
+
 ---
 
 ## 📝 ACTUALIZACIÓN DE .gitignore
@@ -99,6 +118,13 @@
 Se agregaron las siguientes exclusiones:
 
 ```gitignore
+# Database files #
+*.db
+*.sqlite
+*.sqlite3
+db.*
+db.censo_Web*
+
 # Backup files #
 *.bak
 backup*.json
@@ -110,6 +136,8 @@ test_*.py
 *_test.py
 test*.py
 debug*.py
+test*.pdf
+*_test.pdf
 
 # Utility scripts (temporary) #
 crear_*.py
@@ -124,6 +152,8 @@ reemplazar_*.py
 eliminar_*.py
 check_*.py
 add_*.py
+migrate_*.py
+recreate_*.ps1
 ```
 
 ---
@@ -269,13 +299,13 @@ python manage.py dumpdata > backups/backup_$(Get-Date -Format "yyyyMMdd").json
 ## 🚀 ESTADO FINAL
 
 ### Git
-- ✅ Commit creado
-- ✅ Push a GitHub (75647ff)
+- ✅ Commits creados (75647ff, d929975, 18fc2b7)
+- ✅ Push a GitHub completado
 - ✅ Repositorio limpio
 - ✅ .gitignore actualizado
 
 ### Archivos
-- ✅ 60+ archivos eliminados del repo
+- ✅ 66+ archivos eliminados del repo
 - ✅ Se mantienen localmente
 - ✅ No afecta tu trabajo local
 
@@ -361,7 +391,10 @@ git clean -xfd  # CUIDADO: elimina archivos no trackeados
 - ✅ Scripts temporales NO deben estar en el repo
 
 **Acción tomada:**
-- ✅ 60+ archivos eliminados del repositorio
+- ✅ 66+ archivos eliminados del repositorio
+- ✅ Bases de datos eliminadas (db.censo_Web*)
+- ✅ PDF de test eliminado
+- ✅ Scripts temporales eliminados
 - ✅ .gitignore actualizado para prevenir futuros
 - ✅ Archivos se mantienen localmente
 - ✅ Repositorio limpio y profesional
@@ -369,6 +402,7 @@ git clean -xfd  # CUIDADO: elimina archivos no trackeados
 **Estado:**
 - ✅ Repositorio sincronizado en GitHub
 - ✅ Tamaño reducido en ~90%
+- ✅ Sin datos sensibles
 - ✅ Navegación más fácil
 - ✅ Cumple mejores prácticas
 
@@ -376,7 +410,7 @@ git clean -xfd  # CUIDADO: elimina archivos no trackeados
 
 **¡Excelente observación!** El repositorio ahora está mucho más limpio y profesional. 🎉
 
-**Commit:** 75647ff  
-**Archivos eliminados:** 60+  
+**Commits:** 75647ff, d929975, 18fc2b7  
+**Archivos eliminados:** 66+  
 **Estado:** ✅ COMPLETADO
 
