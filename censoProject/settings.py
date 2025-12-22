@@ -127,32 +127,46 @@ DATABASES = {
 try:
     # Intentar usar Redis si está disponible
     import redis
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': 'redis://127.0.0.1:6379/1',
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-                'SOCKET_CONNECT_TIMEOUT': 5,
-                'SOCKET_TIMEOUT': 5,
-                'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
-                'CONNECTION_POOL_KWARGS': {
-                    'max_connections': 50,
-                    'retry_on_timeout': True,
+    # Verificar que Redis esté corriendo
+    try:
+        r = redis.Redis(host='127.0.0.1', port=6379, db=1, socket_connect_timeout=1)
+        r.ping()
+        REDIS_AVAILABLE = True
+    except (redis.ConnectionError, redis.TimeoutError):
+        REDIS_AVAILABLE = False
+
+    if REDIS_AVAILABLE:
+        CACHES = {
+            'default': {
+                'BACKEND': 'django_redis.cache.RedisCache',
+                'LOCATION': 'redis://127.0.0.1:6379/1',
+                'OPTIONS': {
+                    'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                    'SOCKET_CONNECT_TIMEOUT': 5,
+                    'SOCKET_TIMEOUT': 5,
+                    'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+                    'CONNECTION_POOL_KWARGS': {
+                        'max_connections': 50,
+                        'retry_on_timeout': True,
+                    },
+                    'IGNORE_EXCEPTIONS': True,  # Fallback to database if Redis fails
                 },
-                'IGNORE_EXCEPTIONS': True,  # Fallback to database if Redis fails
-            },
-            'KEY_PREFIX': 'censo',
-            'TIMEOUT': 300,  # 5 minutos por defecto
+                'KEY_PREFIX': 'censo',
+                'TIMEOUT': 300,  # 5 minutos por defecto
+            }
         }
-    }
+        print("✅ Redis conectado. Usando cache de Redis.")
 
-    # Session storage in Redis for better performance
-    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    SESSION_CACHE_ALIAS = "default"
+        # Solo usar sesiones en Redis si está disponible y funcionando
+        # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+        # SESSION_CACHE_ALIAS = "default"
+        # NOTA: Comentado porque puede causar problemas de login si Redis falla
+        # Usar sesiones en BD es más confiable
+    else:
+        raise redis.ConnectionError("Redis no disponible")
 
-except ImportError:
-    # Si Redis no está instalado, usar cache en memoria local
+except (ImportError, redis.ConnectionError, redis.TimeoutError, Exception) as e:
+    # Si Redis no está instalado o no está corriendo, usar cache en memoria local
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -161,8 +175,12 @@ except ImportError:
         }
     }
     print("⚠️ Redis no disponible. Usando cache en memoria local (temporal).")
-    print("📝 Para mejor performance, instala Redis: pip install redis django-redis")
+    print("📝 Para mejor performance, instala y ejecuta Redis")
     print("📖 Ver: INSTALACION_REDIS.md")
+
+# Usar sesiones en base de datos (más confiable que cache)
+# Esto evita problemas de login cuando Redis no está disponible
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 
 # Password validation

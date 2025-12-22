@@ -25,10 +25,11 @@ class OrganizationFilterMiddleware:
         # Establecer organizacion del usuario en el request
         if request.user.is_authenticated:
             try:
-                if hasattr(request.user, 'profile'):
-                    request.user_organization = request.user.profile.organization
-                    request.can_view_all = request.user.profile.can_view_all_organizations
-                    request.user_role = request.user.profile.role
+                # Usar userprofile en lugar de profile
+                if hasattr(request.user, 'userprofile'):
+                    request.user_organization = request.user.userprofile.organization
+                    request.can_view_all = request.user.userprofile.can_view_all_organizations
+                    request.user_role = request.user.userprofile.role
                 else:
                     # Usuario sin perfil (puede ser superuser sin perfil)
                     request.user_organization = None
