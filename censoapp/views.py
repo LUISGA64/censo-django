@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction, IntegrityError
-from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count, Sum
+from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count, Sum, Max
 from django.db.models.functions.text import Concat
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -208,6 +208,8 @@ def home(request):
         'total_documentos': total_documentos,
         'documentos_vigentes': documentos_vigentes,
         'documentos_vencidos': documentos_vencidos,
+        'documentos_mes': documentos_mes,
+        'documentos_proximos_vencer': documentos_proximos_vencer,
         # Distribución por edad
         'edades_labels': edades_labels,
         'edades_data': edades_data,
@@ -218,6 +220,11 @@ def home(request):
         'piramide_labels': piramide_labels,
         'piramide_hombres': piramide_hombres_values,
         'piramide_mujeres': piramide_mujeres_values,
+        # Estadísticas adicionales
+        'promedio_personas_ficha': promedio_personas_ficha,
+        'nuevas_fichas_mes': nuevas_fichas_mes,
+        'porcentaje_mujeres': porcentaje_mujeres,
+        'porcentaje_hombres': porcentaje_hombres,
         # Organización del usuario
         'user_organization': user_organization,
         'organizaciones_stats': organizaciones_stats,
@@ -1773,4 +1780,151 @@ def export_persons_excel(request):
     except Exception as e:
         messages.error(request, f"Error al exportar a Excel: {str(e)}")
         return redirect('personas')
+
+
+@login_required
+def global_search(request):
+    """
+    Búsqueda global en todo el sistema.
+    Busca en: Personas, Fichas Familiares, Documentos Generados.
+    """
+    query = request.GET.get('q', '').strip()
+
+    context = {
+        'segment': 'search',
+        'query': query,
+        'personas': [],
+        'fichas': [],
+        'documentos': [],
+        'total_resultados': 0,
+    }
+
+    if not query or len(query) < 2:
+        return render(request, 'censo/global_search.html', context)
+
+    # Filtrar por organización del usuario
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_profile = request.user.userprofile
+            user_organization = user_profile.organization
+        except AttributeError:
+            pass
+
+    # Búsqueda en Personas
+    personas_qs = Person.objects.select_related(
+        'gender', 'family_card', 'family_card__sidewalk_home'
+    ).filter(state=True)
+
+    if user_organization:
+        personas_qs = personas_qs.filter(family_card__organization=user_organization)
+
+    personas = personas_qs.filter(
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query) |
+        Q(identification__icontains=query)
+    )[:10]  # Limitar a 10 resultados
+
+    # Búsqueda en Fichas Familiares
+    fichas_qs = FamilyCard.objects.select_related(
+        'sidewalk_home'
+    ).filter(state=True)
+
+    if user_organization:
+        fichas_qs = fichas_qs.filter(organization=user_organization)
+
+    fichas = fichas_qs.filter(
+        Q(family_card_number__icontains=query)
+    )[:10]
+
+    # Búsqueda en Documentos Generados
+    try:
+        from censoapp.models import GeneratedDocument
+        docs_qs = GeneratedDocument.objects.select_related('person', 'organization')
+
+        if user_organization:
+            docs_qs = docs_qs.filter(organization=user_organization)
+
+        documentos = docs_qs.filter(
+            Q(document_number__icontains=query) |
+            Q(person__first_name__icontains=query) |
+            Q(person__last_name__icontains=query) |
+            Q(person__identification__icontains=query)
+        )[:10]
+
+        context['documentos'] = documentos
+    except ImportError:
+        pass
+
+    context.update({
+        'personas': personas,
+        'fichas': fichas,
+        'total_resultados': personas.count() + fichas.count() + len(context['documentos']),
+    })
+
+    return render(request, 'censo/global_search.html', context)
+
+
+@login_required
+def global_search_api(request):
+    """
+    API para autocompletado de búsqueda global.
+    Retorna JSON con resultados rápidos para autocomplete.
+    """
+    query = request.GET.get('q', '').strip()
+
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+
+    # Filtrar por organización
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_profile = request.user.userprofile
+            user_organization = user_profile.organization
+        except AttributeError:
+            pass
+
+    results = []
+
+    # Buscar personas
+    personas_qs = Person.objects.select_related('family_card').filter(state=True)
+    if user_organization:
+        personas_qs = personas_qs.filter(family_card__organization=user_organization)
+
+    personas = personas_qs.filter(
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query) |
+        Q(identification__icontains=query)
+    )[:5]
+
+    for persona in personas:
+        results.append({
+            'type': 'persona',
+            'title': f"{persona.first_name} {persona.last_name}",
+            'subtitle': f"ID: {persona.identification}",
+            'url': reverse('persona_detail', args=[persona.id]),
+            'icon': 'fa-user'
+        })
+
+    # Buscar fichas
+    fichas_qs = FamilyCard.objects.select_related('sidewalk_home').filter(state=True)
+    if user_organization:
+        fichas_qs = fichas_qs.filter(organization=user_organization)
+
+    fichas = fichas_qs.filter(
+        Q(family_card_number__icontains=query)
+    )[:5]
+
+    for ficha in fichas:
+        results.append({
+            'type': 'ficha',
+            'title': f"Ficha Familiar #{ficha.family_card_number}",
+            'subtitle': f"{ficha.sidewalk_home.sidewalk_name if ficha.sidewalk_home else 'Sin vereda'}",
+            'url': reverse('fichadetail', args=[ficha.id]),
+            'icon': 'fa-home'
+        })
+
+    return JsonResponse({'results': results})
+
 

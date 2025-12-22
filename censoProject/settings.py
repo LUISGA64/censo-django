@@ -122,6 +122,49 @@ DATABASES = {
 }
 
 
+# Cache Configuration with Redis (or fallback to local memory)
+# https://docs.djangoproject.com/en/4.2/topics/cache/
+try:
+    # Intentar usar Redis si está disponible
+    import redis
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://127.0.0.1:6379/1',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+                'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+                'CONNECTION_POOL_KWARGS': {
+                    'max_connections': 50,
+                    'retry_on_timeout': True,
+                },
+                'IGNORE_EXCEPTIONS': True,  # Fallback to database if Redis fails
+            },
+            'KEY_PREFIX': 'censo',
+            'TIMEOUT': 300,  # 5 minutos por defecto
+        }
+    }
+
+    # Session storage in Redis for better performance
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+
+except ImportError:
+    # Si Redis no está instalado, usar cache en memoria local
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'censo-cache',
+            'TIMEOUT': 300,
+        }
+    }
+    print("⚠️ Redis no disponible. Usando cache en memoria local (temporal).")
+    print("📝 Para mejor performance, instala Redis: pip install redis django-redis")
+    print("📖 Ver: INSTALACION_REDIS.md")
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
