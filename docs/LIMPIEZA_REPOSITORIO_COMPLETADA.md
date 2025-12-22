@@ -17,7 +17,7 @@
 
 ## 🗑️ ARCHIVOS ELIMINADOS DEL REPOSITORIO
 
-### Total: 66+ archivos
+### Total: 69 archivos
 
 #### 1. Test Files (14 archivos)
 ```
@@ -111,6 +111,16 @@
 - recreate_db.ps1
 ```
 
+#### 8. Requirements Duplicados (3 archivos) 🆕
+```
+- requirements.txt (encoding corrupto UTF-16)
+- requirements_new.txt (duplicado)
+- requirements_fixed.txt (renombrado a requirements.txt)
+
+Ahora solo existe:
+✅ requirements.txt (versión correcta UTF-8)
+```
+
 ---
 
 ## 📝 ACTUALIZACIÓN DE .gitignore
@@ -154,6 +164,11 @@ check_*.py
 add_*.py
 migrate_*.py
 recreate_*.ps1
+
+# Requirements duplicados #
+requirements_fixed.txt
+requirements_new.txt
+requirements_old.txt
 ```
 
 ---
@@ -299,13 +314,13 @@ python manage.py dumpdata > backups/backup_$(Get-Date -Format "yyyyMMdd").json
 ## 🚀 ESTADO FINAL
 
 ### Git
-- ✅ Commits creados (75647ff, d929975, 18fc2b7)
+- ✅ Commits creados (75647ff, d929975, 18fc2b7, f085d3a, fd50712)
 - ✅ Push a GitHub completado
 - ✅ Repositorio limpio
 - ✅ .gitignore actualizado
 
 ### Archivos
-- ✅ 66+ archivos eliminados del repo
+- ✅ 69 archivos eliminados del repo
 - ✅ Se mantienen localmente
 - ✅ No afecta tu trabajo local
 
@@ -391,10 +406,11 @@ git clean -xfd  # CUIDADO: elimina archivos no trackeados
 - ✅ Scripts temporales NO deben estar en el repo
 
 **Acción tomada:**
-- ✅ 66+ archivos eliminados del repositorio
+- ✅ 69 archivos eliminados del repositorio
 - ✅ Bases de datos eliminadas (db.censo_Web*)
 - ✅ PDF de test eliminado
 - ✅ Scripts temporales eliminados
+- ✅ Requirements duplicados consolidados (3→1)
 - ✅ .gitignore actualizado para prevenir futuros
 - ✅ Archivos se mantienen localmente
 - ✅ Repositorio limpio y profesional
@@ -403,6 +419,7 @@ git clean -xfd  # CUIDADO: elimina archivos no trackeados
 - ✅ Repositorio sincronizado en GitHub
 - ✅ Tamaño reducido en ~90%
 - ✅ Sin datos sensibles
+- ✅ Sin duplicados
 - ✅ Navegación más fácil
 - ✅ Cumple mejores prácticas
 
@@ -410,7 +427,7 @@ git clean -xfd  # CUIDADO: elimina archivos no trackeados
 
 **¡Excelente observación!** El repositorio ahora está mucho más limpio y profesional. 🎉
 
-**Commits:** 75647ff, d929975, 18fc2b7  
-**Archivos eliminados:** 66+  
+**Commits:** 75647ff, d929975, 18fc2b7, f085d3a, fd50712  
+**Archivos eliminados:** 69  
 **Estado:** ✅ COMPLETADO
 
