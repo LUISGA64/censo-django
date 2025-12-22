@@ -410,6 +410,11 @@ if (iconSidenav) {
 }
 
 function toggleSidenav() {
+  // Verificar que sidenav exista antes de usarlo
+  if (!sidenav) {
+    return;
+  }
+
   if (body.classList.contains(className)) {
     body.classList.remove(className);
     setTimeout(function() {
@@ -421,7 +426,9 @@ function toggleSidenav() {
     body.classList.add(className);
     sidenav.classList.add('bg-white');
     sidenav.classList.remove('bg-transparent');
-    iconSidenav.classList.remove('d-none');
+    if (iconSidenav) {
+      iconSidenav.classList.remove('d-none');
+    }
   }
 }
 
@@ -432,6 +439,11 @@ let referenceButtons = document.querySelector('[data-class]');
 window.addEventListener("resize", navbarColorOnResize);
 
 function navbarColorOnResize() {
+  // Verificar que referenceButtons y sidenav existan antes de usarlos
+  if (!referenceButtons || !sidenav) {
+    return;
+  }
+
   if (window.innerWidth > 1200) {
     if (referenceButtons.classList.contains('active') && referenceButtons.getAttribute('data-class') === 'bg-transparent') {
       sidenav.classList.remove('bg-white');

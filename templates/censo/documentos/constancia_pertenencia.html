@@ -1,0 +1,310 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Constancia de Pertenencia - {{ person.full_name }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .info-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .preview-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 12px;
+        min-height: 600px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent mb-3">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'personas' %}"><i class="fas fa-users"></i> Personas</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'detail-person' person.id %}">{{ person.full_name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'select-document-type' person.id %}">Documentos</a></li>
+            <li class="breadcrumb-item active">Constancia de Pertenencia</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Info y Acciones -->
+        <div class="col-lg-4">
+            <div class="info-section">
+                <h5 class="mb-4">
+                    <i class="fas fa-certificate text-primary me-2"></i>
+                    Constancia de Pertenencia
+                </h5>
+
+                <div class="alert alert-info" >
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span class="text-white">Este documento certifica que la persona pertenece al resguardo.
+                        No requiere información adicional.</span>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Persona:</strong><br>
+                    {{ person.full_name }}
+                </div>
+
+                <div class="mb-3">
+                    <strong>Identificación:</strong><br>
+                    {{ person.document_type.document_type }} {{ person.identification_person }}
+                </div>
+
+                <div class="mb-3">
+                    <strong>Vereda:</strong><br>
+                    {{ person.family_card.sidewalk_home.sidewalk_name }}
+                </div>
+
+                <hr>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Generar PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="downloadPDF()">
+                        <i class="fas fa-download me-2"></i>Descargar
+                    </button>
+                    <a href="{% url 'select-document-type' person.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview del PDF -->
+        <div class="col-lg-8">
+            <div class="preview-section">
+                <div id="loading" class="text-center py-5">
+                    <i class="fas fa-file-pdf fa-4x text-primary mb-3"></i>
+                    <p style="color: #212529;">Haga click en "Generar PDF" para crear el documento</p>
+                </div>
+                <iframe id="pdfPreview" style="display:none; width:100%; height:calc(100vh - 200px); border:1px solid #dee2e6; border-radius:8px;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let generatedPDF = null;
+
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'letter'
+    });
+
+    // Declarar fecha y meses al inicio para usarlos en todo el documento
+    const today = new Date();
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+    // Datos desde Django
+    const person = {
+        fullName: '{{ person.full_name }}',
+        identification: '{{ person.identification_person }}',
+        documentType: '{{ person.document_type.document_type }}',
+        vereda: '{{ person.family_card.sidewalk_home.sidewalk_name }}'
+    };
+
+    const organization = {
+        name: '{{ organization.organization_name }}',
+        nit: '{{ organization.organization_identification }}',
+        address: '{{ organization.organization_address }}',
+        phone: '{{ organization.organization_mobile_phone }}',
+        logoUrl: '{% if organization.organization_logo %}{{ organization.organization_logo.url }}{% endif %}'
+    };
+
+    const signers = [
+        {% for signer in signers %}
+        {
+            name: '{{ signer.holder_person.full_name }}',
+            position: '{{ signer.get_position_name_display }}',
+            id: '{{ signer.holder_person.identification_person }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20; // Reducido de 25mm a 20mm para optimizar espacio
+    let yPosition = margin;
+
+    // Logo
+    if (organization.logoUrl) {
+        try {
+            const logoImg = new Image();
+            logoImg.src = organization.logoUrl;
+            doc.addImage(logoImg, 'PNG', margin, yPosition, 20, 20);
+        } catch (e) {
+            console.error('Error cargando logo:', e);
+        }
+    }
+
+    // Info organización
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(organization.name, pageWidth - margin, yPosition + 5, { align: 'right' });
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`NIT: ${organization.nit}`, pageWidth - margin, yPosition + 12, { align: 'right' });
+    doc.text(organization.address, pageWidth - margin, yPosition + 17, { align: 'right' });
+    doc.text(`Tel: ${organization.phone}`, pageWidth - margin, yPosition + 22, { align: 'right' });
+
+    yPosition += 25;
+
+    // Línea separadora
+    doc.setDrawColor(33, 150, 243);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Contenido
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 51, 51);
+
+    const contentWidth = pageWidth - (2 * margin);
+
+    // Párrafo 1
+    const p1 = `La Autoridad Tradicional del ${organization.name}, de acuerdo a la Ley de Origen, el Derecho Mayor, Derecho Propio y en uso de las facultades jurídicas, políticas, territorial y administrativas que nos confiere la ley 89 de 1890 y la Constitución Política de 1991, en sus artículos 7, 8, 10, 246, 286, 287, 329, 330 especialmente y demás normas del fuero indígena vigente.`;
+    let lines = doc.splitTextToSize(p1, contentWidth);
+    doc.text(lines, margin, yPosition);
+    yPosition += (lines.length * 5) + 4;
+
+    // Título centrado
+    doc.setFont('helvetica', 'bold');
+    doc.text('Expide la siguiente CONSTANCIA DE PERTENENCIA', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 7;
+
+    // Párrafo 2
+    doc.setFont('helvetica', 'normal');
+    const p2 = `A ${person.fullName}, identificado(a) con ${person.documentType} No. ${person.identification}. Quien se encuentra debidamente registrado(a) en el censo poblacional del ${organization.name} — Vereda ${person.vereda}.`;
+    lines = doc.splitTextToSize(p2, contentWidth);
+    doc.text(lines, margin, yPosition);
+    yPosition += (lines.length * 5) + 6;
+
+    // Párrafo 3
+    const p3 = `Reside de manera permanente en el territorio del resguardo, participa activamente en las actividades comunitarias y comparte los usos, costumbres y tradiciones de nuestro pueblo indígena.`;
+    lines = doc.splitTextToSize(p3, contentWidth);
+    doc.text(lines, margin, yPosition);
+    yPosition += (lines.length * 5) + 6;
+
+    // Párrafo 4 - Con fecha
+    const p4 = `Se firma en las oficinas del cabildo a los ${today.getDate()} días del mes de ${months[today.getMonth()]} del año ${today.getFullYear()}.`;
+    lines = doc.splitTextToSize(p4, contentWidth);
+    doc.text(lines, margin, yPosition);
+    yPosition += (lines.length * 5) + 6;
+
+    // Firmas
+    if (signers.length > 0) {
+        doc.setFont('helvetica', 'bold');
+        doc.text('AUTORIDAD ANCESTRAL', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+
+        const signersPerRow = Math.min(2, signers.length);
+        const signerWidth = (pageWidth - (2 * margin)) / signersPerRow;
+        const totalRows = Math.ceil(signers.length / signersPerRow);
+
+        signers.forEach((signer, index) => {
+            const col = index % signersPerRow;
+            const row = Math.floor(index / signersPerRow);
+            const xPos = margin + (col * signerWidth) + (signerWidth / 2);
+            const yPos = yPosition + (row * 30);
+
+            doc.setLineWidth(0.3);
+            doc.setDrawColor(51, 51, 51);
+            doc.line(xPos - 35, yPos, xPos + 35, yPos);
+
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text(signer.name, xPos, yPos + 5, { align: 'center' });
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`C.C. ${signer.id}`, xPos, yPos + 10, { align: 'center' });
+            doc.text(signer.position, xPos, yPos + 14, { align: 'center' });
+        });
+
+        // Actualizar yPosition después de las firmas
+        yPosition += (totalRows * 30);
+    }
+
+    // ========================================
+    // CÓDIGO QR Y VERIFICACIÓN
+    // ========================================
+    {% if documento_generado and documento_generado.verification_hash %}
+    const qrSize = 20;
+
+    // Calcular posición del QR: en la esquina inferior derecha con margen de 10mm
+    const qrMarginBottom = 10;
+    const qrY = pageHeight - qrSize - qrMarginBottom;
+    const qrX = pageWidth - margin - qrSize;
+
+    const verificationUrl = '{{ request.scheme }}://{{ request.get_host }}{% url "verify-document" documento_generado.verification_hash %}';
+    console.log('URL de verificación para QR:', verificationUrl);
+    console.log('Hash de verificación:', '{{ documento_generado.verification_hash }}');
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}`;
+
+    try {
+        doc.addImage(qrCodeUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+    } catch (e) {
+        console.error('Error generando QR:', e);
+    }
+
+    // Texto de verificación
+    doc.setFontSize(6);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(102, 102, 102);
+    doc.text('Escanee para verificar', qrX, qrY + qrSize + 3, { align: 'left' });
+
+    doc.setFontSize(5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Doc #{{ documento_generado.document_number }}`, qrX, qrY + qrSize + 6, { align: 'left' });
+    {% endif %}
+
+    // Guardar PDF generado
+    generatedPDF = doc;
+
+    // Mostrar en iframe
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const iframe = document.getElementById('pdfPreview');
+    iframe.src = pdfUrl;
+
+    // Ocultar loading y mostrar iframe
+    document.getElementById('loading').style.display = 'none';
+    iframe.style.display = 'block';
+}
+
+function downloadPDF() {
+    if (generatedPDF) {
+        const person = '{{ person.full_name|escapejs }}';
+        generatedPDF.save(`Constancia_Pertenencia_${person}.pdf`);
+    } else {
+        alert('Por favor, genere el PDF primero');
+    }
+}
+
+// Generar automáticamente al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    generatePDF();
+});
+</script>
+{% endblock %}
+

@@ -977,7 +977,7 @@ class GeneratedDocument(models.Model):
 
     # Hash de verificación para código QR
     verification_hash = models.CharField(
-        max_length=32,
+        max_length=64,  # SHA-256 genera 64 caracteres hexadecimales
         blank=True,
         null=True,
         unique=True,

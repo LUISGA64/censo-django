@@ -1,0 +1,379 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Vista Previa - Documento #{{ document.document_number }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .preview-container {
+        display: flex;
+        height: calc(100vh - 120px);
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .preview-info {
+        width: 300px;
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow-y: auto;
+    }
+
+    .preview-pdf {
+        flex: 1;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pdf-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    iframe {
+        width: 100%;
+        max-width: 800px;
+        height: calc(100% - 60px);
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: white;
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        color: #212529;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent mb-3">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'documents-stats' %}"><i class="fas fa-file-alt"></i> Documentos</a></li>
+            <li class="breadcrumb-item active">Vista Previa #{{ document.document_number }}</li>
+        </ol>
+    </nav>
+
+    <div class="preview-container">
+        <!-- Panel de información -->
+        <div class="preview-info">
+            <h5 class="mb-4">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                Información del Documento
+            </h5>
+
+            <div class="info-item">
+                <div class="info-label">Número de Documento</div>
+                <div class="info-value">#{{ document.document_number }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Tipo</div>
+                <div class="info-value">{{ document.document_type.document_type_name }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Persona</div>
+                <div class="info-value">{{ person.full_name }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Identificación</div>
+                <div class="info-value">{{ person.document_type.document_type }} {{ person.identification_person }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Organización</div>
+                <div class="info-value">{{ organization.organization_name }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Fecha de Emisión</div>
+                <div class="info-value">{{ document.issue_date|date:"d/m/Y" }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Estado</div>
+                <div class="info-value">
+                    <span class="badge bg-success">{{ document.get_status_display }}</span>
+                </div>
+            </div>
+
+            {% if document.verification_hash %}
+            <div class="info-item">
+                <div class="info-label">Verificación</div>
+                <div class="info-value">
+                    <a href="{% url 'verify-document' document.verification_hash %}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-qrcode me-1"></i>Verificar
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'detail-person' person.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-user me-2"></i>Ver Persona
+                </a>
+                <a href="{% url 'documents-stats' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Documentos
+                </a>
+            </div>
+        </div>
+
+        <!-- Vista previa del PDF -->
+        <div class="preview-pdf">
+            <div class="pdf-actions">
+                <button type="button" class="btn btn-primary" onclick="generatePDF()">
+                    <i class="fas fa-sync-alt me-2"></i>Regenerar PDF
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="downloadPDF()">
+                    <i class="fas fa-download me-2"></i>Descargar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="printPDF()">
+                    <i class="fas fa-print me-2"></i>Imprimir
+                </button>
+            </div>
+
+            <iframe id="pdfPreview"></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let generatedPDF = null;
+
+// Datos del documento desde Django
+const documentData = {
+    type: '{{ document.document_type.document_type_name }}',
+    number: '{{ document.document_number }}',
+    issueDate: '{{ document.issue_date|date:"Y-m-d" }}',
+    content: `{{ document.document_content|escapejs }}`,
+    verificationHash: '{{ document.verification_hash }}'
+};
+
+const person = {
+    fullName: '{{ person.full_name }}',
+    identification: '{{ person.identification_person }}',
+    documentType: '{{ person.document_type.document_type }}',
+    vereda: '{{ person.family_card.sidewalk_home.sidewalk_name }}',
+    gender: '{{ person.gender.gender }}'
+};
+
+const organization = {
+    name: '{{ organization.organization_name }}',
+    nit: '{{ organization.organization_identification }}',
+    address: '{{ organization.organization_address }}',
+    phone: '{{ organization.organization_mobile_phone }}',
+    logoUrl: '{% if organization.organization_logo %}{{ organization.organization_logo.url }}{% endif %}'
+};
+
+const signers = [
+    {% for signer in document.signers.all %}
+    {
+        name: '{{ signer.holder_person.full_name }}',
+        position: '{{ signer.get_position_name_display }}',
+        id: '{{ signer.holder_person.identification_person }}'
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'letter'
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 25;
+    let yPosition = margin;
+
+    // Logo
+    if (organization.logoUrl) {
+        try {
+            const logoImg = new Image();
+            logoImg.src = organization.logoUrl;
+            doc.addImage(logoImg, 'PNG', margin, yPosition, 30, 30);
+        } catch (e) {
+            console.error('Error cargando logo:', e);
+        }
+    }
+
+    // Info organización
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(organization.name, pageWidth - margin, yPosition + 5, { align: 'right' });
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`NIT: ${organization.nit}`, pageWidth - margin, yPosition + 12, { align: 'right' });
+    doc.text(organization.address, pageWidth - margin, yPosition + 17, { align: 'right' });
+    doc.text(`Tel: ${organization.phone}`, pageWidth - margin, yPosition + 22, { align: 'right' });
+
+    yPosition += 40;
+
+    // Línea separadora
+    doc.setDrawColor(33, 150, 243);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Título del documento
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(33, 150, 243);
+    doc.text(documentData.type.toUpperCase(), pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+
+    // Contenido
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 51, 51);
+
+    const contentWidth = pageWidth - (2 * margin);
+
+    // Parsear el contenido
+    const lines = doc.splitTextToSize(documentData.content, contentWidth);
+    doc.text(lines, margin, yPosition);
+    yPosition += (lines.length * 6) + 15;
+
+    // Fecha
+    const today = new Date(documentData.issueDate);
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const dateStr = `Dado en el ${organization.name}, a los ${today.getDate()} días del mes de ${months[today.getMonth()]} de ${today.getFullYear()}.`;
+    const dateLines = doc.splitTextToSize(dateStr, contentWidth);
+    doc.text(dateLines, margin, yPosition);
+    yPosition += (dateLines.length * 6) + 20;
+
+    // Firmas
+    if (signers.length > 0) {
+        doc.setFont('helvetica', 'bold');
+        doc.text('FIRMAS AUTORIZADAS', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+
+        const signersPerRow = Math.min(2, signers.length);
+        const signerWidth = (pageWidth - (2 * margin)) / signersPerRow;
+
+        signers.forEach((signer, index) => {
+            const col = index % signersPerRow;
+            const row = Math.floor(index / signersPerRow);
+            const xPos = margin + (col * signerWidth) + (signerWidth / 2);
+            const yPos = yPosition + (row * 30);
+
+            doc.setLineWidth(0.3);
+            doc.setDrawColor(51, 51, 51);
+            doc.line(xPos - 35, yPos, xPos + 35, yPos);
+
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text(signer.name, xPos, yPos + 5, { align: 'center' });
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`C.C. ${signer.id}`, xPos, yPos + 10, { align: 'center' });
+            doc.text(signer.position, xPos, yPos + 14, { align: 'center' });
+        });
+    }
+
+    // Código QR
+    if (documentData.verificationHash) {
+        const qrSize = 30;
+        const qrMarginBottom = 18;
+        const qrY = pageHeight - qrSize - qrMarginBottom;
+        const qrX = pageWidth - margin - qrSize;
+
+        const verificationUrl = '{{ request.scheme }}://{{ request.get_host }}{% url "verify-document" "HASH_PLACEHOLDER" %}'.replace('HASH_PLACEHOLDER', documentData.verificationHash);
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}`;
+
+        try {
+            doc.addImage(qrCodeUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(102, 102, 102);
+            doc.text('Escanee el código QR para', qrX, qrY + qrSize + 4, { align: 'left' });
+            doc.text('verificar la autenticidad', qrX, qrY + qrSize + 7.5, { align: 'left' });
+
+            doc.setFontSize(6);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Doc #${documentData.number}`, qrX, qrY + qrSize + 11, { align: 'left' });
+        } catch (e) {
+            console.error('Error generando QR:', e);
+        }
+    }
+
+    // Guardar PDF
+    generatedPDF = doc;
+
+    // Mostrar en iframe
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    document.getElementById('pdfPreview').src = pdfUrl;
+}
+
+function downloadPDF() {
+    if (generatedPDF) {
+        generatedPDF.save(`Documento_${documentData.number}_${person.fullName}.pdf`);
+    } else {
+        alert('Genere el PDF primero');
+    }
+}
+
+function printPDF() {
+    if (generatedPDF) {
+        const pdfBlob = generatedPDF.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const printWindow = window.open(pdfUrl);
+        printWindow.onload = function() {
+            printWindow.print();
+        };
+    } else {
+        alert('Genere el PDF primero');
+    }
+}
+
+// Generar automáticamente al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    generatePDF();
+});
+</script>
+{% endblock %}
+

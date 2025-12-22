@@ -70,8 +70,10 @@ def sanitize_text_for_pdf(text):
 def generate_document_view(request, person_id):
     """
     Vista para generar un documento para una persona.
-    Muestra formulario con tipos de documentos disponibles.
+    Muestra formulario con plantillas de documentos disponibles para la organización.
     """
+    from censoapp.models import DocumentTemplate
+
     person = get_object_or_404(Person, pk=person_id, state=True)
 
     # Obtener organización de la persona
@@ -92,8 +94,18 @@ def generate_document_view(request, person_id):
             messages.error(request, "No tiene un perfil de usuario configurado. Contacte al administrador.")
             return redirect('home')
 
-    # Obtener tipos de documentos activos
-    document_types = DocumentType.objects.filter(is_active=True)
+    # PRIORIDAD 1: Obtener plantillas personalizadas de la organización (activas)
+    custom_templates = DocumentTemplate.objects.filter(
+        organization=organization,
+        is_active=True
+    ).select_related('document_type').order_by('document_type__document_type_name', '-is_default')
+
+    # PRIORIDAD 2: Si no hay plantillas personalizadas, obtener tipos de documentos genéricos
+    document_types = DocumentType.objects.filter(is_active=True) if not custom_templates.exists() else None
+
+    # Determinar qué mostrar: plantillas personalizadas o tipos genéricos
+    use_custom_templates = custom_templates.exists()
+    available_documents = custom_templates if use_custom_templates else document_types
 
     # Verificar que exista junta directiva vigente
     today = date.today()
@@ -101,11 +113,28 @@ def generate_document_view(request, person_id):
     signers = BoardPosition.get_signers_on_date(organization, today)
 
     if request.method == 'POST':
+        # Obtener ID del documento (puede ser template_id o document_type_id)
+        template_id = request.POST.get('template_id')
         document_type_id = request.POST.get('document_type')
         expiration_days = request.POST.get('expiration_days', 365)
 
         try:
-            document_type = get_object_or_404(DocumentType, pk=document_type_id, is_active=True)
+            # Determinar si se usa plantilla personalizada o tipo genérico
+            if template_id:
+                # Usar plantilla personalizada
+                custom_template = get_object_or_404(
+                    DocumentTemplate,
+                    pk=template_id,
+                    organization=organization,
+                    is_active=True
+                )
+                document_type = custom_template.document_type
+                using_custom_template = True
+            else:
+                # Usar tipo de documento genérico
+                document_type = get_object_or_404(DocumentType, pk=document_type_id, is_active=True)
+                custom_template = None
+                using_custom_template = False
 
             # Verificar que haya firmantes disponibles
             if not signers.exists():
@@ -158,12 +187,14 @@ def generate_document_view(request, person_id):
             logger.info(
                 f"Documento creado: {generated_doc.document_number} - "
                 f"Hash: {verification_hash} - "
-                f"Persona: {person.full_name}"
+                f"Persona: {person.full_name} - "
+                f"Template: {'Personalizada' if using_custom_template else 'Genérica'}"
             )
 
+            template_msg = f" (plantilla: {custom_template.name})" if using_custom_template else ""
             messages.success(
                 request,
-                f"Documento '{document_type.document_type_name}' generado exitosamente. "
+                f"Documento '{document_type.document_type_name}'{template_msg} generado exitosamente. "
                 f"Número: {generated_doc.document_number}"
             )
 
@@ -180,12 +211,15 @@ def generate_document_view(request, person_id):
 
     context = {
         'person': person,
-        'document_types': document_types,
         'organization': organization,
         'has_board': board_positions.exists(),
         'has_signers': signers.exists(),
         'signers': signers,
-        'segment': 'personas'
+        'segment': 'personas',
+        # Plantillas personalizadas o tipos genéricos
+        'use_custom_templates': use_custom_templates,
+        'custom_templates': custom_templates if use_custom_templates else None,
+        'document_types': document_types if not use_custom_templates else None,
     }
 
     return render(request, 'censo/documentos/generate_document.html', context)
@@ -276,7 +310,8 @@ def generate_document_content(document_type, person, organization, issue_date, e
 
 def render_custom_template(template, person, organization, issue_date, expiration_date):
     """
-    Renderiza una plantilla personalizada con todos sus bloques y estilos.
+    Renderiza una plantilla personalizada SOLO como texto plano.
+    El PDF template se encarga de toda la estructura y formato.
 
     Args:
         template: Instancia de DocumentTemplate
@@ -286,7 +321,7 @@ def render_custom_template(template, person, organization, issue_date, expiratio
         expiration_date: Fecha de vencimiento
 
     Returns:
-        str: HTML del documento renderizado
+        str: Contenido del documento como TEXTO PLANO (sin etiquetas HTML)
     """
     from censoapp.models import TemplateVariable
 
@@ -333,13 +368,11 @@ def render_custom_template(template, person, organization, issue_date, expiratio
     }
 
     # Agregar variables personalizadas de la organización
-    # Ahora soporta variables dinámicas que traen datos de modelos relacionados
     custom_vars = TemplateVariable.objects.filter(
         organization=organization,
         is_active=True
     )
     for var in custom_vars:
-        # Usar el método get_value() que procesa variables estáticas y dinámicas
         variables[f'{{{var.variable_name}}}'] = var.get_value(
             person=person,
             organization=organization,
@@ -347,153 +380,64 @@ def render_custom_template(template, person, organization, issue_date, expiratio
         )
 
     # ========================================
-    # CONSTRUIR HTML DEL DOCUMENTO
+    # CONSTRUIR CONTENIDO COMO TEXTO PLANO
     # ========================================
-    html_parts = []
+    content_parts = []
 
-    # Estilos CSS
-    html_parts.append(f'''
-    <style>
-        body {{
-            font-family: {template.font_family};
-            font-size: {template.font_size}pt;
-            color: {template.text_color};
-            margin: {template.margin_top}mm {template.margin_right}mm {template.margin_bottom}mm {template.margin_left}mm;
-        }}
-        .document-title {{
-            text-align: {template.title_alignment};
-            font-size: {template.font_size + 4}pt;
-            font-weight: bold;
-            color: {template.primary_color};
-            margin-bottom: 20px;
-        }}
-        .introduction {{
-            text-align: center;
-            margin-bottom: 15px;
-            {f"font-weight: bold;" if template.introduction_bold else ""}
-        }}
-        .content-block {{
-            margin-bottom: 10px;
-        }}
-        .closing {{
-            margin-top: 20px;
-        }}
-        {template.custom_css or ''}
-    </style>
-    ''')
-
-    # Logo y encabezado de organización
-    if template.logo_position != 'none' or template.show_organization_info:
-        html_parts.append('<div style="margin-bottom: 30px;">')
-
-        if template.logo_position != 'none' and organization.organization_logo:
-            position_style = {
-                'top-left': 'float: left;',
-                'top-right': 'float: right;',
-                'top-center': 'text-align: center;'
-            }.get(template.logo_position, '')
-
-            html_parts.append(f'''
-            <div style="{position_style} width: {template.logo_width}px;">
-                <img src="{organization.organization_logo.url}" width="{template.logo_width}" />
-            </div>
-            ''')
-
-        if template.show_organization_info:
-            info_align = {
-                'top-left': 'left',
-                'top-center': 'center',
-                'top-right': 'right'
-            }.get(template.organization_info_position, 'right')
-
-            html_parts.append(f'''
-            <div style="text-align: {info_align};">
-                <strong>{organization.organization_name}</strong><br>
-                NIT: {getattr(organization, 'organization_identification', '')}<br>
-                {getattr(organization, 'organization_address', '')}<br>
-                Tel: {getattr(organization, 'organization_mobile_phone', '')}
-            </div>
-            ''')
-
-        if template.header_custom_text:
-            html_parts.append(replace_variables(template.header_custom_text, variables))
-
-        html_parts.append('<div style="clear: both;"></div>')
-        html_parts.append('</div>')
-
-    # Título del documento
-    title = replace_variables(template.document_title, variables)
-    html_parts.append(f'<div class="document-title">{title}</div>')
+    # Debug: Log de la plantilla
+    logger.info(f"Renderizando plantilla: {template.name} (ID: {template.id})")
+    logger.info(f"Tipo content_blocks: {type(template.content_blocks)}")
+    logger.info(f"Valor content_blocks: {template.content_blocks}")
 
     # Introducción
     if template.introduction_text:
         intro = replace_variables(template.introduction_text, variables)
-        html_parts.append(f'<div class="introduction">{intro}</div>')
+        content_parts.append(intro)
+        content_parts.append('')  # Línea en blanco
+        logger.info(f"Introducción agregada: {intro[:100]}...")
 
-    # ========================================
-    # BLOQUES DE CONTENIDO
-    # ========================================
+    # Bloques de contenido
     if template.content_blocks:
         import json
         try:
-            blocks = template.content_blocks if isinstance(template.content_blocks, list) else json.loads(template.content_blocks)
+            # Manejar tanto listas como strings JSON
+            if isinstance(template.content_blocks, list):
+                blocks = template.content_blocks
+            elif isinstance(template.content_blocks, str):
+                blocks = json.loads(template.content_blocks)
+            else:
+                blocks = template.content_blocks
 
-            for block in sorted(blocks, key=lambda x: x.get('order', 0)):
+            logger.info(f"Bloques procesados: {len(blocks)} bloques encontrados")
+
+            for i, block in enumerate(sorted(blocks, key=lambda x: x.get('order', 0))):
                 content = replace_variables(block.get('content', ''), variables)
-
-                # Construir estilos del bloque
-                styles = []
-                styles.append(f"text-align: {block.get('alignment', 'justify')};")
-
-                if block.get('is_bold'):
-                    styles.append('font-weight: bold;')
-                if block.get('is_italic'):
-                    styles.append('font-style: italic;')
-                if block.get('is_underline'):
-                    styles.append('text-decoration: underline;')
-
-                modifier = block.get('font_size_modifier', 0)
-                if modifier != 0:
-                    styles.append(f'font-size: {template.font_size + modifier}pt;')
-
-                if block.get('custom_style'):
-                    styles.append(block.get('custom_style'))
-
-                style_str = ' '.join(styles)
-                html_parts.append(f'<div class="content-block" style="{style_str}">{content}</div>')
+                if content.strip():  # Solo agregar si hay contenido
+                    content_parts.append(content)
+                    content_parts.append('')  # Línea en blanco
+                    logger.info(f"Bloque {i+1} agregado: {content[:100]}...")
+                else:
+                    logger.warning(f"Bloque {i+1} está vacío")
 
         except Exception as e:
-            # Si hay error procesando bloques, continuar sin ellos
-            print(f"Error procesando bloques: {e}")
+            logger.error(f"Error procesando bloques de contenido: {e}")
+            logger.error(f"Valor de content_blocks: {template.content_blocks}")
+            import traceback
+            logger.error(traceback.format_exc())
 
     # Texto de cierre
     if template.closing_text:
         closing = replace_variables(template.closing_text, variables)
-        html_parts.append(f'<div class="closing">{closing}</div>')
+        content_parts.append(closing)
+        logger.info(f"Texto de cierre agregado: {closing[:100]}...")
 
-    # Firmas
-    if template.show_signatures:
-        html_parts.append('<div style="margin-top: 40px;">')
-        # Aquí se podrían agregar las firmas de la junta directiva
-        # Por ahora dejamos espacio para firmas
-        html_parts.append('<div style="margin-top: 60px; text-align: center;">')
-        html_parts.append('<div style="display: inline-block; margin: 0 30px;">')
-        html_parts.append('_________________________<br>')
-        html_parts.append('Firma Autorizada')
-        html_parts.append('</div>')
-        html_parts.append('</div>')
-        html_parts.append('</div>')
+    # Construir resultado final
+    result = '\n\n'.join(filter(None, content_parts))
+    logger.info(f"Contenido final generado - Longitud: {len(result)} caracteres")
+    logger.info(f"Primeros 200 caracteres: {result[:200]}...")
 
-    # Pie de página
-    if template.footer_text:
-        footer = replace_variables(template.footer_text, variables)
-        html_parts.append(f'<div style="margin-top: 20px; font-size: {template.font_size - 2}pt; text-align: center;">{footer}</div>')
+    return result
 
-    # HTML personalizado
-    if template.custom_html:
-        html_parts.append(replace_variables(template.custom_html, variables))
-
-    return '\n'.join(html_parts)
 
 
 def replace_variables(text, variables):
@@ -617,7 +561,8 @@ def view_document(request, document_id):
         'segment': 'personas'
     }
 
-    return render(request, 'censo/documentos/view_document.html', context)
+    # Usar template con jsPDF (mejor control de diseño)
+    return render(request, 'censo/documentos/view_document_jspdf.html', context)
 
 
 @login_required
@@ -695,7 +640,7 @@ def preview_document_pdf(request, document_id):
         'segment': 'documentos'
     }
 
-    return render(request, 'censo/documentos/preview_document.html', context)
+    return render(request, 'censo/documentos/preview_document_jspdf.html', context)
 
 
 @login_required
