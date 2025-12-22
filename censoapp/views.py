@@ -1858,9 +1858,11 @@ def global_search(request):
         personas_qs = personas_qs.filter(family_card__organization=user_organization)
 
     personas = personas_qs.filter(
-        Q(first_name__icontains=query) |
-        Q(last_name__icontains=query) |
-        Q(identification__icontains=query)
+        Q(first_name_1__icontains=query) |
+        Q(first_name_2__icontains=query) |
+        Q(last_name_1__icontains=query) |
+        Q(last_name_2__icontains=query) |
+        Q(identification_person__icontains=query)
     )[:10]  # Limitar a 10 resultados
 
     # Búsqueda en Fichas Familiares
@@ -1885,9 +1887,11 @@ def global_search(request):
 
         documentos = docs_qs.filter(
             Q(document_number__icontains=query) |
-            Q(person__first_name__icontains=query) |
-            Q(person__last_name__icontains=query) |
-            Q(person__identification__icontains=query)
+            Q(person__first_name_1__icontains=query) |
+            Q(person__first_name_2__icontains=query) |
+            Q(person__last_name_1__icontains=query) |
+            Q(person__last_name_2__icontains=query) |
+            Q(person__identification_person__icontains=query)
         )[:10]
 
         context['documentos'] = documentos
@@ -1931,16 +1935,26 @@ def global_search_api(request):
         personas_qs = personas_qs.filter(family_card__organization=user_organization)
 
     personas = personas_qs.filter(
-        Q(first_name__icontains=query) |
-        Q(last_name__icontains=query) |
-        Q(identification__icontains=query)
+        Q(first_name_1__icontains=query) |
+        Q(first_name_2__icontains=query) |
+        Q(last_name_1__icontains=query) |
+        Q(last_name_2__icontains=query) |
+        Q(identification_person__icontains=query)
     )[:5]
 
     for persona in personas:
+        # Construir nombre completo
+        nombre_completo = f"{persona.first_name_1}"
+        if persona.first_name_2:
+            nombre_completo += f" {persona.first_name_2}"
+        nombre_completo += f" {persona.last_name_1}"
+        if persona.last_name_2:
+            nombre_completo += f" {persona.last_name_2}"
+
         results.append({
             'type': 'persona',
-            'title': f"{persona.first_name} {persona.last_name}",
-            'subtitle': f"ID: {persona.identification}",
+            'title': nombre_completo,
+            'subtitle': f"ID: {persona.identification_person}",
             'url': reverse('persona_detail', args=[persona.id]),
             'icon': 'fa-user'
         })

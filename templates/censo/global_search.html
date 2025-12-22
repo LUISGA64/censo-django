@@ -166,10 +166,10 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div class="result-title">
-                                    {{ persona.first_name }} {{ persona.last_name }}
+                                    {{ persona.first_name_1 }}{% if persona.first_name_2 %} {{ persona.first_name_2 }}{% endif %} {{ persona.last_name_1 }}{% if persona.last_name_2 %} {{ persona.last_name_2 }}{% endif %}
                                 </div>
                                 <div class="result-subtitle">
-                                    <i class="fa fa-id-card"></i> {{ persona.identification }}
+                                    <i class="fa fa-id-card"></i> {{ persona.identification_person }}
                                     {% if persona.family_card %}
                                         | <i class="fa fa-home"></i> Ficha #{{ persona.family_card.family_card_number }}
                                     {% endif %}
@@ -232,7 +232,7 @@
                                     {{ doc.get_document_type_display }} - {{ doc.document_number }}
                                 </div>
                                 <div class="result-subtitle">
-                                    <i class="fa fa-user"></i> {{ doc.person.first_name }} {{ doc.person.last_name }}
+                                    <i class="fa fa-user"></i> {{ doc.person.first_name_1 }}{% if doc.person.first_name_2 %} {{ doc.person.first_name_2 }}{% endif %} {{ doc.person.last_name_1 }}{% if doc.person.last_name_2 %} {{ doc.person.last_name_2 }}{% endif %}
                                     | <i class="fa fa-calendar"></i> {{ doc.issue_date|date:"d/m/Y" }}
                                     |
                                     {% if doc.status == 'ISSUED' %}
