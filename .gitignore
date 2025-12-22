@@ -44,6 +44,11 @@ eliminar_*.py
 check_*.py
 add_*.py
 
+# Requirements duplicados #
+requirements_fixed.txt
+requirements_new.txt
+requirements_old.txt
+
 # If you are using PyCharm #
 # User-specific stuff
 .idea/**/workspace.xml
