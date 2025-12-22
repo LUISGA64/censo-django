@@ -75,10 +75,18 @@ def home(request):
     # Cabezas de familia
     total_cabezas = personas_qs.filter(family_head=True).count()
 
-    # Documentos generados
+    # Inicializar variables de estadísticas (para evitar NameError)
     total_documentos = 0
     documentos_vigentes = 0
     documentos_vencidos = 0
+    documentos_mes = 0
+    documentos_proximos_vencer = 0
+    promedio_personas_ficha = 0
+    nuevas_fichas_mes = 0
+    porcentaje_mujeres = 0
+    porcentaje_hombres = 0
+
+    # Documentos generados
     if documentos_disponibles:
         if user_organization:
             docs_qs = GeneratedDocument.objects.filter(organization=user_organization)
@@ -91,6 +99,36 @@ def home(request):
             expiration_date__gte=date.today()
         ).count()
         documentos_vencidos = docs_qs.filter(status='EXPIRED').count()
+
+        # Documentos generados este mes
+        from datetime import timedelta
+        documentos_mes = docs_qs.filter(
+            issue_date__month=date.today().month,
+            issue_date__year=date.today().year
+        ).count()
+
+        # Próximos a vencer (30 días)
+        fecha_limite = date.today() + timedelta(days=30)
+        documentos_proximos_vencer = docs_qs.filter(
+            status='ISSUED',
+            expiration_date__lte=fecha_limite,
+            expiration_date__gte=date.today()
+        ).count()
+
+    # === ESTADÍSTICAS ADICIONALES ===
+    # Promedio de personas por ficha
+    promedio_personas_ficha = round(total_personas / total_fichas, 1) if total_fichas > 0 else 0
+
+    # Nuevas fichas este mes
+    fecha_inicio_mes = date.today().replace(day=1)
+    if hasattr(FamilyCard, 'created_at'):
+        nuevas_fichas_mes = fichas_qs.filter(created_at__gte=fecha_inicio_mes).count()
+    else:
+        nuevas_fichas_mes = 0
+
+    # Porcentaje de cobertura (ejemplo: mujeres/hombres)
+    porcentaje_mujeres = round((total_mujeres / total_personas * 100), 1) if total_personas > 0 else 0
+    porcentaje_hombres = round((total_hombres / total_personas * 100), 1) if total_personas > 0 else 0
 
     # === DISTRIBUCIÓN POR EDAD ===
     today = date.today()
