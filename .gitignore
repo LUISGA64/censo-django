@@ -6,8 +6,15 @@ __pycache__
 db.sqlite3
 db.censoweb
 db.censoWeb
+db.censo_Web*
 identifier.sqlite
 media
+
+# Database files #
+*.db
+*.sqlite
+*.sqlite3
+db.*
 
 # Backup files #
 *.bak
@@ -20,6 +27,8 @@ test_*.py
 *_test.py
 test*.py
 debug*.py
+test*.pdf
+*_test.pdf
 
 # Utility scripts (temporary) #
 crear_*.py
