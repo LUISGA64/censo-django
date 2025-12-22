@@ -22,6 +22,19 @@ class ImportadorMasivo:
         self.fichas_creadas = 0
         self.personas_creadas = 0
 
+        # Verificar si los datos de vivienda están habilitados
+        self.housing_data_enabled = self._check_housing_data_enabled()
+
+    def _check_housing_data_enabled(self):
+        """Verifica si el parámetro de datos de vivienda está habilitado."""
+        try:
+            from censoapp.models import SystemParameters
+            param = SystemParameters.objects.filter(key='Datos de Vivienda').first()
+            return param and param.value == 'S'
+        except Exception:
+            # Si no existe el parámetro, asumimos que NO están habilitados
+            return False
+
     def validar_estructura(self):
         """Valida que el archivo tenga la estructura correcta."""
         try:
@@ -39,9 +52,14 @@ class ImportadorMasivo:
             # Validar columnas de Fichas
             ws_fichas = wb['Fichas']
             columnas_fichas_requeridas = [
-                'numero_ficha', 'vereda', 'zona', 'direccion',
-                'tipo_vivienda', 'material_paredes', 'material_piso', 'material_techo'
+                'numero_ficha', 'vereda', 'zona', 'direccion', 'tipo_vivienda'
             ]
+
+            # Solo requerir columnas de materiales si el parámetro está habilitado
+            if self.housing_data_enabled:
+                columnas_fichas_requeridas.extend([
+                    'material_paredes', 'material_piso', 'material_techo'
+                ])
 
             headers_fichas = [cell.value for cell in ws_fichas[1]]
             for col in columnas_fichas_requeridas:

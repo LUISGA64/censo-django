@@ -124,14 +124,27 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            <div class="page-header mb-4">
-                <h2 class="page-title mb-3">
+            <div class="page-header flex flex-column align-items-start mb-4">
+                <h2 class="page-title mb-1">
                     <i class="fa fa-upload"></i> Importación Masiva de Datos
                 </h2>
-                <p class="text-muted mb-0" style="font-size: 1rem; padding-left: 2.25rem;">
+                <p class="text-muted mb-0" style="font-size: 1rem; padding-left: .5rem;">
                     Carga cientos de fichas y personas desde un archivo Excel en minutos
                 </p>
             </div>
+
+            <!-- Mensaje informativo sobre datos de vivienda -->
+            {% if housing_data_status %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fa fa-info-circle"></i>
+                {% if housing_data_status == 'enabled' %}
+                    <strong>Datos de vivienda habilitados:</strong> El template incluirá columnas para material_paredes, material_piso y material_techo.
+                {% else %}
+                    <strong>Datos de vivienda deshabilitados:</strong> El template NO incluirá columnas de materiales de construcción. Solo se registrarán datos básicos de la ficha familiar.
+                {% endif %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
         </div>
     </div>
 

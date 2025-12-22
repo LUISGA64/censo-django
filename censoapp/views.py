@@ -1985,8 +1985,17 @@ def global_search_api(request):
 @login_required
 def importacion_masiva_inicio(request):
     """Vista principal de importación masiva."""
+    # Verificar estado del parámetro de datos de vivienda
+    housing_data_enabled = False
+    try:
+        param = SystemParameters.objects.filter(key='Datos de Vivienda').first()
+        housing_data_enabled = param and param.value == 'S'
+    except Exception:
+        pass
+
     context = {
         'segment': 'importacion',
+        'housing_data_status': 'enabled' if housing_data_enabled else 'disabled',
     }
 
     # Si es superusuario, pasar lista de organizaciones
@@ -2003,6 +2012,14 @@ def descargar_template_importacion(request):
     from openpyxl.styles import Font, PatternFill, Alignment
     from django.http import HttpResponse
 
+    # Verificar si los datos de vivienda están habilitados
+    housing_data_enabled = False
+    try:
+        param = SystemParameters.objects.filter(key='Datos de Vivienda').first()
+        housing_data_enabled = param and param.value == 'S'
+    except Exception:
+        pass
+
     # Crear workbook
     wb = Workbook()
 
@@ -2010,11 +2027,14 @@ def descargar_template_importacion(request):
     ws_fichas = wb.active
     ws_fichas.title = "Fichas"
 
-    # Headers de fichas
+    # Headers de fichas - condicionales según parámetro
     headers_fichas = [
-        'numero_ficha', 'vereda', 'zona', 'direccion',
-        'tipo_vivienda', 'material_paredes', 'material_piso', 'material_techo'
+        'numero_ficha', 'vereda', 'zona', 'direccion', 'tipo_vivienda'
     ]
+
+    # Solo agregar columnas de materiales si está habilitado
+    if housing_data_enabled:
+        headers_fichas.extend(['material_paredes', 'material_piso', 'material_techo'])
 
     # Estilo de headers
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
@@ -2027,9 +2047,13 @@ def descargar_template_importacion(request):
         cell.font = header_font
         cell.alignment = Alignment(horizontal='center')
 
-    # Datos de ejemplo
-    ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Propia', 'Ladrillo', 'Cemento', 'Zinc'])
-    ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Arrendada', 'Madera', 'Tierra', 'Teja'])
+    # Datos de ejemplo - condicionales
+    if housing_data_enabled:
+        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Propia', 'Ladrillo', 'Cemento', 'Zinc'])
+        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Arrendada', 'Madera', 'Tierra', 'Teja'])
+    else:
+        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Propia'])
+        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Arrendada'])
 
     # === HOJA DE PERSONAS ===
     ws_personas = wb.create_sheet("Personas")
@@ -2065,32 +2089,50 @@ def descargar_template_importacion(request):
     ws_instrucciones = wb.create_sheet("Instrucciones")
     ws_instrucciones.column_dimensions['A'].width = 50
 
+    # Instrucciones base
     instrucciones = [
         "INSTRUCCIONES PARA IMPORTACIÓN MASIVA",
         "",
         "1. HOJA 'Fichas':",
-        "   - numero_ficha: Número único de la ficha familiar",
-        "   - vereda: Nombre de la vereda",
-        "   - zona: U (Urbana) o R (Rural)",
-        "   - direccion: Dirección de la vivienda",
-        "   - tipo_vivienda: Propia, Arrendada, Familiar, etc.",
+        "   - numero_ficha: Número único de la ficha familiar (OBLIGATORIO)",
+        "   - vereda: Nombre de la vereda (OBLIGATORIO)",
+        "   - zona: U (Urbana) o R (Rural) (OBLIGATORIO)",
+        "   - direccion: Dirección de la vivienda (OBLIGATORIO)",
+        "   - tipo_vivienda: Propia, Arrendada, Familiar, etc. (OBLIGATORIO)",
+    ]
+
+    # Agregar instrucciones de materiales solo si están habilitados
+    if housing_data_enabled:
+        instrucciones.extend([
+            "   - material_paredes: Material de las paredes (OPCIONAL)",
+            "   - material_piso: Material del piso (OPCIONAL)",
+            "   - material_techo: Material del techo (OPCIONAL)",
+        ])
+    else:
+        instrucciones.append("   NOTA: Las columnas de materiales NO están habilitadas en este sistema")
+
+    instrucciones.extend([
         "",
         "2. HOJA 'Personas':",
-        "   - numero_ficha: Debe coincidir con una ficha existente",
+        "   - numero_ficha: Debe coincidir con una ficha existente (OBLIGATORIO)",
         "   - primer_nombre: Obligatorio",
         "   - primer_apellido: Obligatorio",
-        "   - identificacion: Debe ser única (sin repetir)",
-        "   - tipo_documento: CC, TI, RC, CE, etc.",
-        "   - fecha_nacimiento: Formato YYYY-MM-DD (ej: 1990-01-15)",
-        "   - genero: Masculino o Femenino",
-        "   - cabeza_familia: SI o NO",
+        "   - identificacion: Debe ser única (sin repetir) (OBLIGATORIO)",
+        "   - tipo_documento: CC, TI, RC, CE, etc. (OBLIGATORIO)",
+        "   - fecha_nacimiento: Formato YYYY-MM-DD (ej: 1990-01-15) (OBLIGATORIO)",
+        "   - genero: Masculino o Femenino (OBLIGATORIO)",
+        "   - cabeza_familia: SI o NO (OBLIGATORIO)",
+        "   - celular: Número de celular (OPCIONAL)",
+        "   - email: Correo electrónico (OPCIONAL)",
+        "   - nivel_educativo: Nivel educativo (OPCIONAL)",
+        "   - ocupacion: Ocupación (OPCIONAL)",
         "",
         "3. NOTAS IMPORTANTES:",
         "   - No eliminar las columnas del encabezado",
         "   - Cada ficha debe tener al menos una persona",
         "   - Solo puede haber un cabeza de familia por ficha",
         "   - Las identificaciones no pueden estar duplicadas",
-        "   - Los campos marcados como obligatorios no pueden estar vacíos",
+        "   - Los campos marcados como OBLIGATORIOS no pueden estar vacíos",
         "",
         "4. PROCESO:",
         "   1. Llenar los datos en las hojas Fichas y Personas",
