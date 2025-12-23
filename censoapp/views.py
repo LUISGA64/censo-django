@@ -2329,6 +2329,15 @@ def confirmar_importacion(request):
                 log_name = os.path.basename(resultado['log_file'])
                 mensaje_exito += f" Ver detalles en: {log_name}"
 
+                # Guardar log en sesión para poder consultarlo
+                request.session['importacion_log'] = {
+                    'log_file': resultado['log_file'],
+                    'errores': [],
+                    'fichas_creadas': resultado.get('fichas_creadas', 0),
+                    'personas_creadas': resultado.get('personas_creadas', 0),
+                    'exitoso': True
+                }
+
             messages.success(request, mensaje_exito)
 
             if resultado.get('advertencias'):
@@ -2387,7 +2396,10 @@ def confirmar_importacion(request):
                     'fichas_creadas': resultado.get('fichas_creadas', 0),
                     'personas_creadas': resultado.get('personas_creadas', 0)
                 }
+                # Redirigir a la página de log cuando hay errores
+                return redirect('ver-log-importacion')
 
+        # Si no hay errores o es exitoso, ir a fichas familiares
         return redirect('familyCardIndex')
 
     except Exception as e:

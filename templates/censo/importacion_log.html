@@ -68,23 +68,28 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card" style="border-left: 4px solid #dc3545;">
+            <div class="card" style="border-left: 4px solid {% if errores|length > 0 %}#dc3545{% else %}#28a745{% endif %};">
                 <div class="card-body">
                     <h5 class="card-title">Errores</h5>
-                    <h2 class="text-danger">{{ errores|length }}</h2>
+                    <h2 class="{% if errores|length > 0 %}text-danger{% else %}text-success{% endif %}">{{ errores|length }}</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Botón descargar log -->
+    <!-- Botones de acción -->
     <div class="row mb-3">
         <div class="col-md-12">
+            {% if log_file %}
             <a href="{% url 'descargar-log-importacion' %}" class="btn btn-primary">
                 <i class="fa fa-download"></i> Descargar Log Completo
             </a>
+            {% endif %}
+            <a href="{% url 'familyCardIndex' %}" class="btn btn-success">
+                <i class="fa fa-home"></i> Ir a Fichas Familiares
+            </a>
             <a href="{% url 'importacion-masiva' %}" class="btn btn-secondary">
-                <i class="fa fa-arrow-left"></i> Volver
+                <i class="fa fa-upload"></i> Nueva Importación
             </a>
         </div>
     </div>
@@ -132,8 +137,22 @@
     <div class="row">
         <div class="col-md-12">
             <div class="alert alert-success">
-                <i class="fa fa-check-circle"></i>
-                No se encontraron errores en la importación
+                <h5><i class="fa fa-check-circle"></i> ¡Importación Exitosa!</h5>
+                <p class="mb-0">
+                    Se importaron correctamente <strong>{{ fichas_creadas }} fichas familiares</strong> y
+                    <strong>{{ personas_creadas }} personas</strong> sin errores.
+                </p>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fa fa-info-circle"></i> ¿Qué puedes hacer ahora?</h5>
+                    <ul>
+                        <li><strong>Ver las fichas importadas:</strong> Haz clic en "Ir a Fichas Familiares"</li>
+                        <li><strong>Descargar el log:</strong> Para tener un registro de la importación</li>
+                        <li><strong>Importar más datos:</strong> Haz clic en "Nueva Importación"</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
