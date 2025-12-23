@@ -1,0 +1,275 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Preview Importación {% endblock %}
+
+{% block stylesheets %}
+<style>
+    .preview-table {
+        font-size: 0.9rem;
+    }
+
+    .error-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .btn-confirmar {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .btn-confirmar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        color: white;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header mb-4">
+                <h2 class="page-title">
+                    <i class="fa fa-eye"></i> Preview de Importación
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    {% if archivo_valido %}
+        <!-- Archivo válido - Mostrar preview -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-success">
+                    <h5><i class="fa fa-check-circle"></i> ¡Archivo válido!</h5>
+                    <p class="mb-0">
+                        Se importarán <strong>{{ total_fichas }} fichas familiares</strong> y
+                        <strong>{{ total_personas }} personas</strong>
+                    </p>
+                </div>
+
+                {% if advertencias %}
+                <div class="alert alert-warning">
+                    <h6><i class="fa fa-exclamation-triangle"></i> Advertencias:</h6>
+                    <ul class="mb-0">
+                        {% for adv in advertencias %}
+                        <li>{{ adv }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Preview de Fichas -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-home"></i> Preview de Fichas (Mostrando primeras 10)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>Número Ficha</th>
+                                        <th>Vereda</th>
+                                        <th>Zona</th>
+                                        <th>Dirección</th>
+                                        <th>Tipo Vivienda</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ficha in fichas_preview %}
+                                    <tr>
+                                        <td><strong>{{ ficha.numero_ficha }}</strong></td>
+                                        <td>{{ ficha.vereda }}</td>
+                                        <td>{{ ficha.zona }}</td>
+                                        <td>{{ ficha.direccion }}</td>
+                                        <td>{{ ficha.tipo_vivienda }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if total_fichas > 10 %}
+                        <p class="text-muted text-center mt-2">
+                            ... y {{ total_fichas|add:"-10" }} fichas más
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview de Personas -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-users"></i> Preview de Personas (Mostrando primeras 10)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ficha</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Identificación</th>
+                                        <th>Fecha Nac.</th>
+                                        <th>Género</th>
+                                        <th>Cabeza</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for persona in personas_preview %}
+                                    <tr>
+                                        <td>{{ persona.numero_ficha }}</td>
+                                        <td>
+                                            {{ persona.primer_nombre }}
+                                            {% if persona.segundo_nombre %}{{ persona.segundo_nombre }}{% endif %}
+                                            {{ persona.primer_apellido }}
+                                            {% if persona.segundo_apellido %}{{ persona.segundo_apellido }}{% endif %}
+                                        </td>
+                                        <td>{{ persona.identificacion }}</td>
+                                        <td>{{ persona.fecha_nacimiento }}</td>
+                                        <td>{{ persona.genero }}</td>
+                                        <td>
+                                            {% if persona.cabeza_familia|upper == 'SI' or persona.cabeza_familia|upper == 'SÍ' %}
+                                                <span class="badge bg-success">SÍ</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">NO</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if total_personas > 10 %}
+                        <p class="text-muted text-center mt-2">
+                            ... y {{ total_personas|add:"-10" }} personas más
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="row mt-4 mb-4">
+            <div class="col-md-12 text-center">
+                <a href="{% url 'importacion-masiva' %}" class="btn btn-secondary btn-lg me-3">
+                    <i class="fa fa-arrow-left"></i> Cancelar
+                </a>
+
+                <form method="POST" action="{% url 'confirmar-importacion' %}" style="display: inline-block;" id="formConfirmar">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-confirmar btn-lg" onclick="return confirmarImportacion()">
+                        <i class="fa fa-check"></i> Confirmar Importación
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Archivo con errores -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-danger">
+                    <h5><i class="fa fa-times-circle"></i> El archivo tiene errores</h5>
+                    <p class="mb-0">Corrige los errores y vuelve a intentar</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-exclamation-triangle"></i> Errores Encontrados ({{ errores|length }})
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="error-list">
+                            <ul>
+                                {% for error in errores %}
+                                <li class="text-danger">{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if advertencias %}
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">
+                            <i class="fa fa-exclamation-triangle"></i> Advertencias ({{ advertencias|length }})
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            {% for adv in advertencias %}
+                            <li class="text-warning">{{ adv }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row mt-4 mb-4">
+            <div class="col-md-12 text-center">
+                <a href="{% url 'importacion-masiva' %}" class="btn btn-primary btn-lg">
+                    <i class="fa fa-arrow-left"></i> Volver e Intentar de Nuevo
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    function confirmarImportacion() {
+        return confirm(
+            '¿Estás seguro de que deseas importar {{ total_fichas }} fichas y {{ total_personas }} personas?\n\n' +
+            'Esta acción no se puede deshacer.'
+        );
+    }
+
+    // Mostrar loading al confirmar
+    document.getElementById('formConfirmar')?.addEventListener('submit', function() {
+        Swal.fire({
+            title: 'Importando...',
+            html: 'Por favor espera mientras se importan los datos.<br>Esto puede tomar varios minutos.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    });
+</script>
+{% endblock javascripts %}
+

@@ -168,7 +168,7 @@ class Eps(models.Model):
 
 
 class Kinship(models.Model):
-    code_kinship = models.CharField(blank=False, null=False, max_length=1)
+    code_kinship = models.CharField(blank=False, null=False, max_length=2)
     description_kinship = models.CharField(max_length=25, blank=False, null=False)
 
     def __str__(self):
