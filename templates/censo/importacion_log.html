@@ -1,0 +1,172 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Log de Importación {% endblock %}
+
+{% block stylesheets %}
+<style>
+    .error-card {
+        margin-bottom: 15px;
+        border-left: 4px solid #dc3545;
+    }
+
+    .error-header {
+        background: #f8d7da;
+        padding: 10px 15px;
+        border-bottom: 1px solid #f5c6cb;
+    }
+
+    .error-body {
+        padding: 15px;
+    }
+
+    .error-detail {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .error-detail strong {
+        color: #495057;
+        min-width: 120px;
+        display: inline-block;
+    }
+
+    .stats-card {
+        border-left: 4px solid #007bff;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header mb-4">
+                <h2 class="page-title">
+                    <i class="fa fa-file-text"></i> Reporte de Importación
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="card-title">Fichas Creadas</h5>
+                    <h2 class="text-primary">{{ fichas_creadas }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="card-title">Personas Creadas</h5>
+                    <h2 class="text-success">{{ personas_creadas }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="border-left: 4px solid #dc3545;">
+                <div class="card-body">
+                    <h5 class="card-title">Errores</h5>
+                    <h2 class="text-danger">{{ errores|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón descargar log -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <a href="{% url 'descargar-log-importacion' %}" class="btn btn-primary">
+                <i class="fa fa-download"></i> Descargar Log Completo
+            </a>
+            <a href="{% url 'importacion-masiva' %}" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de errores -->
+    {% if errores %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="mb-3">
+                <i class="fa fa-exclamation-triangle text-danger"></i>
+                Errores Detallados ({{ errores|length }})
+            </h4>
+
+            {% for error in errores %}
+            <div class="card error-card">
+                <div class="error-header">
+                    <strong>
+                        <i class="fa fa-times-circle"></i>
+                        Error #{{ forloop.counter }} - {{ error.tipo }}
+                    </strong>
+                </div>
+                <div class="error-body">
+                    <div class="error-detail">
+                        <strong>Ficha:</strong> {{ error.ficha }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Persona:</strong> {{ error.persona }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Identificación:</strong> {{ error.identificacion }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Fila Excel:</strong> {{ error.fila_excel }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Error:</strong>
+                        <span class="text-danger">{{ error.error }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-success">
+                <i class="fa fa-check-circle"></i>
+                No se encontraron errores en la importación
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Información del archivo de log -->
+    {% if log_file %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h6><i class="fa fa-info-circle"></i> Archivo de Log</h6>
+                <p class="mb-0">
+                    <strong>Ubicación:</strong> <code>{{ log_file }}</code>
+                </p>
+                <p class="mb-0">
+                    Este archivo contiene el historial completo de la importación con timestamps.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    // Auto-scroll a errores si hay muchos
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorCount = {{ errores|length }};
+        if (errorCount > 0) {
+            console.log('Se encontraron ' + errorCount + ' errores en la importación');
+        }
+    });
+</script>
+{% endblock javascripts %}
+

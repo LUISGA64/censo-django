@@ -10,7 +10,8 @@ from .views import (home, profile, association, CreateAssociation, family_card_i
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
                     delete_person_familyCard, get_system_parameters, MaterialConstructionView, export_persons_excel,
                     organization_detail, global_search, global_search_api,
-                    importacion_masiva_inicio, descargar_template_importacion, validar_archivo_importacion, confirmar_importacion)
+                    importacion_masiva_inicio, descargar_template_importacion, validar_archivo_importacion,
+                    confirmar_importacion, ver_log_importacion, descargar_log_importacion)
 from .document_views import (view_document, list_person_documents, download_document_pdf,
                             organization_documents_stats, preview_document_pdf, verify_document)
 from .simple_document_views import (select_document_type, generate_aval_general, generate_aval_estudio,
@@ -90,4 +91,6 @@ urlpatterns = [
     path('importacion/template/', login_required(descargar_template_importacion), name='descargar-template'),
     path('importacion/validar/', login_required(validar_archivo_importacion), name='validar-importacion'),
     path('importacion/confirmar/', login_required(confirmar_importacion), name='confirmar-importacion'),
+    path('importacion/log/', login_required(ver_log_importacion), name='ver-log-importacion'),
+    path('importacion/log/descargar/', login_required(descargar_log_importacion), name='descargar-log-importacion'),
 ]

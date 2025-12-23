@@ -2029,7 +2029,7 @@ def descargar_template_importacion(request):
 
     # Headers de fichas - condicionales según parámetro
     headers_fichas = [
-        'numero_ficha', 'vereda', 'zona', 'direccion', 'tipo_vivienda'
+        'numero_ficha', 'vereda', 'zona', 'direccion'
     ]
 
     # Solo agregar columnas de materiales si está habilitado
@@ -2049,11 +2049,11 @@ def descargar_template_importacion(request):
 
     # Datos de ejemplo - condicionales
     if housing_data_enabled:
-        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Propia', 'Ladrillo', 'Cemento', 'Zinc'])
-        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Arrendada', 'Madera', 'Tierra', 'Teja'])
+        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Ladrillo', 'Cemento', 'Zinc'])
+        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Madera', 'Tierra', 'Teja'])
     else:
-        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Propia'])
-        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Arrendada'])
+        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123'])
+        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45'])
 
     # === HOJA DE PERSONAS ===
     ws_personas = wb.create_sheet("Personas")
@@ -2071,17 +2071,17 @@ def descargar_template_importacion(request):
         cell.font = header_font
         cell.alignment = Alignment(horizontal='center')
 
-    # Datos de ejemplo
+    # Datos de ejemplo con formato de fecha dd/mm/yyyy
     ws_personas.append([
-        1, 'Juan', 'Carlos', 'García', 'López', '123456789', 'CC', '1980-05-15',
+        1, 'Juan', 'Carlos', 'García', 'López', '123456789', 'CC', '15/05/1980',
         'Masculino', 'Jefe de Hogar', 'SI', '3001234567', 'juan@email.com', 'Bachiller', 'Agricultor'
     ])
     ws_personas.append([
-        1, 'María', 'Elena', 'García', 'Pérez', '987654321', 'CC', '1985-08-20',
+        1, 'María', 'Elena', 'García', 'Pérez', '987654321', 'CC', '20/08/1985',
         'Femenino', 'Cónyuge', 'NO', '3009876543', 'maria@email.com', 'Técnico', 'Ama de Casa'
     ])
     ws_personas.append([
-        1, 'Pedro', '', 'García', 'García', '456789123', 'TI', '2010-03-10',
+        1, 'Pedro', '', 'García', 'García', '456789123', 'TI', '10/03/2010',
         'Masculino', 'Hijo', 'NO', '', '', 'Primaria', 'Estudiante'
     ])
 
@@ -2091,17 +2091,16 @@ def descargar_template_importacion(request):
 
     # Instrucciones base
     instrucciones = [
-        "INSTRUCCIONES PARA IMPORTACIÓN MASIVA",
+        "INSTRUCCIONES PARA IMPORTACION MASIVA",
         "",
         "1. HOJA 'Fichas':",
-        "   - numero_ficha: Número único de la ficha familiar (OBLIGATORIO)",
+        "   - numero_ficha: Numero unico de la ficha familiar (OBLIGATORIO)",
         "   - vereda: Nombre de la vereda (OBLIGATORIO)",
         "   - zona: U (Urbana) o R (Rural) (OBLIGATORIO)",
-        "   - direccion: Dirección de la vivienda (OBLIGATORIO)",
-        "   - tipo_vivienda: Propia, Arrendada, Familiar, etc. (OBLIGATORIO)",
+        "   - direccion: Direccion de la vivienda (OBLIGATORIO)",
     ]
 
-    # Agregar instrucciones de materiales solo si están habilitados
+    # Agregar instrucciones de materiales solo si estan habilitados
     if housing_data_enabled:
         instrucciones.extend([
             "   - material_paredes: Material de las paredes (OPCIONAL)",
@@ -2109,7 +2108,7 @@ def descargar_template_importacion(request):
             "   - material_techo: Material del techo (OPCIONAL)",
         ])
     else:
-        instrucciones.append("   NOTA: Las columnas de materiales NO están habilitadas en este sistema")
+        instrucciones.append("   NOTA: Las columnas de materiales NO estan habilitadas en este sistema")
 
     instrucciones.extend([
         "",
@@ -2117,36 +2116,41 @@ def descargar_template_importacion(request):
         "   - numero_ficha: Debe coincidir con una ficha existente (OBLIGATORIO)",
         "   - primer_nombre: Obligatorio",
         "   - primer_apellido: Obligatorio",
-        "   - identificacion: Debe ser única (sin repetir) (OBLIGATORIO)",
+        "   - identificacion: Debe ser unica (sin repetir) (OBLIGATORIO)",
         "   - tipo_documento: CC, TI, RC, CE, etc. (OBLIGATORIO)",
-        "   - fecha_nacimiento: Formato YYYY-MM-DD (ej: 1990-01-15) (OBLIGATORIO)",
+        "   - fecha_nacimiento: Formatos aceptados:",
+        "       * dd/mm/yyyy (ej: 25/12/1990) - RECOMENDADO",
+        "       * dd-mm-yyyy (ej: 25-12-1990)",
+        "       * yyyy-mm-dd (ej: 1990-12-25)",
         "   - genero: Masculino o Femenino (OBLIGATORIO)",
         "   - cabeza_familia: SI o NO (OBLIGATORIO)",
-        "   - celular: Número de celular (OPCIONAL)",
-        "   - email: Correo electrónico (OPCIONAL)",
+        "   - celular: Numero de celular (OPCIONAL)",
+        "   - email: Correo electronico (OPCIONAL)",
         "   - nivel_educativo: Nivel educativo (OPCIONAL)",
-        "   - ocupacion: Ocupación (OPCIONAL)",
+        "   - ocupacion: Ocupacion (OPCIONAL)",
         "",
         "3. NOTAS IMPORTANTES:",
         "   - No eliminar las columnas del encabezado",
         "   - Cada ficha debe tener al menos una persona",
         "   - Solo puede haber un cabeza de familia por ficha",
         "   - Las identificaciones no pueden estar duplicadas",
-        "   - Los campos marcados como OBLIGATORIOS no pueden estar vacíos",
+        "   - Los campos marcados como OBLIGATORIOS no pueden estar vacios",
+        "   - Para fechas, puede usar el formato de Excel (dd/mm/yyyy)",
         "",
         "4. PROCESO:",
         "   1. Llenar los datos en las hojas Fichas y Personas",
         "   2. Guardar el archivo",
         "   3. Subir el archivo en la plataforma",
         "   4. Revisar el preview y corregir errores si los hay",
-        "   5. Confirmar la importación",
+        "   5. Confirmar la importacion",
         "",
         "5. VALORES PERMITIDOS:",
         "   - zona: U, R, URBANA, RURAL",
         "   - genero: Masculino, Femenino",
-        "   - cabeza_familia: SI, NO, SÍ, S, N",
+        "   - cabeza_familia: SI, NO, SI, S, N",
         "   - tipo_documento: CC, TI, RC, CE, PA",
-    ]
+        "   - fecha_nacimiento: dd/mm/yyyy, dd-mm-yyyy, yyyy-mm-dd",
+    ])
 
     for row_num, texto in enumerate(instrucciones, 1):
         cell = ws_instrucciones.cell(row=row_num, column=1)
@@ -2183,67 +2187,105 @@ def validar_archivo_importacion(request):
 
     # Obtener organización del usuario
     user_organization = None
-    if not request.user.is_superuser:
+    try:
+        if not request.user.is_superuser:
+            try:
+                user_organization = request.user.userprofile.organization
+            except AttributeError:
+                messages.error(request, "Tu usuario no tiene una organización asignada")
+                return redirect('importacion-masiva')
+        else:
+            # Superusuario debe seleccionar organización
+            org_id = request.POST.get('organization_id')
+            if not org_id:
+                messages.error(request, "Debes seleccionar una organización")
+                return redirect('importacion-masiva')
+            user_organization = Organizations.objects.get(id=org_id)
+
+        # Guardar archivo temporalmente
+        import os
+        from django.conf import settings
+        from censoapp.importador_masivo import ImportadorMasivo
+
+        temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', archivo.name)
+        os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+
+        with open(temp_path, 'wb+') as destination:
+            for chunk in archivo.chunks():
+                destination.write(chunk)
+
+        # Validar archivo
+        importador = ImportadorMasivo(temp_path, user_organization)
+
+        # Ejecutar validación dentro de try-except
         try:
-            user_organization = request.user.userprofile.organization
-        except AttributeError:
-            messages.error(request, "Tu usuario no tiene una organización asignada")
+            validacion_exitosa = importador.validar_todo()
+        except Exception as e:
+            # Eliminar archivo temporal
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+            messages.error(request, f"Error al validar el archivo: {str(e)}")
+            logger.error(f"Error en validación de importación: {str(e)}", exc_info=True)
             return redirect('importacion-masiva')
-    else:
-        # Superusuario debe seleccionar organización
-        org_id = request.POST.get('organization_id')
-        if not org_id:
-            messages.error(request, "Debes seleccionar una organización")
-            return redirect('importacion-masiva')
-        user_organization = Organizations.objects.get(id=org_id)
 
-    # Guardar archivo temporalmente
-    import os
-    from django.conf import settings
-    from censoapp.importador_masivo import ImportadorMasivo
+        if validacion_exitosa:
+            # Guardar ruta en sesión para importación posterior
+            request.session['archivo_importacion'] = temp_path
+            request.session['organization_id'] = user_organization.id
 
-    temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', archivo.name)
-    os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+            # Extraer preview
+            try:
+                fichas_preview = importador.extraer_datos_fichas()[:10]
+                personas_preview = importador.extraer_datos_personas()[:10]
+                total_fichas = len(importador.extraer_datos_fichas())
+                total_personas = len(importador.extraer_datos_personas())
+            except Exception as e:
+                # Si falla la extracción de preview, eliminar archivo y mostrar error
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                messages.error(request, f"Error al procesar el archivo: {str(e)}")
+                logger.error(f"Error al extraer preview: {str(e)}", exc_info=True)
+                return redirect('importacion-masiva')
 
-    with open(temp_path, 'wb+') as destination:
-        for chunk in archivo.chunks():
-            destination.write(chunk)
+            context = {
+                'segment': 'importacion',
+                'archivo_valido': True,
+                'fichas_preview': fichas_preview,
+                'personas_preview': personas_preview,
+                'total_fichas': total_fichas,
+                'total_personas': total_personas,
+                'advertencias': importador.advertencias,
+            }
 
-    # Validar archivo
-    importador = ImportadorMasivo(temp_path, user_organization)
+            return render(request, 'censo/importacion_preview.html', context)
+        else:
+            # Eliminar archivo temporal
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
 
-    if importador.validar_todo():
-        # Guardar ruta en sesión para importación posterior
-        request.session['archivo_importacion'] = temp_path
-        request.session['organization_id'] = user_organization.id
+            context = {
+                'segment': 'importacion',
+                'archivo_valido': False,
+                'errores': importador.errores,
+                'advertencias': importador.advertencias,
+            }
 
-        # Extraer preview
-        fichas_preview = importador.extraer_datos_fichas()[:10]
-        personas_preview = importador.extraer_datos_personas()[:10]
+            return render(request, 'censo/importacion_preview.html', context)
 
-        context = {
-            'segment': 'importacion',
-            'archivo_valido': True,
-            'fichas_preview': fichas_preview,
-            'personas_preview': personas_preview,
-            'total_fichas': len(importador.extraer_datos_fichas()),
-            'total_personas': len(importador.extraer_datos_personas()),
-            'advertencias': importador.advertencias,
-        }
+    except Exception as e:
+        # Capturar cualquier error no manejado
+        messages.error(request, f"Error inesperado al procesar el archivo: {str(e)}")
+        logger.error(f"Error inesperado en validar_archivo_importacion: {str(e)}", exc_info=True)
 
-        return render(request, 'censo/importacion_preview.html', context)
-    else:
-        # Eliminar archivo temporal
-        os.remove(temp_path)
+        # Limpiar archivo temporal si existe
+        try:
+            if 'temp_path' in locals() and os.path.exists(temp_path):
+                os.remove(temp_path)
+        except:
+            pass
 
-        context = {
-            'segment': 'importacion',
-            'archivo_valido': False,
-            'errores': importador.errores,
-            'advertencias': importador.advertencias,
-        }
-
-        return render(request, 'censo/importacion_preview.html', context)
+        return redirect('importacion-masiva')
 
 
 @login_required
@@ -2276,26 +2318,131 @@ def confirmar_importacion(request):
         del request.session['organization_id']
 
         if resultado['exito']:
-            messages.success(
-                request,
+            mensaje_exito = (
                 f"✅ Importación completada exitosamente: "
                 f"{resultado['fichas_creadas']} fichas y "
-                f"{resultado['personas_creadas']} personas creadas"
+                f"{resultado['personas_creadas']} personas creadas."
             )
 
+            # Agregar información del log
+            if resultado.get('log_file'):
+                log_name = os.path.basename(resultado['log_file'])
+                mensaje_exito += f" Ver detalles en: {log_name}"
+
+            messages.success(request, mensaje_exito)
+
             if resultado.get('advertencias'):
-                for adv in resultado['advertencias'][:5]:  # Máximo 5 advertencias
-                    messages.warning(request, adv)
+                messages.warning(
+                    request,
+                    f"⚠️ {len(resultado['advertencias'])} advertencias generadas. "
+                    f"Ver archivo de log para detalles."
+                )
         else:
-            messages.error(request, "❌ Error en la importación:")
-            for error in resultado.get('errores', [])[:10]:  # Máximo 10 errores
-                messages.error(request, error)
+            # Mensaje principal de error
+            messages.error(
+                request,
+                f"❌ Importación fallida. "
+                f"{len(resultado.get('errores_detallados', []))} errores encontrados."
+            )
+
+            # Mostrar errores detallados
+            errores_detallados = resultado.get('errores_detallados', [])
+            if errores_detallados:
+                # Agrupar errores por ficha
+                errores_por_ficha = {}
+                for error in errores_detallados:
+                    ficha = error['ficha']
+                    if ficha not in errores_por_ficha:
+                        errores_por_ficha[ficha] = []
+                    errores_por_ficha[ficha].append(error)
+
+                # Mostrar resumen de errores
+                for ficha, errores in list(errores_por_ficha.items())[:5]:  # Primeras 5 fichas
+                    for error in errores[:2]:  # Primeros 2 errores por ficha
+                        messages.error(
+                            request,
+                            f"Ficha {ficha} - {error['persona']}: {error['error']}"
+                        )
+
+                if len(errores_por_ficha) > 5:
+                    messages.warning(
+                        request,
+                        f"⚠️ Hay {len(errores_por_ficha) - 5} fichas más con errores. "
+                        f"Ver archivo de log para detalles completos."
+                    )
+
+            # Información del archivo de log
+            if resultado.get('log_file'):
+                log_name = os.path.basename(resultado['log_file'])
+                messages.info(
+                    request,
+                    f"📄 Reporte completo de errores guardado en: {log_name}"
+                )
+
+            # Guardar información del log en sesión para mostrarlo en una página
+            if resultado.get('log_file') and resultado.get('errores_detallados'):
+                request.session['importacion_log'] = {
+                    'log_file': resultado['log_file'],
+                    'errores': errores_detallados,
+                    'fichas_creadas': resultado.get('fichas_creadas', 0),
+                    'personas_creadas': resultado.get('personas_creadas', 0)
+                }
 
         return redirect('familyCardIndex')
 
     except Exception as e:
+        logger.error(f"Error inesperado en confirmar_importacion: {str(e)}", exc_info=True)
         messages.error(request, f"Error inesperado: {str(e)}")
         return redirect('importacion-masiva')
 
+
+@login_required
+def ver_log_importacion(request):
+    """Muestra el log de la última importación con errores."""
+    log_info = request.session.get('importacion_log')
+
+    if not log_info:
+        messages.warning(request, "No hay información de log disponible")
+        return redirect('importacion-masiva')
+
+    context = {
+        'segment': 'importacion',
+        'log_file': log_info.get('log_file'),
+        'errores': log_info.get('errores', []),
+        'fichas_creadas': log_info.get('fichas_creadas', 0),
+        'personas_creadas': log_info.get('personas_creadas', 0),
+    }
+
+    return render(request, 'censo/importacion_log.html', context)
+
+
+@login_required
+def descargar_log_importacion(request):
+    """Descarga el archivo de log de importación."""
+    log_info = request.session.get('importacion_log')
+
+    if not log_info or not log_info.get('log_file'):
+        messages.error(request, "No hay archivo de log disponible")
+        return redirect('importacion-masiva')
+
+    import os
+    from django.http import FileResponse, Http404
+
+    log_file_path = log_info['log_file']
+
+    if not os.path.exists(log_file_path):
+        messages.error(request, "El archivo de log no existe")
+        return redirect('importacion-masiva')
+
+    try:
+        response = FileResponse(
+            open(log_file_path, 'rb'),
+            content_type='text/plain; charset=utf-8'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(log_file_path)}"'
+        return response
+    except Exception as e:
+        messages.error(request, f"Error al descargar el log: {str(e)}")
+        return redirect('importacion-masiva')
 
 
