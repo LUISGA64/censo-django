@@ -61,8 +61,20 @@ git push origin main
 ```bash
 # Abrir nueva consola Bash desde el dashboard
 # Clonar repositorio
-git clone https://github.com/TU_USUARIO/censo-django.git
+git clone https://github.com/LUISGA64/censo-django.git
 cd censo-django
+
+# ⚠️ IMPORTANTE: Cambiar a la rama development
+git checkout development
+git pull origin development
+
+# Verificar que estás en la rama correcta
+git branch
+# Debe mostrar: * development
+
+# Verificar que existen los archivos necesarios
+ls requirements.txt
+ls censoProject/settings_pythonanywhere.py
 ```
 
 ### Opción B: Subir archivos ZIP
@@ -291,7 +303,8 @@ touch /var/www/censoindigenademo_pythonanywhere_com_wsgi.py
 ### Actualizar código desde GitHub
 ```bash
 cd ~/censo-django
-git pull origin main
+git checkout development
+git pull origin development
 python manage.py migrate
 python manage.py collectstatic --noinput
 # Reload desde dashboard Web
@@ -318,11 +331,12 @@ Cuando hagas cambios en tu código local:
 # En tu PC
 git add .
 git commit -m "Descripción de cambios"
-git push origin main
+git push origin development
 
 # En PythonAnywhere Bash
 cd ~/censo-django
-git pull origin main
+git checkout development
+git pull origin development
 workon censo-env
 pip install -r requirements.txt  # Si hay nuevas dependencias
 python manage.py migrate  # Si hay nuevas migraciones

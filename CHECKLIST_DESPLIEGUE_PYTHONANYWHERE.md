@@ -45,13 +45,25 @@ git push origin main
 ### 2. Clonar Código
 - [ ] Consola Bash abierta
 - [ ] Repositorio clonado
+- [ ] Rama development activada
 - [ ] Código verificado en ~/censo-django
 
 **Comandos:**
 ```bash
-git clone https://github.com/TU_USUARIO/censo-django.git
+git clone https://github.com/LUISGA64/censo-django.git
 cd censo-django
+
+# Cambiar a rama development
+git checkout development
+git pull origin development
+
+# Verificar rama correcta
+git branch
+
+# Verificar archivos
 ls -la
+ls requirements.txt
+ls censoProject/settings_pythonanywhere.py
 ```
 
 ### 3. Entorno Virtual
@@ -310,7 +322,8 @@ tail -f /var/log/TU_USERNAME.pythonanywhere.com.error.log
 ### Actualizar Aplicación
 ```bash
 cd ~/censo-django
-git pull origin main
+git checkout development
+git pull origin development
 workon censo-env
 pip install -r requirements.txt
 python manage.py migrate

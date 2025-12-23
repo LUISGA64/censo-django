@@ -25,8 +25,16 @@ git push origin main
 
 ### En PythonAnywhere - Consola Bash
 ```bash
-git clone https://github.com/TU_USUARIO/censo-django.git
+git clone https://github.com/LUISGA64/censo-django.git
 cd censo-django
+
+# Cambiar a la rama development (donde está el código)
+git checkout development
+git pull origin development
+
+# Verificar que estás en la rama correcta
+git branch
+# Debe mostrar: * development
 ```
 
 ---
@@ -191,7 +199,8 @@ python manage.py check --deploy
 
 ```bash
 cd ~/censo-django
-git pull origin main
+git checkout development
+git pull origin development
 workon censo-env
 pip install -r requirements.txt
 python manage.py migrate
