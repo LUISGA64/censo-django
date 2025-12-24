@@ -226,6 +226,47 @@ Antes de mostrar a los cabildos:
 
 ## 🆘 Solución de Problemas
 
+### **🎨 ERROR MÁS COMÚN: CSS No Carga (La página se ve sin estilos)**
+
+**Síntoma:** La aplicación carga pero solo se ve texto plano, sin colores ni formato.
+
+**Solución Paso a Paso:**
+
+1. **Recolectar archivos estáticos:**
+   ```bash
+   cd ~/censo-django
+   workon censo-env
+   python manage.py collectstatic --clear --noinput --settings=censoProject.settings_pythonanywhere
+   ```
+
+2. **Verificar que se crearon los archivos:**
+   ```bash
+   ls -la staticfiles/
+   # Debe mostrar carpetas como: vendors/, build/, assets/, etc.
+   ```
+
+3. **Configurar Static Files en Web Tab:**
+   - Dashboard → **Web** → **Static files**
+   - Click en "Add a new static file mapping"
+   - **URL:** `/static/`
+   - **Directory:** `/home/luisga64/censo-django/staticfiles`
+   - ⚠️ **IMPORTANTE:** Usar `staticfiles` (NO `static`)
+
+4. **Configurar Media Files:**
+   - URL: `/media/`
+   - Directory: `/home/luisga64/censo-django/media`
+
+5. **Recargar aplicación:**
+   - Dashboard → Web → Click en **"Reload"**
+
+6. **Limpiar caché del navegador:**
+   - Presionar **Ctrl + F5** en el navegador
+   - O abrir en ventana de incógnito
+
+**Ver guía completa:** `SOLUCION_CSS_PYTHONANYWHERE.md`
+
+---
+
 ### **Error: `STATIC_ROOT` not set**
 ```bash
 # Crear el directorio
@@ -247,10 +288,10 @@ Verificar en `settings_pythonanywhere.py`:
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 ```
 
-### **Static files no cargan**
+### **Archivos estáticos en ubicación incorrecta**
 Verificar configuración en Web Tab:
-- URL: `/static/`
-- Directory: `/home/luisga64/censo-django/staticfiles`
+- ✅ URL: `/static/` → Directory: `/home/luisga64/censo-django/staticfiles`
+- ❌ NO usar: `/home/luisga64/censo-django/static`
 
 ---
 
