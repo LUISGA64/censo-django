@@ -112,19 +112,34 @@ def invalidate_cache(pattern='*'):
         invalidate_cache('dashboard:*')  # Invalida todo el cache del dashboard
     """
     try:
-        from django_redis import get_redis_connection
-        conn = get_redis_connection("default")
+        # Verificar si se está usando Redis
+        cache_backend = settings.CACHES['default']['BACKEND']
 
-        # Obtener todas las claves que coincidan con el patrón
-        keys = conn.keys(f"censo:{pattern}")
+        if 'redis' in cache_backend.lower():
+            # Si es Redis, usar la conexión directa
+            from django_redis import get_redis_connection
+            conn = get_redis_connection("default")
 
-        if keys:
-            conn.delete(*keys)
-            return len(keys)
-        return 0
+            # Obtener todas las claves que coincidan con el patrón
+            keys = conn.keys(f"censo:{pattern}")
+
+            if keys:
+                conn.delete(*keys)
+                return len(keys)
+            return 0
+        else:
+            # Si es Local Memory Cache o cualquier otro backend
+            # Limpiar todo el cache (no soporta patrones)
+            cache.clear()
+            return 1
     except Exception as e:
-        print(f"Error al invalidar cache: {e}")
-        return 0
+        # Si hay cualquier error, intentar limpiar todo el cache
+        try:
+            cache.clear()
+            return 1
+        except:
+            print(f"Error al invalidar cache: {e}")
+            return 0
 
 
 def get_or_set_cache(key, callback, timeout=300):
