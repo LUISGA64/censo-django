@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os.path
 from pathlib import Path
+import redis
 
 from django.urls import reverse_lazy
 
@@ -126,7 +127,6 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/topics/cache/
 try:
     # Intentar usar Redis si está disponible
-    import redis
     # Verificar que Redis esté corriendo
     try:
         r = redis.Redis(host='127.0.0.1', port=6379, db=1, socket_connect_timeout=1)
@@ -215,6 +215,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # STATICFILES_DIRS = (BASE_DIR / 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
