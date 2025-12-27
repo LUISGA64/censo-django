@@ -2383,6 +2383,7 @@ def confirmar_importacion(request):
             # Información del archivo de log
             if resultado.get('log_file'):
                 log_name = os.path.basename(resultado['log_file'])
+                print(log_name)
                 messages.info(
                     request,
                     f"📄 Reporte completo de errores guardado en: {log_name}"
