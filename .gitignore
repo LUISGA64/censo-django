@@ -151,3 +151,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 /db.censo_Web
+
+
+# Archivos de configuración
+settings.py
+settings_*.py
+local_settings.py
