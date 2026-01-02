@@ -6,49 +6,84 @@
 {% block stylesheets %}
 {{ block.super }}
 <style>
+    /* Contenedor principal responsive */
     .preview-container {
         display: flex;
-        height: calc(100vh - 120px);
+        flex-direction: column;
         gap: 1rem;
         padding: 1rem;
+        min-height: calc(100vh - 120px);
     }
 
+    /* Panel de información responsive */
     .preview-info {
-        width: 300px;
+        width: 100%;
         background: white;
         border-radius: 12px;
         padding: 1.5rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        overflow-y: auto;
+        order: 2;
     }
 
+    /* Vista previa del PDF responsive */
     .preview-pdf {
-        flex: 1;
+        width: 100%;
         background: #f8f9fa;
         border-radius: 12px;
-        padding: 2rem;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
         align-items: center;
+        order: 1;
     }
 
+    /* Acciones del PDF responsive */
     .pdf-actions {
         display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
         margin-bottom: 1rem;
         width: 100%;
-        max-width: 800px;
     }
 
-    iframe {
+    .pdf-actions .btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Canvas/Embed del PDF responsive */
+    #pdfCanvas,
+    #pdfContainer embed,
+    #pdfContainer object,
+    #pdfContainer iframe {
         width: 100%;
-        max-width: 800px;
-        height: calc(100% - 60px);
+        max-width: 100%;
+        height: auto;
+        min-height: 600px;
         border: 1px solid #dee2e6;
         border-radius: 8px;
         background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
+    /* Contenedor del canvas/embed */
+    .pdf-canvas-container {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        padding: 0;
+    }
+
+    .pdf-canvas-container embed,
+    .pdf-canvas-container object {
+        display: block;
+    }
+
+    /* Información del documento */
     .info-item {
         margin-bottom: 1rem;
         padding-bottom: 1rem;
@@ -70,6 +105,130 @@
     .info-value {
         font-size: 0.95rem;
         color: #212529;
+        word-wrap: break-word;
+    }
+
+    /* Controles de navegación para PDF multipágina */
+    .pdf-navigation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .pdf-navigation button {
+        min-width: 100px;
+    }
+
+    .page-info {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    /* Breadcrumb responsive */
+    .breadcrumb {
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+    }
+
+    /* Loading spinner */
+    .pdf-loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+        color: #2196F3;
+    }
+
+    .pdf-loading.active {
+        display: block;
+    }
+
+    /* Responsive para tablets y superiores */
+    @media (min-width: 768px) {
+        .preview-container {
+            flex-direction: row;
+            gap: 1.5rem;
+        }
+
+        .preview-info {
+            width: 320px;
+            flex-shrink: 0;
+            order: 1;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .preview-pdf {
+            flex: 1;
+            padding: 1.5rem;
+            order: 2;
+        }
+
+        .pdf-actions .btn {
+            flex: 0 1 auto;
+        }
+    }
+
+    /* Responsive para desktop grande */
+    @media (min-width: 1200px) {
+        .preview-info {
+            width: 350px;
+        }
+
+        .preview-pdf {
+            padding: 2rem;
+        }
+    }
+
+    /* Estilos para impresión */
+    @media print {
+        .preview-info,
+        .pdf-actions,
+        .pdf-navigation,
+        nav {
+            display: none !important;
+        }
+
+        .preview-container {
+            display: block;
+        }
+
+        .preview-pdf {
+            padding: 0;
+            background: white;
+        }
+
+        #pdfCanvas {
+            border: none;
+            box-shadow: none;
+        }
+    }
+
+    /* Mejoras de accesibilidad */
+    .btn:focus {
+        outline: 2px solid #2196F3;
+        outline-offset: 2px;
+    }
+
+    /* Scrollbar personalizado para panel de información */
+    .preview-info::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .preview-info::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .preview-info::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    .preview-info::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 </style>
 {% endblock %}
@@ -157,17 +316,38 @@
         <div class="preview-pdf">
             <div class="pdf-actions">
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">
-                    <i class="fas fa-sync-alt me-2"></i>Regenerar PDF
+                    <i class="fas fa-sync-alt me-1"></i><span class="d-none d-sm-inline">Regenerar</span> PDF
                 </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="downloadPDF()">
-                    <i class="fas fa-download me-2"></i>Descargar
+                <button type="button" class="btn btn-success" onclick="downloadPDF()">
+                    <i class="fas fa-download me-1"></i><span class="d-none d-sm-inline">Descargar</span>
                 </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="printPDF()">
-                    <i class="fas fa-print me-2"></i>Imprimir
+                <button type="button" class="btn btn-secondary" onclick="printPDF()">
+                    <i class="fas fa-print me-1"></i><span class="d-none d-sm-inline">Imprimir</span>
                 </button>
             </div>
 
-            <iframe id="pdfPreview"></iframe>
+            <div class="pdf-loading" id="pdfLoading">
+                <div class="spinner-border text-primary mb-2" role="status">
+                    <span class="visually-hidden">Generando PDF...</span>
+                </div>
+                <p>Generando documento PDF...</p>
+            </div>
+
+            <div class="pdf-canvas-container" id="pdfContainer" style="display: none;">
+                <!-- El PDF se renderizará aquí dinámicamente -->
+            </div>
+
+            <div class="pdf-navigation" id="pdfNavigation" style="display: none;">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="previousPage()" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <span class="page-info">
+                    Página <span id="pageNum">1</span> de <span id="pageCount">1</span>
+                </span>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="nextPage()" id="nextBtn">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -179,6 +359,8 @@
 
 <script>
 let generatedPDF = null;
+let currentPage = 1;
+let totalPages = 1;
 
 // Datos del documento desde Django
 const documentData = {
@@ -215,164 +397,331 @@ const signers = [
     {% endfor %}
 ];
 
-function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'letter'
-    });
+function showLoading() {
+    document.getElementById('pdfLoading').classList.add('active');
+    document.getElementById('pdfContainer').style.display = 'none';
+    document.getElementById('pdfNavigation').style.display = 'none';
+}
 
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 25;
-    let yPosition = margin;
+function hideLoading() {
+    document.getElementById('pdfLoading').classList.remove('active');
+    document.getElementById('pdfContainer').style.display = 'block';
+}
 
-    // Logo
-    if (organization.logoUrl) {
-        try {
-            const logoImg = new Image();
-            logoImg.src = organization.logoUrl;
-            doc.addImage(logoImg, 'PNG', margin, yPosition, 30, 30);
-        } catch (e) {
-            console.error('Error cargando logo:', e);
+async function generatePDF() {
+    showLoading();
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'letter'
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 25;
+        let yPosition = margin;
+
+        // Logo (cargar con timeout para evitar problemas en móvil)
+        if (organization.logoUrl) {
+            try {
+                const logoImg = await loadImage(organization.logoUrl);
+                doc.addImage(logoImg, 'PNG', margin, yPosition, 30, 30);
+            } catch (e) {
+                console.warn('No se pudo cargar el logo:', e);
+            }
         }
-    }
 
-    // Info organización
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text(organization.name, pageWidth - margin, yPosition + 5, { align: 'right' });
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`NIT: ${organization.nit}`, pageWidth - margin, yPosition + 12, { align: 'right' });
-    doc.text(organization.address, pageWidth - margin, yPosition + 17, { align: 'right' });
-    doc.text(`Tel: ${organization.phone}`, pageWidth - margin, yPosition + 22, { align: 'right' });
-
-    yPosition += 40;
-
-    // Línea separadora
-    doc.setDrawColor(33, 150, 243);
-    doc.setLineWidth(0.5);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
-
-    // Título del documento
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(33, 150, 243);
-    doc.text(documentData.type.toUpperCase(), pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 15;
-
-    // Contenido
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(51, 51, 51);
-
-    const contentWidth = pageWidth - (2 * margin);
-
-    // Parsear el contenido
-    const lines = doc.splitTextToSize(documentData.content, contentWidth);
-    doc.text(lines, margin, yPosition);
-    yPosition += (lines.length * 6) + 15;
-
-    // Fecha
-    const today = new Date(documentData.issueDate);
-    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    const dateStr = `Dado en el ${organization.name}, a los ${today.getDate()} días del mes de ${months[today.getMonth()]} de ${today.getFullYear()}.`;
-    const dateLines = doc.splitTextToSize(dateStr, contentWidth);
-    doc.text(dateLines, margin, yPosition);
-    yPosition += (dateLines.length * 6) + 20;
-
-    // Firmas
-    if (signers.length > 0) {
+        // Info organización
+        doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('FIRMAS AUTORIZADAS', pageWidth / 2, yPosition, { align: 'center' });
+        doc.text(organization.name, pageWidth - margin, yPosition + 5, { align: 'right' });
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`NIT: ${organization.nit}`, pageWidth - margin, yPosition + 12, { align: 'right' });
+        doc.text(organization.address, pageWidth - margin, yPosition + 17, { align: 'right' });
+        doc.text(`Tel: ${organization.phone}`, pageWidth - margin, yPosition + 22, { align: 'right' });
+
+        yPosition += 40;
+
+        // Línea separadora
+        doc.setDrawColor(33, 150, 243);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 10;
+
+        // Título del documento
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(33, 150, 243);
+        doc.text(documentData.type.toUpperCase(), pageWidth / 2, yPosition, { align: 'center' });
         yPosition += 15;
 
-        const signersPerRow = Math.min(2, signers.length);
-        const signerWidth = (pageWidth - (2 * margin)) / signersPerRow;
+        // Contenido
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 51, 51);
 
-        signers.forEach((signer, index) => {
-            const col = index % signersPerRow;
-            const row = Math.floor(index / signersPerRow);
-            const xPos = margin + (col * signerWidth) + (signerWidth / 2);
-            const yPos = yPosition + (row * 30);
+        const contentWidth = pageWidth - (2 * margin);
 
-            doc.setLineWidth(0.3);
-            doc.setDrawColor(51, 51, 51);
-            doc.line(xPos - 35, yPos, xPos + 35, yPos);
+        // Parsear el contenido
+        const lines = doc.splitTextToSize(documentData.content, contentWidth);
+        doc.text(lines, margin, yPosition);
+        yPosition += (lines.length * 6) + 15;
 
-            doc.setFontSize(9);
+        // Fecha
+        const today = new Date(documentData.issueDate);
+        const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        const dateStr = `Dado en el ${organization.name}, a los ${today.getDate()} días del mes de ${months[today.getMonth()]} de ${today.getFullYear()}.`;
+        const dateLines = doc.splitTextToSize(dateStr, contentWidth);
+        doc.text(dateLines, margin, yPosition);
+        yPosition += (dateLines.length * 6) + 20;
+
+        // Firmas
+        if (signers.length > 0) {
             doc.setFont('helvetica', 'bold');
-            doc.text(signer.name, xPos, yPos + 5, { align: 'center' });
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`C.C. ${signer.id}`, xPos, yPos + 10, { align: 'center' });
-            doc.text(signer.position, xPos, yPos + 14, { align: 'center' });
-        });
+            doc.text('FIRMAS AUTORIZADAS', pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 15;
+
+            const signersPerRow = Math.min(2, signers.length);
+            const signerWidth = (pageWidth - (2 * margin)) / signersPerRow;
+
+            signers.forEach((signer, index) => {
+                const col = index % signersPerRow;
+                const row = Math.floor(index / signersPerRow);
+                const xPos = margin + (col * signerWidth) + (signerWidth / 2);
+                const yPos = yPosition + (row * 30);
+
+                doc.setLineWidth(0.3);
+                doc.setDrawColor(51, 51, 51);
+                doc.line(xPos - 35, yPos, xPos + 35, yPos);
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.text(signer.name, xPos, yPos + 5, { align: 'center' });
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`C.C. ${signer.id}`, xPos, yPos + 10, { align: 'center' });
+                doc.text(signer.position, xPos, yPos + 14, { align: 'center' });
+            });
+        }
+
+        // Código QR
+        if (documentData.verificationHash) {
+            const qrSize = 30;
+            const qrMarginBottom = 18;
+            const qrY = pageHeight - qrSize - qrMarginBottom;
+            const qrX = pageWidth - margin - qrSize;
+
+            const verificationUrl = '{{ request.scheme }}://{{ request.get_host }}{% url "verify-document" "HASH_PLACEHOLDER" %}'.replace('HASH_PLACEHOLDER', documentData.verificationHash);
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}`;
+
+            try {
+                const qrImg = await loadImage(qrCodeUrl);
+                doc.addImage(qrImg, 'PNG', qrX, qrY, qrSize, qrSize);
+
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(102, 102, 102);
+                doc.text('Escanee el código QR para', qrX, qrY + qrSize + 4, { align: 'left' });
+                doc.text('verificar la autenticidad', qrX, qrY + qrSize + 7.5, { align: 'left' });
+
+                doc.setFontSize(6);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Doc #${documentData.number}`, qrX, qrY + qrSize + 11, { align: 'left' });
+            } catch (e) {
+                console.warn('No se pudo generar el código QR:', e);
+            }
+        }
+
+        // Guardar PDF
+        generatedPDF = doc;
+        totalPages = doc.internal.pages.length - 1; // jsPDF añade una página en blanco al inicio
+
+        // Renderizar en canvas
+        await renderPDFToCanvas();
+
+        hideLoading();
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        alert('Error al generar el PDF. Por favor, intente nuevamente.');
+        hideLoading();
     }
+}
 
-    // Código QR
-    if (documentData.verificationHash) {
-        const qrSize = 30;
-        const qrMarginBottom = 18;
-        const qrY = pageHeight - qrSize - qrMarginBottom;
-        const qrX = pageWidth - margin - qrSize;
+async function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
 
-        const verificationUrl = '{{ request.scheme }}://{{ request.get_host }}{% url "verify-document" "HASH_PLACEHOLDER" %}'.replace('HASH_PLACEHOLDER', documentData.verificationHash);
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}`;
+        // Timeout de 5 segundos
+        setTimeout(() => reject(new Error('Timeout cargando imagen')), 5000);
+    });
+}
+
+async function renderPDFToCanvas() {
+    if (!generatedPDF) return;
+
+    try {
+        // Obtener el PDF como blob y crear URL
+        const pdfBlob = generatedPDF.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Obtener el contenedor
+        const container = document.getElementById('pdfContainer');
+        container.innerHTML = ''; // Limpiar contenido previo
+
+        // Usar embed para mejor compatibilidad
+        const embed = document.createElement('embed');
+        embed.src = pdfUrl;
+        embed.type = 'application/pdf';
+        embed.style.width = '100%';
+        embed.style.height = '800px';
+        embed.style.border = '1px solid #dee2e6';
+        embed.style.borderRadius = '8px';
+        embed.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+
+        container.appendChild(embed);
+
+        console.log('✅ PDF renderizado correctamente');
+
+    } catch (error) {
+        console.error('Error renderizando PDF:', error);
+
+        // Fallback: intentar con objeto
+        const container = document.getElementById('pdfContainer');
+        container.innerHTML = '';
 
         try {
-            doc.addImage(qrCodeUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+            const pdfBlob = generatedPDF.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
 
-            doc.setFontSize(7);
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(102, 102, 102);
-            doc.text('Escanee el código QR para', qrX, qrY + qrSize + 4, { align: 'left' });
-            doc.text('verificar la autenticidad', qrX, qrY + qrSize + 7.5, { align: 'left' });
+            const obj = document.createElement('object');
+            obj.data = pdfUrl;
+            obj.type = 'application/pdf';
+            obj.style.width = '100%';
+            obj.style.height = '800px';
+            obj.style.border = '1px solid #dee2e6';
+            obj.style.borderRadius = '8px';
+            obj.innerHTML = `
+                <div style="padding: 2rem; text-align: center;">
+                    <p>No se puede mostrar el PDF en este navegador.</p>
+                    <a href="${pdfUrl}" download="documento_${documentData.number}.pdf"
+                       class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>Descargar PDF
+                    </a>
+                </div>
+            `;
 
-            doc.setFontSize(6);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Doc #${documentData.number}`, qrX, qrY + qrSize + 11, { align: 'left' });
-        } catch (e) {
-            console.error('Error generando QR:', e);
+            container.appendChild(obj);
+            console.warn('⚠️ Usando fallback de object para mostrar PDF');
+
+        } catch (fallbackError) {
+            console.error('Error en fallback:', fallbackError);
+            container.innerHTML = `
+                <div class="alert alert-warning" role="alert">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>No se puede previsualizar</h5>
+                    <p>Tu navegador no puede mostrar el PDF directamente.</p>
+                    <button onclick="downloadPDF()" class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>Descargar PDF
+                    </button>
+                </div>
+            `;
         }
     }
-
-    // Guardar PDF
-    generatedPDF = doc;
-
-    // Mostrar en iframe
-    const pdfBlob = doc.output('blob');
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    document.getElementById('pdfPreview').src = pdfUrl;
 }
 
 function downloadPDF() {
     if (generatedPDF) {
-        generatedPDF.save(`Documento_${documentData.number}_${person.fullName}.pdf`);
+        const fileName = `Documento_${documentData.number}_${person.fullName.replace(/\s+/g, '_')}.pdf`;
+        generatedPDF.save(fileName);
     } else {
-        alert('Genere el PDF primero');
+        alert('Por favor, espere a que se genere el PDF');
     }
 }
 
 function printPDF() {
     if (generatedPDF) {
-        const pdfBlob = generatedPDF.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const printWindow = window.open(pdfUrl);
-        printWindow.onload = function() {
-            printWindow.print();
-        };
+        // Método 1: Usar autoPrint de jsPDF (más compatible con móviles)
+        try {
+            const pdfBlob = generatedPDF.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            // Crear iframe oculto para imprimir
+            const printFrame = document.createElement('iframe');
+            printFrame.style.display = 'none';
+            document.body.appendChild(printFrame);
+
+            printFrame.onload = function() {
+                try {
+                    printFrame.contentWindow.print();
+                    setTimeout(() => document.body.removeChild(printFrame), 1000);
+                } catch (e) {
+                    console.error('Error al imprimir:', e);
+                    // Fallback: abrir en nueva ventana
+                    window.open(pdfUrl);
+                }
+            };
+
+            printFrame.src = pdfUrl;
+        } catch (error) {
+            console.error('Error al imprimir:', error);
+            alert('No se pudo imprimir. Intente descargar el PDF e imprimir desde su aplicación de PDF.');
+        }
     } else {
-        alert('Genere el PDF primero');
+        alert('Por favor, espere a que se genere el PDF');
     }
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        updatePageDisplay();
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        updatePageDisplay();
+    }
+}
+
+function updatePageDisplay() {
+    document.getElementById('pageNum').textContent = currentPage;
+    document.getElementById('pageCount').textContent = totalPages;
+
+    // Habilitar/deshabilitar botones
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = currentPage === totalPages;
 }
 
 // Generar automáticamente al cargar
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Iniciando generación del PDF...');
     generatePDF();
+});
+
+// Regenerar solo si cambia significativamente el tamaño (no necesario para embed/object)
+let resizeTimeout;
+let lastWidth = window.innerWidth;
+
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        const newWidth = window.innerWidth;
+        // Solo regenerar si el cambio es significativo (más de 100px)
+        if (Math.abs(newWidth - lastWidth) > 100) {
+            console.log('Cambio significativo de tamaño, manteniendo PDF actual');
+            lastWidth = newWidth;
+            // El embed/object se ajusta automáticamente
+        }
+    }, 500);
 });
 </script>
 {% endblock %}
