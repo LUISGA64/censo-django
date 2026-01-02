@@ -747,17 +747,18 @@ def organization_documents_stats(request, organization_id=None):
     # Documentos por mes (últimos 6 meses)
     from django.utils import timezone
     from datetime import timedelta
+    from django.db.models.functions import TruncMonth
 
     six_months_ago = timezone.now().date() - timedelta(days=180)
 
     docs_by_month = GeneratedDocument.objects.filter(
         organization=organization,
         issue_date__gte=six_months_ago
-    ).extra(
-        select={'month': "strftime('%%Y-%%m', issue_date)"}
-    ).values('month').annotate(
+    ).annotate(
+        month_date=TruncMonth('issue_date')
+    ).values('month_date').annotate(
         total=Count('id')
-    ).order_by('month')
+    ).order_by('month_date')
 
     context = {
         'organization': organization,

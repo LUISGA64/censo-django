@@ -606,7 +606,7 @@
         // ===== GRÁFICO DE DOCUMENTOS POR MES =====
         const monthLabels = [
             {% for item in docs_by_month %}
-            "{{ item.month }}",
+            "{{ item.month_date|date:'Y-m' }}",
             {% endfor %}
         ];
 

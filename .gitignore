@@ -157,3 +157,9 @@ venv.bak/
 settings.py
 settings_*.py
 local_settings.py
+
+# Permitir versionar archivo de ejemplo
+!settings.example.py
+
+
+*.md
