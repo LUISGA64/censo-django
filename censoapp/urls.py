@@ -16,6 +16,13 @@ from .document_views import (view_document, list_person_documents, download_docu
                             organization_documents_stats, preview_document_pdf, verify_document)
 from .simple_document_views import (select_document_type, generate_aval_general, generate_aval_estudio,
                                    generate_constancia_pertenencia)
+# Dashboard Analytics
+from .dashboard_views import (dashboard_analytics, api_gender_distribution, api_age_pyramid,
+                              api_education_distribution, api_civil_state, api_sidewalks,
+                              api_population_growth)
+# Geolocalización
+from .geolocation_views import (map_view, map_sidewalks_data, map_heatmap, map_clusters,
+                                sidewalk_detail_map, update_sidewalk_location)
 
 
 urlpatterns = [
@@ -93,4 +100,22 @@ urlpatterns = [
     path('importacion/confirmar/', login_required(confirmar_importacion), name='confirmar-importacion'),
     path('importacion/log/', login_required(ver_log_importacion), name='ver-log-importacion'),
     path('importacion/log/descargar/', login_required(descargar_log_importacion), name='descargar-log-importacion'),
+
+    # ----- DASHBOARD ANALÍTICO -----
+    path('dashboard/analytics/', login_required(dashboard_analytics), name='dashboard-analytics'),
+    # APIs del dashboard
+    path('api/dashboard/gender/', login_required(api_gender_distribution), name='api-gender'),
+    path('api/dashboard/age-pyramid/', login_required(api_age_pyramid), name='api-age-pyramid'),
+    path('api/dashboard/education/', login_required(api_education_distribution), name='api-education'),
+    path('api/dashboard/civil-state/', login_required(api_civil_state), name='api-civil-state'),
+    path('api/dashboard/sidewalks/', login_required(api_sidewalks), name='api-sidewalks'),
+    path('api/dashboard/population-growth/', login_required(api_population_growth), name='api-population-growth'),
+
+    # ----- GEOLOCALIZACIÓN Y MAPAS -----
+    path('mapa/', login_required(map_view), name='map-view'),
+    path('api/map/sidewalks/', login_required(map_sidewalks_data), name='map-sidewalks-data'),
+    path('mapa/calor/', login_required(map_heatmap), name='map-heatmap'),
+    path('mapa/clusters/', login_required(map_clusters), name='map-clusters'),
+    path('mapa/vereda/<int:sidewalk_id>/', login_required(sidewalk_detail_map), name='sidewalk-detail-map'),
+    path('api/sidewalk/<int:sidewalk_id>/location/', login_required(update_sidewalk_location), name='update-sidewalk-location'),
 ]

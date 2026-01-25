@@ -460,3 +460,103 @@ a:hover {
     }
 }
 
+
+
+/* ===================================
+   MEJORAS DE ACCESIBILIDAD Y CONTRASTE
+   Alerts con mejor legibilidad - Texto Blanco sobre Fondos Sólidos
+   =================================== */
+
+/* Alert Info - Azul sólido con texto blanco */
+.alert-info {
+    background-color: #2196F3 !important;
+    border: 1px solid #1565c0 !important;
+    border-left: 4px solid #1565c0 !important;
+    color: #ffffff !important;
+}
+
+.alert-info strong, .alert-info b {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.alert-info i {
+    color: #ffffff !important;
+}
+
+.alert-info ul li, .alert-info ol li, .alert-info p {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* Alert Success - Verde sólido con texto blanco */
+.alert-success {
+    background-color: #4CAF50 !important;
+    border: 1px solid #2e7d32 !important;
+    border-left: 4px solid #2e7d32 !important;
+    color: #ffffff !important;
+}
+
+.alert-success strong, .alert-success b {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.alert-success i {
+    color: #ffffff !important;
+}
+
+.alert-success ul li, .alert-success ol li, .alert-success p {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* Alert Warning - Naranja sólido con texto blanco */
+.alert-warning {
+    background-color: #FF9800 !important;
+    border: 1px solid #ef6c00 !important;
+    border-left: 4px solid #ef6c00 !important;
+    color: #ffffff !important;
+}
+
+.alert-warning strong, .alert-warning b {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.alert-warning i {
+    color: #ffffff !important;
+}
+
+.alert-warning ul li, .alert-warning ol li, .alert-warning p {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* Alert Danger - Rojo sólido con texto blanco */
+.alert-danger {
+    background-color: #f44336 !important;
+    border: 1px solid #c62828 !important;
+    border-left: 4px solid #c62828 !important;
+    color: #ffffff !important;
+}
+
+.alert-danger strong, .alert-danger b {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.alert-danger i {
+    color: #ffffff !important;
+}
+
+.alert-danger ul li, .alert-danger ol li, .alert-danger p {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* Enlaces en alerts con texto blanco */
+.alert-info a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }
+.alert-success a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }
+.alert-warning a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }
+.alert-danger a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }

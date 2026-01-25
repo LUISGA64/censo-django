@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Clusters - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .map-header {
+        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        color: white;
+        padding: 2rem;
+        margin: -1.5rem -1.5rem 2rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+    }
+
+    .map-container {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .folium-map-wrapper {
+        width: 100%;
+        min-height: 600px;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="map-header">
+        <h3><i class="fas fa-object-group me-2"></i>Mapa de Clusters</h3>
+        <p class="mb-0">Agrupación Inteligente de Veredas</p>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{% url 'map-view' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-map me-2"></i>Mapa Normal
+            </a>
+            <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-sm">
+                <i class="fas fa-fire me-2"></i>Mapa de Calor
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="map-container">
+                {{ map_html|safe }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-success">
+                <strong><i class="fas fa-info-circle me-2"></i>Información sobre Clusters:</strong>
+                <p class="mb-0 mt-2">
+                    Los marcadores se agrupan automáticamente según el nivel de zoom. Haz zoom para expandir los clusters y ver los marcadores individuales de cada vereda.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

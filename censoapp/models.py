@@ -138,9 +138,18 @@ def save_user_profile(sender, instance, **kwargs):
 class Sidewalks(models.Model):
     sidewalk_name = models.CharField(blank=False, null=False, max_length=40)
     organization_id = models.ForeignKey('Organizations', blank=False, null=False, on_delete=models.CASCADE)
+    description = models.TextField(blank=True, null=True, help_text="Descripción de la vereda")
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True,
+                                   help_text="Latitud GPS (ej: 2.3167)")
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True,
+                                    help_text="Longitud GPS (ej: -76.4000)")
 
     def __str__(self):
         return self.sidewalk_name
+
+    class Meta:
+        verbose_name = "Vereda"
+        verbose_name_plural = "Veredas"
 
 
 class CivilState(models.Model):

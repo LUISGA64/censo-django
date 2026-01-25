@@ -1,0 +1,73 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Calor - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .map-header {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        color: white;
+        padding: 2rem;
+        margin: -1.5rem -1.5rem 2rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(255, 152, 0, 0.3);
+    }
+
+    .map-container {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .folium-map-wrapper {
+        width: 100%;
+        min-height: 600px;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="map-header">
+        <h3><i class="fas fa-fire me-2"></i>Mapa de Calor</h3>
+        <p class="mb-0">Densidad Poblacional</p>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{% url 'map-view' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-map me-2"></i>Mapa Normal
+            </a>
+            <a href="{% url 'map-clusters' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-object-group me-2"></i>Clusters
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="map-container">
+                {{ map_html|safe }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <strong><i class="fas fa-info-circle me-2"></i>Interpretación del Mapa de Calor:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Azul: Baja densidad poblacional</li>
+                    <li>Verde/Amarillo: Densidad media</li>
+                    <li>Rojo: Alta concentración de población</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

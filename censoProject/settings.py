@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os.path
 from pathlib import Path
 import redis
+from decouple import config, Csv
 
 from django.urls import reverse_lazy
 
@@ -19,19 +20,71 @@ from django.urls import reverse_lazy
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+# ==============================================================================
+# SECURITY SETTINGS
+# ==============================================================================
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-yfgadym(in)p_+lvn*m897z**9)^$yrpvr!-lkrmf_x)ilhv)q'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+
+# ==============================================================================
+# HTTPS/SSL SECURITY SETTINGS
+# ==============================================================================
+
+if not DEBUG:
+    # Forzar HTTPS en producción
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+    SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
+    CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
+
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000, cast=int)  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Seguridad adicional
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+
+    # Proxy settings para servidores detrás de balanceador
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    # En desarrollo, estas configuraciones están desactivadas
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+
+# ==============================================================================
+# SESSION SECURITY
+# ==============================================================================
+
+SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', default=86400, cast=int)  # 24 horas
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = config('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True, cast=bool)
+SESSION_COOKIE_HTTPONLY = True  # No accesible desde JavaScript
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protección CSRF adicional
+
+# CSRF Security
+CSRF_COOKIE_HTTPONLY = False  # Debe ser False para que Django pueda leerla
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_USE_SESSIONS = False
+
+# ==============================================================================
+# DATA ENCRYPTION
+# ==============================================================================
+
+# Clave para encriptar datos sensibles (números de identificación, etc.)
+DATA_ENCRYPTION_KEY = config('DATA_ENCRYPTION_KEY', default='')
 
 # URL del sitio (para códigos QR y verificación de documentos)
-SITE_URL = 'http://127.0.0.1:8000'  # Cambiar en producción
+SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
 
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 
@@ -58,6 +111,10 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'formtools',
     'simple_history',
+    # Seguridad
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -70,6 +127,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',  # 2FA Middleware
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
@@ -115,22 +173,14 @@ WSGI_APPLICATION = 'censoProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.censo_Web',
-#     }
-# }
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'censodb'),
-        'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'Password'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.mysql'),
+        'NAME': config('DB_NAME', default='censodb'),
+        'USER': config('DB_USER', default='root'),
+        'PASSWORD': config('DB_PASSWORD', default='Password'),
+        'HOST': config('DB_HOST', default='127.0.0.1'),
+        'PORT': config('DB_PORT', default='3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
@@ -145,8 +195,12 @@ DATABASES = {
 try:
     # Intentar usar Redis si está disponible
     # Verificar que Redis esté corriendo
+    redis_host = config('REDIS_HOST', default='127.0.0.1')
+    redis_port = config('REDIS_PORT', default=6379, cast=int)
+    redis_db = config('REDIS_DB', default=1, cast=int)
+
     try:
-        r = redis.Redis(host='127.0.0.1', port=6379, db=1, socket_connect_timeout=1)
+        r = redis.Redis(host=redis_host, port=redis_port, db=redis_db, socket_connect_timeout=1)
         r.ping()
         REDIS_AVAILABLE = True
     except (redis.ConnectionError, redis.TimeoutError):
@@ -156,7 +210,7 @@ try:
         CACHES = {
             'default': {
                 'BACKEND': 'django_redis.cache.RedisCache',
-                'LOCATION': 'redis://127.0.0.1:6379/1',
+                'LOCATION': f'redis://{redis_host}:{redis_port}/{redis_db}',
                 'OPTIONS': {
                     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
                     'SOCKET_CONNECT_TIMEOUT': 5,
@@ -209,6 +263,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 12,  # Mínimo 12 caracteres (antes 8)
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -217,6 +274,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Expiración de contraseñas (opcional - descomentar si se requiere)
+# PASSWORD_EXPIRY_DAYS = 90
 
 
 # Internationalization
@@ -274,12 +334,34 @@ USERSESSIONS_TRACK_ACTIVITY = False
 
 
 # CORS
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173'
-]
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:5173',
+    cast=Csv()
+)
+CORS_ALLOW_CREDENTIALS = True
+
+# NO usar CORS_ORIGIN_ALLOW_ALL = True en producción (inseguro)
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    # Rate limiting para prevenir abuso de API
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',      # Anónimos: 100 requests por día
+        'user': '1000/day',     # Autenticados: 1000 requests por día
+    },
+    # Autenticación
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # Permisos por defecto
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 LOGGING = {
@@ -287,7 +369,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
         'simple': {
@@ -297,9 +379,19 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'debug.log'),
+            'level': config('LOG_LEVEL', default='INFO'),
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'maxBytes': 1024 * 1024 * 15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'security_file': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'security.log'),
+            'maxBytes': 1024 * 1024 * 15,  # 15MB
+            'backupCount': 10,
             'formatter': 'verbose',
         },
         'console': {
@@ -314,6 +406,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'django.security': {
+            'handlers': ['security_file', 'console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         'censoapp': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
@@ -326,3 +423,114 @@ LOGGING = {
         },
     },
 }
+
+# ==============================================================================
+# SENTRY - ERROR MONITORING
+# ==============================================================================
+
+if not DEBUG:
+    # Solo activar Sentry en producción
+    sentry_dsn = config('SENTRY_DSN', default='')
+    if sentry_dsn:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            integrations=[DjangoIntegration()],
+
+            # Tasa de muestreo de performance (1.0 = 100%, 0.1 = 10%)
+            traces_sample_rate=0.1,
+
+            # Entorno (development, staging, production)
+            environment=config('SENTRY_ENVIRONMENT', default='production'),
+
+            # NO enviar información personal de usuarios
+            send_default_pii=False,
+
+            # Capturar errores de base de datos
+            _experiments={
+                "profiles_sample_rate": 0.1,
+            },
+        )
+        print("✅ Sentry inicializado para monitoreo de errores")
+
+# ==============================================================================
+# ADMIN EMAIL NOTIFICATIONS
+# ==============================================================================
+
+# Notificaciones por email en caso de errores 500 en producción
+if not DEBUG:
+    ADMINS = [
+        ('Admin', config('ADMIN_EMAIL', default='')),
+    ]
+    MANAGERS = ADMINS
+    SERVER_EMAIL = config('SERVER_EMAIL', default='no-reply@censo.com')
+
+# ==============================================================================
+# SECURITY MIDDLEWARE CONFIGURATION
+# ==============================================================================
+
+# Crear directorio de logs si no existe
+import pathlib
+pathlib.Path(os.path.join(BASE_DIR, 'logs')).mkdir(exist_ok=True)
+
+# ==============================================================================
+# LEAFLET MAPS CONFIGURATION
+# ==============================================================================
+
+LEAFLET_CONFIG = {
+    # Configuración del mapa base
+    'DEFAULT_CENTER': (4.5709, -74.2973),  # Coordenadas Colombia (Bogotá)
+    'DEFAULT_ZOOM': 6,
+    'MIN_ZOOM': 3,
+    'MAX_ZOOM': 18,
+
+    # Capas de tiles (OpenStreetMap)
+    'TILES': [
+        ('OpenStreetMap',
+         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+         {'attribution': '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          'maxZoom': 19}),
+        ('Satellite',
+         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+         {'attribution': 'Tiles &copy; Esri',
+          'maxZoom': 19}),
+        ('Topo',
+         'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+         {'attribution': 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap',
+          'maxZoom': 17}),
+    ],
+
+    # Escala y controles
+    'SCALE': 'both',  # metric, imperial o both
+    'ATTRIBUTION_PREFIX': 'Censo Web',
+
+    # Plugins
+    'PLUGINS': {
+        'forms': {
+            'auto-include': True
+        },
+        'draw': {
+            'css': ['https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css'],
+            'js': 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js',
+            'auto-include': True,
+        },
+        'markercluster': {
+            'css': ['https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css',
+                    'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css'],
+            'js': 'https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js',
+            'auto-include': True,
+        },
+    },
+
+    # Límites espaciales (opcional)
+    'SPATIAL_EXTENT': (-85.0, -180.0, 85.0, 180.0),  # (south, west, north, east)
+
+    # Overlays (capas adicionales)
+    'OVERLAYS': [],
+
+    # Reset view
+    'RESET_VIEW': True,
+}
+

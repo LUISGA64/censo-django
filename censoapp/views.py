@@ -213,6 +213,34 @@ def home(request):
     piramide_hombres_values = [-piramide_hombres[label] for label in piramide_labels]
     piramide_mujeres_values = [piramide_mujeres[label] for label in piramide_labels]
 
+    # === DISTRIBUCIÓN POR GÉNERO ===
+    genero_dist = personas_qs.values('gender__gender').annotate(total=Count('id')).order_by('-total')
+    genero_labels = [g['gender__gender'] for g in genero_dist]
+    genero_data = [g['total'] for g in genero_dist]
+
+    # === DISTRIBUCIÓN POR ESTADO CIVIL ===
+    estado_civil_dist = personas_qs.values('civil_state__state_civil').annotate(total=Count('id')).order_by('-total')
+    estado_civil_labels = [e['civil_state__state_civil'] for e in estado_civil_dist]
+    estado_civil_data = [e['total'] for e in estado_civil_dist]
+
+    # === DISTRIBUCIÓN POR NIVEL EDUCATIVO ===
+    educacion_dist = personas_qs.values('education_level__education_level').annotate(total=Count('id')).order_by('-total')
+    educacion_labels = [ed['education_level__education_level'] for ed in educacion_dist]
+    educacion_data = [ed['total'] for ed in educacion_dist]
+
+    # === EVOLUCIÓN POBLACIONAL (últimos 5 años) ===
+    from datetime import datetime
+    current_year = datetime.now().year
+    evolucion_labels = []
+    evolucion_data = []
+
+    for i in range(5, -1, -1):
+        year = current_year - i
+        # Contar personas nacidas hasta ese año
+        count = personas_qs.filter(date_birth__year__lte=year).count()
+        evolucion_labels.append(str(year))
+        evolucion_data.append(count)
+
     # === ESTADÍSTICAS POR ORGANIZACIÓN (para superusuarios) ===
     organizaciones_stats = []
     if request.user.is_superuser:
@@ -258,6 +286,18 @@ def home(request):
         'piramide_labels': piramide_labels,
         'piramide_hombres': piramide_hombres_values,
         'piramide_mujeres': piramide_mujeres_values,
+        # Distribución por género
+        'genero_labels': genero_labels,
+        'genero_data': genero_data,
+        # Distribución por estado civil
+        'estado_civil_labels': estado_civil_labels,
+        'estado_civil_data': estado_civil_data,
+        # Distribución por educación
+        'educacion_labels': educacion_labels,
+        'educacion_data': educacion_data,
+        # Evolución poblacional
+        'evolucion_labels': evolucion_labels,
+        'evolucion_data': evolucion_data,
         # Estadísticas adicionales
         'promedio_personas_ficha': promedio_personas_ficha,
         'nuevas_fichas_mes': nuevas_fichas_mes,

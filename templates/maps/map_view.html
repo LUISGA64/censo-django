@@ -1,0 +1,300 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Veredas - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<style>
+    .map-header {
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        padding: 2rem;
+        margin: -1.5rem -1.5rem 2rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+    }
+
+    #map {
+        height: 600px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1;
+    }
+
+    .map-controls {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-mini-card {
+        background: white;
+        border-left: 4px solid #2196F3;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .stat-mini-card h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2196F3;
+        margin: 0;
+    }
+
+    .stat-mini-card p {
+        margin: 0;
+        color: #6B7280;
+        font-size: 0.9rem;
+    }
+
+    .leaflet-popup-content {
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .map-legend {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="map-header">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-2">
+                    <i class="fas fa-map-marked-alt me-2"></i>
+                    Mapa Geográfico de Veredas
+                </h3>
+                <p class="mb-0">Visualización territorial y distribución poblacional</p>
+                {% if organization %}
+                    <p class="mb-0 mt-2">
+                        <i class="fas fa-building me-2"></i>
+                        <strong>{{ organization.organization_name }}</strong>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-mini-card">
+                <h3>{{ total_veredas }}</h3>
+                <p><i class="fas fa-map-pin me-2"></i>Veredas Registradas</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-mini-card" style="border-left-color: #4CAF50;">
+                <h3 style="color: #4CAF50;">{{ veredas_con_ubicacion }}</h3>
+                <p><i class="fas fa-map-marker-alt me-2"></i>Con Ubicación GPS</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-mini-card" style="border-left-color: #FF9800;">
+                <h3 style="color: #FF9800;">{{ total_veredas|add:"-"|add:veredas_con_ubicacion|default:0 }}</h3>
+                <p><i class="fas fa-exclamation-triangle me-2"></i>Sin Ubicación</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa y Controles -->
+    <div class="row">
+        <div class="col-lg-9 mb-4">
+            <div id="map"></div>
+        </div>
+
+        <div class="col-lg-3">
+            <!-- Controles -->
+            <div class="map-controls">
+                <h6 class="mb-3">
+                    <i class="fas fa-layer-group me-2"></i>
+                    Opciones de Visualización
+                </h6>
+
+                <div class="mb-3">
+                    <a href="{% url 'map-clusters' %}" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-object-group me-2"></i>
+                        Ver Clusters
+                    </a>
+                    <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-sm w-100">
+                        <i class="fas fa-fire me-2"></i>
+                        Mapa de Calor
+                    </a>
+                </div>
+
+                <hr>
+
+                <h6 class="mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Leyenda
+                </h6>
+
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F44336;"></div>
+                        <span>> 100 personas</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF9800;"></div>
+                        <span>50-100 personas</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4CAF50;"></div>
+                        <span>20-50 personas</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2196F3;"></div>
+                        <span>< 20 personas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+{{ block.super }}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar mapa
+    const map = L.map('map').setView([4.5709, -74.2973], 6);
+
+    // Capa base - OpenStreetMap
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Capa Satélite
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 19
+    });
+
+    // Capa Topográfica
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap',
+        maxZoom: 17
+    });
+
+    // Control de capas
+    const baseMaps = {
+        "Mapa": osmLayer,
+        "Satélite": satelliteLayer,
+        "Topográfico": topoLayer
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+
+    // Escala
+    L.control.scale({imperial: false}).addTo(map);
+
+    // Cargar datos de veredas
+    fetch('{% url "map-sidewalks-data" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.features.length === 0) {
+                alert('No hay veredas con ubicación GPS registrada');
+                return;
+            }
+
+            // Crear capa GeoJSON
+            L.geoJSON(data, {
+                pointToLayer: function(feature, latlng) {
+                    const props = feature.properties;
+
+                    // Color según población
+                    let color = '#2196F3'; // Azul (< 20)
+                    if (props.personas > 100) {
+                        color = '#F44336'; // Rojo
+                    } else if (props.personas > 50) {
+                        color = '#FF9800'; // Naranja
+                    } else if (props.personas > 20) {
+                        color = '#4CAF50'; // Verde
+                    }
+
+                    return L.circleMarker(latlng, {
+                        radius: Math.min(props.personas / 5 + 5, 30),
+                        fillColor: color,
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+
+                    const popupContent = `
+                        <div style="min-width: 200px;">
+                            <h6 style="color: #2196F3; margin-bottom: 10px;">
+                                <i class="fas fa-map-marker-alt"></i> ${props.name}
+                            </h6>
+                            <p style="margin: 5px 0;">
+                                <strong>Fichas Familiares:</strong> ${props.fichas}
+                            </p>
+                            <p style="margin: 5px 0;">
+                                <strong>Personas:</strong> ${props.personas}
+                            </p>
+                            ${props.description ? `<p style="margin: 5px 0; font-size: 0.9em; color: #666;">${props.description}</p>` : ''}
+                            <hr style="margin: 10px 0;">
+                            <a href="/mapa/vereda/${props.id}/"
+                               class="btn btn-primary btn-sm"
+                               style="text-decoration: none;">
+                                Ver Detalle <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    `;
+
+                    layer.bindPopup(popupContent);
+                    layer.bindTooltip(props.name, {
+                        permanent: false,
+                        direction: 'top'
+                    });
+                }
+            }).addTo(map);
+
+            // Ajustar zoom a los marcadores
+            const bounds = L.geoJSON(data).getBounds();
+            map.fitBounds(bounds, { padding: [50, 50] });
+        })
+        .catch(error => {
+            console.error('Error cargando datos:', error);
+            alert('Error al cargar los datos del mapa');
+        });
+});
+</script>
+{% endblock javascripts %}

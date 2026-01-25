@@ -916,6 +916,83 @@
             </div>
         </div>
     </div>
+
+    <!-- Tercera Fila de Gráficos - Demografía Detallada -->
+    <div class="row g-4 mt-2">
+        <!-- Distribución por Género -->
+        <div class="col-lg-4 fade-in-up" style="animation-delay: 0.9s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h5 class="chart-title">
+                            <i class="fas fa-venus-mars text-primary me-2"></i>
+                            Distribución por Género
+                        </h5>
+                        <p class="chart-subtitle">Balance poblacional</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="chartGenero"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución por Estado Civil -->
+        <div class="col-lg-4 fade-in-up" style="animation-delay: 1s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h5 class="chart-title">
+                            <i class="fas fa-heart text-danger me-2"></i>
+                            Estado Civil
+                        </h5>
+                        <p class="chart-subtitle">Estructura familiar</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="chartEstadoCivil"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución por Nivel Educativo -->
+        <div class="col-lg-4 fade-in-up" style="animation-delay: 1.1s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h5 class="chart-title">
+                            <i class="fas fa-graduation-cap text-success me-2"></i>
+                            Nivel Educativo
+                        </h5>
+                        <p class="chart-subtitle">Formación académica</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="chartEducacion"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cuarta Fila - Evolución Poblacional -->
+    <div class="row g-4 mt-2 mb-4">
+        <div class="col-12 fade-in-up" style="animation-delay: 1.2s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h5 class="chart-title">
+                            <i class="fas fa-chart-line text-purple me-2"></i>
+                            Evolución Poblacional
+                        </h5>
+                        <p class="chart-subtitle">Crecimiento de la población en los últimos 5 años</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 350px;">
+                    <canvas id="chartEvolucion"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock content %}
 
@@ -1312,6 +1389,243 @@ document.addEventListener('DOMContentLoaded', function() {
             animateValue(el, 0, value, 1500);
         }
     });
+
+    // ========================================
+    // 4. GRÁFICO DE DISTRIBUCIÓN POR GÉNERO
+    // ========================================
+    const ctxGenero = document.getElementById('chartGenero');
+    if (ctxGenero) {
+        const generoLabels = {{ genero_labels|safe }};
+        const generoData = {{ genero_data|safe }};
+
+        new Chart(ctxGenero, {
+            type: 'doughnut',
+            data: {
+                labels: generoLabels,
+                datasets: [{
+                    data: generoData,
+                    backgroundColor: [
+                        colors.primary,
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        colors.success
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12, weight: '600' },
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return ` ${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1000
+                }
+            }
+        });
+    }
+
+    // ========================================
+    // 5. GRÁFICO DE ESTADO CIVIL
+    // ========================================
+    const ctxEstadoCivil = document.getElementById('chartEstadoCivil');
+    if (ctxEstadoCivil) {
+        const estadoCivilLabels = {{ estado_civil_labels|safe }};
+        const estadoCivilData = {{ estado_civil_data|safe }};
+
+        new Chart(ctxEstadoCivil, {
+            type: 'bar',
+            data: {
+                labels: estadoCivilLabels,
+                datasets: [{
+                    label: 'Personas',
+                    data: estadoCivilData,
+                    backgroundColor: [
+                        colors.primary,
+                        colors.success,
+                        colors.warning,
+                        colors.danger,
+                        'rgba(139, 92, 246, 0.8)'
+                    ],
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#F3F4F6',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // ========================================
+    // 6. GRÁFICO DE NIVEL EDUCATIVO
+    // ========================================
+    const ctxEducacion = document.getElementById('chartEducacion');
+    if (ctxEducacion) {
+        const educacionLabels = {{ educacion_labels|safe }};
+        const educacionData = {{ educacion_data|safe }};
+
+        new Chart(ctxEducacion, {
+            type: 'pie',
+            data: {
+                labels: educacionLabels,
+                datasets: [{
+                    data: educacionData,
+                    backgroundColor: [
+                        colors.primary,
+                        colors.success,
+                        colors.warning,
+                        colors.danger,
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(0, 188, 212, 0.8)',
+                        'rgba(233, 30, 99, 0.8)',
+                        'rgba(66, 165, 245, 0.8)'
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 10,
+                            font: { size: 10, weight: '500' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return ` ${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ========================================
+    // 7. GRÁFICO DE EVOLUCIÓN POBLACIONAL
+    // ========================================
+    const ctxEvolucion = document.getElementById('chartEvolucion');
+    if (ctxEvolucion) {
+        const evolucionLabels = {{ evolucion_labels|safe }};
+        const evolucionData = {{ evolucion_data|safe }};
+
+        new Chart(ctxEvolucion, {
+            type: 'line',
+            data: {
+                labels: evolucionLabels,
+                datasets: [{
+                    label: 'Población',
+                    data: evolucionData,
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: colors.primary,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: colors.primaryDark,
+                    pointHoverBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#F3F4F6',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+    }
 
     // ========================================
     // RESPONSIVE: Ajustar gráficos al redimensionar ventana
