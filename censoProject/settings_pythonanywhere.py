@@ -90,30 +90,31 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 WSGI_APPLICATION = 'censoProject.wsgi.application'
 
-# Database - SQLite para demo (más fácil en PythonAnywhere)
-# Para producción real, usar MySQL
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.censo_Web',
-#     }
-# }
-
-# Descomentar para usar MySQL en producción:
+# Database - SQLite TEMPORAL para PythonAnywhere
+# Funcional mientras configuras MySQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'censodb'),
-        'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'Password'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.censo_Web',
+        'ATOMIC_REQUESTS': True,
     }
 }
+
+# MySQL - Para usar cuando esté configurado en PythonAnywhere:
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'luisga64$censo',  # Formato: usuario$nombredb
+#         'USER': 'luisga64',
+#         'PASSWORD': 'TU_PASSWORD_MYSQL',  # Del Database tab
+#         'HOST': 'luisga64.mysql.pythonanywhere-services.com',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#             'charset': 'utf8mb4',
+#         },
+#     }
+# }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
