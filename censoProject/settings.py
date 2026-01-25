@@ -171,22 +171,30 @@ WSGI_APPLICATION = 'censoProject.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+# SQLite para PythonAnywhere (temporal mientras configuras MySQL)
 DATABASES = {
     'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.mysql'),
-        'NAME': config('DB_NAME', default='censodb'),
-        'USER': config('DB_USER', default='root'),
-        'PASSWORD': config('DB_PASSWORD', default='Password'),
-        'HOST': config('DB_HOST', default='127.0.0.1'),
-        'PORT': config('DB_PORT', default='3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.censo_Web',
+        'ATOMIC_REQUESTS': True,
     }
 }
+
+# MySQL - Descomentar cuando tengas configurado MySQL en PythonAnywhere:
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': config('DB_NAME', default='luisga64$censo'),
+#         'USER': config('DB_USER', default='luisga64'),
+#         'PASSWORD': config('DB_PASSWORD', default='PASSWORD_AQUI'),
+#         'HOST': config('DB_HOST', default='luisga64.mysql.pythonanywhere-services.com'),
+#         'PORT': config('DB_PORT', default='3306'),
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#             'charset': 'utf8mb4',
+#         },
+#     }
+# }
 
 
 
