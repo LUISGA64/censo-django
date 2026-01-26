@@ -234,7 +234,8 @@ try:
                 'TIMEOUT': 300,  # 5 minutos por defecto
             }
         }
-        print("✅ Redis conectado. Usando cache de Redis.")
+        import sys
+        sys.stderr.write("OK: Redis conectado. Usando cache de Redis.\n")
 
         # Solo usar sesiones en Redis si está disponible y funcionando
         # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -253,9 +254,11 @@ except (ImportError, redis.ConnectionError, redis.TimeoutError, Exception) as e:
             'TIMEOUT': 300,
         }
     }
-    print("⚠️ Redis no disponible. Usando cache en memoria local (temporal).")
-    print("📝 Para mejor performance, instala y ejecuta Redis")
-    print("📖 Ver: INSTALACION_REDIS.md")
+    import sys
+    # Usar print sin emojis para evitar problemas de codificación en Windows
+    sys.stderr.write("WARNING: Redis no disponible. Usando cache en memoria local (temporal).\n")
+    sys.stderr.write("NOTA: Para mejor performance, instala y ejecuta Redis\n")
+    sys.stderr.write("Ver: INSTALACION_REDIS.md\n")
 
 # Usar sesiones en base de datos (más confiable que cache)
 # Esto evita problemas de login cuando Redis no está disponible

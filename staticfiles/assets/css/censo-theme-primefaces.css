@@ -1,0 +1,570 @@
+/* ===================================================================
+   CENSO DJANGO - TEMA PRIMEFACES SAGA BLUE
+   Paleta de Colores Profesional basada en PrimeFaces
+   Versión: 4.0 - PrimeFaces Edition
+   =================================================================== */
+
+/* ===================================
+   1. VARIABLES PRIMEFACES
+   =================================== */
+:root {
+    /* Azul Principal - PrimeFaces Material Design */
+    --primary-color: #2196F3;
+    --primary-dark: #1976D2;
+    --primary-darker: #1565C0;
+    --primary-light: #42A5F5;
+    --primary-lighter: #64B5F6;
+
+    /* Azules Secundarios */
+    --primary-900: #0D47A1;
+    --primary-800: #1565C0;
+    --primary-700: #1976D2;
+    --primary-600: #1E88E5;
+    --primary-500: #2196F3;
+    --primary-400: #42A5F5;
+    --primary-300: #64B5F6;
+    --primary-200: #90CAF9;
+    --primary-100: #BBDEFB;
+    --primary-50: #E3F2FD;
+
+    /* Acento - Rosa Material */
+    --accent-color: #FF4081;
+    --accent-dark: #F50057;
+    --accent-light: #FF80AB;
+
+    /* Grises - Material Design */
+    --surface-0: #FFFFFF;
+    --surface-50: #FAFAFA;
+    --surface-100: #F5F5F5;
+    --surface-200: #EEEEEE;
+    --surface-300: #E0E0E0;
+    --surface-400: #BDBDBD;
+    --surface-500: #9E9E9E;
+    --surface-600: #757575;
+    --surface-700: #616161;
+    --surface-800: #424242;
+    --surface-900: #212121;
+
+    /* Neutrales Mapeados */
+    --neutral-900: #212121;
+    --neutral-800: #424242;
+    --neutral-700: #616161;
+    --neutral-600: #757575;
+    --neutral-500: #9E9E9E;
+    --neutral-400: #BDBDBD;
+    --neutral-300: #E0E0E0;
+    --neutral-200: #EEEEEE;
+    --neutral-100: #F5F5F5;
+    --neutral-50: #FAFAFA;
+
+    /* Colores Semánticos - Material Design */
+    --success-700: #388E3C;
+    --success-600: #43A047;
+    --success-500: #4CAF50;
+    --success-100: #C8E6C9;
+
+    --danger-700: #D32F2F;
+    --danger-600: #E53935;
+    --danger-500: #F44336;
+    --danger-100: #FFCDD2;
+
+    --warning-700: #F57C00;
+    --warning-600: #FB8C00;
+    --warning-500: #FF9800;
+    --warning-100: #FFE0B2;
+
+    --info-700: #0288D1;
+    --info-600: #039BE5;
+    --info-500: #03A9F4;
+    --info-100: #B3E5FC;
+
+    /* Texto - Material Design */
+    --text-color: rgba(0, 0, 0, 0.87);
+    --text-secondary: rgba(0, 0, 0, 0.60);
+    --text-disabled: rgba(0, 0, 0, 0.38);
+    --text-hint: rgba(0, 0, 0, 0.38);
+
+    /* Sombras - Material Design */
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    --shadow-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    --shadow-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    --shadow-4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    --shadow-5: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+}
+
+/* ===================================
+   2. BOTONES PRIMEFACES
+   =================================== */
+.btn-primary {
+    background: var(--primary-500);
+    border: none;
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: var(--shadow-2);
+}
+
+.btn-primary:hover {
+    background: var(--primary-700);
+    box-shadow: var(--shadow-3);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    background: var(--primary-800);
+    box-shadow: var(--shadow-1);
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--surface-500);
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+.btn-secondary:hover {
+    background: var(--surface-600);
+}
+
+.btn-success {
+    background: var(--success-500);
+    border: none;
+    color: white;
+    font-weight: 500;
+    box-shadow: var(--shadow-2);
+}
+
+.btn-success:hover {
+    background: var(--success-600);
+    box-shadow: var(--shadow-3);
+}
+
+.btn-danger {
+    background: var(--danger-500);
+    border: none;
+    color: white;
+    font-weight: 500;
+    box-shadow: var(--shadow-2);
+}
+
+.btn-danger:hover {
+    background: var(--danger-600);
+    box-shadow: var(--shadow-3);
+}
+
+.btn-info {
+    background: var(--info-500);
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+.btn-warning {
+    background: var(--warning-500);
+    border: none;
+    color: rgba(0, 0, 0, 0.87);
+    font-weight: 500;
+}
+
+/* Botones Outline */
+.btn-outline-primary {
+    border: 2px solid var(--primary-500);
+    color: var(--primary-500);
+    background: transparent;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-500);
+    color: white;
+}
+
+/* ===================================
+   3. CARDS MATERIAL DESIGN
+   =================================== */
+.card {
+    border: none;
+    border-radius: 4px;
+    box-shadow: var(--shadow-1);
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    background: white;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-2);
+}
+
+/* Card header por defecto - Estilo Material */
+.card-header {
+    background: var(--surface-50);
+    border-bottom: 1px solid var(--surface-200);
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 1.25rem 1.5rem;
+}
+
+/* Card header principal - PrimeFaces Style */
+.card-header-primary,
+.card-header-custom {
+    background: var(--primary-500);
+    color: white;
+    border-bottom: none;
+    box-shadow: var(--shadow-2);
+}
+
+.card-header-light {
+    background: var(--surface-50);
+    border-bottom: 2px solid var(--primary-500);
+    color: var(--text-color);
+}
+
+/* ===================================
+   4. TABLAS MATERIAL
+   =================================== */
+.table {
+    color: var(--text-color);
+}
+
+.table thead th {
+    background: var(--surface-100);
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--primary-500);
+    padding: 1rem 0.75rem;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+    background-color: var(--surface-50);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--surface-50);
+}
+
+/* ===================================
+   5. BADGES MATERIAL
+   =================================== */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    padding: 0.375rem 0.75rem;
+    border-radius: 12px;
+}
+
+.badge-primary {
+    background: var(--primary-500);
+    color: white;
+}
+
+.badge-success {
+    background: var(--success-500);
+    color: white;
+}
+
+.badge-danger {
+    background: var(--danger-500);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--warning-500);
+    color: var(--text-color);
+}
+
+.badge-info {
+    background: var(--info-500);
+    color: white;
+}
+
+.badge-secondary {
+    background: var(--surface-500);
+    color: white;
+}
+
+/* ===================================
+   6. ALERTAS MATERIAL
+   =================================== */
+.alert {
+    border-left: 4px solid;
+    border-radius: 4px;
+    font-weight: 400;
+    box-shadow: var(--shadow-1);
+}
+
+.alert-primary {
+    background-color: var(--primary-100);
+    border-color: var(--primary-500);
+    color: var(--primary-900);
+}
+
+.alert-success {
+    background-color: var(--success-100);
+    border-color: var(--success-500);
+    color: var(--success-700);
+}
+
+.alert-danger {
+    background-color: var(--danger-100);
+    border-color: var(--danger-500);
+    color: var(--danger-700);
+}
+
+.alert-warning {
+    background-color: var(--warning-100);
+    border-color: var(--warning-500);
+    color: var(--warning-700);
+}
+
+.alert-info {
+    background-color: var(--info-100);
+    border-color: var(--info-500);
+    color: var(--info-700);
+}
+
+/* ===================================
+   7. FORMULARIOS MATERIAL
+   =================================== */
+.form-control {
+    border: 1px solid var(--surface-300);
+    border-radius: 4px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+    color: var(--text-color);
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    outline: none;
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* ===================================
+   8. NAVEGACIÓN Y SIDEBAR
+   =================================== */
+.navbar-vertical {
+    background: white;
+    box-shadow: var(--shadow-2);
+}
+
+.navbar-vertical .navbar-nav .nav-link {
+    color: var(--text-secondary);
+    padding: 0.65rem 1rem;
+    margin: 0.125rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    font-weight: 400;
+}
+
+.navbar-vertical .navbar-nav .nav-link:hover {
+    background-color: var(--primary-50);
+    color: var(--primary-700);
+}
+
+.navbar-vertical .navbar-nav .nav-link.active {
+    background: var(--primary-500);
+    color: white;
+    font-weight: 500;
+    box-shadow: var(--shadow-1);
+}
+
+.navbar-vertical .navbar-nav .nav-link i {
+    color: var(--text-hint);
+    transition: color 0.2s;
+}
+
+.navbar-vertical .navbar-nav .nav-link:hover i,
+.navbar-vertical .navbar-nav .nav-link.active i {
+    color: inherit;
+}
+
+.sidenav-header {
+    border-bottom: 1px solid var(--surface-200);
+    background: white;
+}
+
+/* ===================================
+   9. TIPOGRAFÍA MATERIAL
+   =================================== */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+}
+
+h1 { font-size: 2.125rem; font-weight: 300; }
+h2 { font-size: 1.875rem; font-weight: 300; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.text-primary {
+    color: var(--primary-500) !important;
+}
+
+.text-success {
+    color: var(--success-500) !important;
+}
+
+.text-danger {
+    color: var(--danger-500) !important;
+}
+
+.text-warning {
+    color: var(--warning-600) !important;
+}
+
+.text-info {
+    color: var(--info-500) !important;
+}
+
+/* ===================================
+   10. UTILIDADES MATERIAL
+   =================================== */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%);
+}
+
+.bg-primary {
+    background-color: var(--primary-500) !important;
+}
+
+.bg-success {
+    background-color: var(--success-500) !important;
+}
+
+.shadow-material {
+    box-shadow: var(--shadow-2);
+}
+
+.shadow-material-lg {
+    box-shadow: var(--shadow-3);
+}
+
+.elevation-1 { box-shadow: var(--shadow-1); }
+.elevation-2 { box-shadow: var(--shadow-2); }
+.elevation-3 { box-shadow: var(--shadow-3); }
+.elevation-4 { box-shadow: var(--shadow-4); }
+.elevation-5 { box-shadow: var(--shadow-5); }
+
+/* ===================================
+   11. HOVER Y ESTADOS
+   =================================== */
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-3);
+}
+
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===================================
+   12. MODALES MATERIAL
+   =================================== */
+.modal-header {
+    background: var(--primary-500);
+    color: white;
+    border-bottom: none;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 4px;
+    box-shadow: var(--shadow-5);
+}
+
+/* ===================================
+   13. TABS MATERIAL
+   =================================== */
+.nav-pills .nav-link {
+    border-radius: 4px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.nav-pills .nav-link.active {
+    background: var(--primary-500);
+    color: white;
+    box-shadow: var(--shadow-1);
+}
+
+/* ===================================
+   14. ICONOS
+   =================================== */
+.icon-shape {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+
+/* ===================================
+   15. RESPONSIVE
+   =================================== */
+@media (max-width: 768px) {
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+}
+
+/* ===================================
+   16. SIDEBAR ESPECÍFICO
+   =================================== */
+.sidenav {
+    background: white;
+    box-shadow: var(--shadow-2);
+}
+
+/* ===================================
+   17. HEADERS ESPECÍFICOS
+   =================================== */
+.card-header-custom {
+    background: var(--primary-500) !important;
+    color: white !important;
+    box-shadow: var(--shadow-2);
+}
+
+/* ===================================
+   NOTAS:
+   Este tema está basado en PrimeFaces Saga Blue
+   y Material Design Guidelines.
+
+   Colores principales:
+   - Primary: #2196F3 (Material Blue)
+   - Success: #4CAF50 (Material Green)
+   - Danger: #F44336 (Material Red)
+   - Warning: #FF9800 (Material Orange)
+
+   =================================== */
+
