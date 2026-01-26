@@ -10,6 +10,10 @@ db.censo_Web*
 identifier.sqlite
 media
 
+# Static files recolectados (generados con collectstatic)
+staticfiles/
+!staticfiles/.gitkeep
+
 # Database files #
 *.db
 *.sqlite
@@ -153,13 +157,26 @@ venv.bak/
 /db.censo_Web
 
 
-# Archivos de configuración
-settings.py
-settings_*.py
-local_settings.py
+# Archivos de configuración sensibles
+.env
+.env.*
+!.env.example
+!.env.pythonanywhere.example
 
-# Permitir versionar archivo de ejemplo
-!settings.example.py
+# Settings de Django (solo ignorar el principal y producción)
+censoProject/settings.py
+censoProject/local_settings.py
 
+# Permitir settings de ejemplo y PythonAnywhere
+!censoProject/settings.example.py
+!censoProject/settings_pythonanywhere.py
+!censoProject/settings_production.py
 
-*.md
+# Archivos de documentación importantes (PERMITIR)
+!README.md
+!*.md
+
+# Archivos de backup
+*.bak
+*_backup.*
+*.backup
