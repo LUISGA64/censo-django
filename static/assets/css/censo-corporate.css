@@ -560,3 +560,114 @@ a:hover {
 .alert-success a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }
 .alert-warning a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }
 .alert-danger a { color: #ffffff !important; text-decoration: underline !important; font-weight: 700 !important; }
+
+/* ===================================
+   SIDEBAR - SIN SCROLL, TODOS LOS ELEMENTOS VISIBLES
+   Mostrar todos los nav-items sin scroll,
+   ajustando automáticamente el tamaño
+   =================================== */
+
+/* Sidebar principal - Altura completa */
+.sidenav {
+    height: calc(100vh - 1.5rem) !important;
+    max-height: calc(100vh - 1.5rem) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Header del sidebar - Compacto */
+.sidenav-header {
+    flex-shrink: 0 !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.sidenav-header .navbar-brand {
+    padding: 0 !important;
+}
+
+.sidenav-header .navbar-brand-img {
+    max-height: 2rem !important;
+}
+
+/* Área de navegación - SIN scroll, distribución automática */
+#sidenav-collapse-main {
+    flex: 1 !important;
+    overflow: hidden !important; /* SIN scroll */
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Lista de navegación - Distribución uniforme */
+.sidenav .navbar-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-evenly !important; /* Distribuye uniformemente */
+    flex: 1 !important;
+    padding: 0.5rem 0 !important;
+    margin: 0 !important;
+}
+
+/* Nav items - Tamaño compacto y flexible */
+.sidenav .nav-item {
+    margin-bottom: 0 !important;
+    flex: 0 1 auto !important;
+}
+
+.sidenav .nav-link {
+    padding: 0.5rem 1rem !important;
+    min-height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Iconos más compactos */
+.sidenav .icon-shape {
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem !important;
+}
+
+.sidenav .icon-shape i {
+    font-size: 0.875rem !important;
+}
+
+/* Texto más compacto */
+.sidenav .nav-link-text {
+    font-size: 0.875rem !important;
+    line-height: 1.2 !important;
+}
+
+/* Headers de sección más compactos */
+.sidenav .nav-item h6 {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 1rem !important;
+    margin: 0.25rem 0 !important;
+}
+
+/* Línea divisoria horizontal compacta */
+.sidenav hr {
+    margin: 0.5rem 0 !important;
+}
+
+/* Responsive: En móviles permitir scroll si es absolutamente necesario */
+@media (max-width: 1199.98px) {
+    .sidenav {
+        height: 100vh !important;
+        max-height: 100vh !important;
+    }
+
+    #sidenav-collapse-main {
+        overflow-y: auto !important;
+    }
+
+    /* Scrollbar minimalista solo para móvil */
+    #sidenav-collapse-main::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    #sidenav-collapse-main::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 2px;
+    }
+}

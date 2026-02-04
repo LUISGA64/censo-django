@@ -1,0 +1,282 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Búsqueda Global{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .search-page-container {
+        padding: 2rem 0;
+    }
+
+    .search-page-input {
+        font-size: 1.2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+
+    .search-page-input:focus {
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        outline: none;
+    }
+
+    .search-results-container {
+        margin-top: 2rem;
+    }
+
+    .result-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .result-card:hover {
+        border-color: #4F46E5;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .result-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1.5rem;
+    }
+
+    .result-content {
+        flex: 1;
+    }
+
+    .result-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-meta {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .category-header {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+    }
+
+    mark {
+        background-color: #fef08a;
+        padding: 0.1rem 0.2rem;
+        border-radius: 0.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h4>🔍 Búsqueda Global</h4>
+                    <p class="text-sm mb-0">Busca personas, fichas familiares o documentos</p>
+                </div>
+                <div class="card-body">
+                    <div class="search-page-container">
+                        <!-- Buscador -->
+                        <div class="mb-4">
+                            <input type="text"
+                                   id="searchPageInput"
+                                   class="form-control search-page-input"
+                                   placeholder="Escribe un nombre, identificación o número de ficha..."
+                                   autocomplete="off"
+                                   autofocus>
+                            <small class="text-muted">Escribe al menos 3 caracteres para buscar</small>
+                        </div>
+
+                        <!-- Resultados -->
+                        <div id="searchPageResults" class="search-results-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('searchPageInput');
+    const resultsDiv = document.getElementById('searchPageResults');
+    let timeout;
+
+    input.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+
+        clearTimeout(timeout);
+
+        if (query.length < 3) {
+            resultsDiv.innerHTML = '';
+            return;
+        }
+
+        resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+
+        timeout = setTimeout(() => {
+            fetch(`/api/search/?q=${encodeURIComponent(query)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderResults(data, query);
+            })
+            .catch(error => {
+                resultsDiv.innerHTML = '<div class="alert alert-danger">Error al realizar la búsqueda</div>';
+            });
+        }, 300);
+    });
+
+    function renderResults(data, query) {
+        if (data.error) {
+            resultsDiv.innerHTML = `<div class="alert alert-warning">${data.error}</div>`;
+            return;
+        }
+
+        if (data.total === 0) {
+            resultsDiv.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-search fa-3x mb-3" style="opacity: 0.3;"></i>
+                    <p>No se encontraron resultados para "<strong>${escapeHtml(query)}</strong>"</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+
+        // Personas
+        if (data.personas && data.personas.length > 0) {
+            html += '<div class="category-header"><i class="fas fa-user"></i> Personas</div>';
+            data.personas.forEach(p => {
+                html += `
+                    <a href="${p.url}" class="result-card d-flex align-items-center">
+                        <div class="result-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="result-content">
+                            <div class="result-title">${highlightMatch(p.name, query)}</div>
+                            <div class="result-meta">
+                                <span class="badge bg-secondary me-2">${p.document_type}</span>
+                                ${highlightMatch(p.identification, query)}
+                                ${p.family_card_number ? ` • Ficha #${p.family_card_number}` : ''}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+        }
+
+        // Fichas
+        if (data.fichas && data.fichas.length > 0) {
+            html += '<div class="category-header"><i class="fas fa-home"></i> Fichas Familiares</div>';
+            data.fichas.forEach(f => {
+                html += `
+                    <a href="${f.url}" class="result-card d-flex align-items-center">
+                        <div class="result-icon">
+                            <i class="fas fa-house-user"></i>
+                        </div>
+                        <div class="result-content">
+                            <div class="result-title">Ficha #${highlightMatch(String(f.number), query)}</div>
+                            <div class="result-meta">
+                                ${highlightMatch(f.address || 'Sin dirección', query)}
+                                ${f.sidewalk ? ` • ${f.sidewalk}` : ''}
+                                • ${f.members_count} integrante(s)
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+        }
+
+        // Documentos
+        if (data.documentos && data.documentos.length > 0) {
+            html += '<div class="category-header"><i class="fas fa-file-alt"></i> Documentos</div>';
+            data.documentos.forEach(d => {
+                const statusClass = d.is_expired ? 'bg-danger' : 'bg-success';
+                const statusText = d.is_expired ? 'Vencido' : 'Vigente';
+
+                html += `
+                    <a href="${d.url}" class="result-card d-flex align-items-center">
+                        <div class="result-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="result-content">
+                            <div class="result-title">${highlightMatch(d.number, query)}</div>
+                            <div class="result-meta">
+                                ${highlightMatch(d.person_name, query)}
+                                <span class="badge ${statusClass} ms-2">${statusText}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+        }
+
+        resultsDiv.innerHTML = html;
+    }
+
+    function highlightMatch(text, query) {
+        if (!text || !query) return text;
+        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function escapeRegex(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+});
+</script>
+{% endblock %}

@@ -9,9 +9,11 @@ from .views import (home, profile, association, CreateAssociation, family_card_i
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
                     delete_person_familyCard, get_system_parameters, MaterialConstructionView, export_persons_excel,
-                    organization_detail, global_search, global_search_api,
+                    organization_detail,
                     importacion_masiva_inicio, descargar_template_importacion, validar_archivo_importacion,
                     confirmar_importacion, ver_log_importacion, descargar_log_importacion)
+# Búsqueda Global - Nueva implementación mejorada
+from .search_views import global_search, test_search_view, search_page_view
 from .document_views import (view_document, list_person_documents, download_document_pdf,
                             organization_documents_stats, preview_document_pdf, verify_document)
 from .simple_document_views import (select_document_type, generate_aval_general, generate_aval_estudio,
@@ -90,8 +92,9 @@ urlpatterns = [
     path('documentos/estadisticas/<int:organization_id>/', login_required(organization_documents_stats), name='documents-stats-org'),
 
     # ----- BÚSQUEDA GLOBAL -----
-    path('busqueda/', login_required(global_search), name='global-search'),
-    path('api/busqueda/', login_required(global_search_api), name='global-search-api'),
+    path('search/', login_required(search_page_view), name='search-page'),  # Página HTML
+    path('api/search/', login_required(global_search), name='global-search'),  # API JSON
+    path('test-search/', login_required(test_search_view), name='test-search'),  # Vista de prueba
 
     # ----- IMPORTACIÓN MASIVA -----
     path('importacion/', login_required(importacion_masiva_inicio), name='importacion-masiva'),

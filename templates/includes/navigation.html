@@ -13,17 +13,17 @@
           </nav>
           <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
             <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-              <!-- Barra de búsqueda global -->
-              <form method="GET" action="{% url 'global-search' %}" class="w-100">
-                <div class="input-group">
-                  <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-                  <input type="text"
-                         class="form-control"
-                         name="q"
-                         placeholder="Buscar personas, fichas..."
-                         autocomplete="off">
-                </div>
-              </form>
+              <!-- 🔍 Búsqueda Global Avanzada -->
+              <div class="global-search-container">
+                <input type="text"
+                       id="globalSearchInput"
+                       class="form-control"
+                       placeholder="🔍 Buscar en todo el sistema... (Ctrl+K)"
+                       autocomplete="off"
+                       aria-label="Búsqueda global">
+                <div id="globalSearchResults" class="search-results-dropdown"></div>
+                <span class="search-keyboard-hint">Ctrl+K</span>
+              </div>
             </div>
             <ul class="navbar-nav  justify-content-end">
               <li class="nav-item d-flex align-items-center">

@@ -225,7 +225,7 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="analytics-label">Población Total</div>
-                <div class="analytics-value">{{ summary.total_population|default:0 }}</div>
+                <div class="analytics-value">{{ total_personas|default:0 }}</div>
                 <div class="analytics-subtitle">Personas registradas activas</div>
             </div>
         </div>
@@ -236,7 +236,7 @@
                     <i class="fas fa-home"></i>
                 </div>
                 <div class="analytics-label">Fichas Familiares</div>
-                <div class="analytics-value">{{ summary.total_families|default:0 }}</div>
+                <div class="analytics-value">{{ total_familias|default:0 }}</div>
                 <div class="analytics-subtitle">Hogares registrados</div>
             </div>
         </div>
@@ -244,22 +244,22 @@
         <div class="col-xl-3 col-sm-6 mb-3 fade-in-up" style="animation-delay: 0.3s;">
             <div class="analytics-stat-card orange">
                 <div class="analytics-icon">
-                    <i class="fas fa-calendar"></i>
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="analytics-label">Edad Promedio</div>
-                <div class="analytics-value">{{ summary.average_age|default:0 }}</div>
-                <div class="analytics-subtitle">años de edad</div>
+                <div class="analytics-label">Docs. por Vencer</div>
+                <div class="analytics-value">{{ docs_expiring|default:0 }}</div>
+                <div class="analytics-subtitle">próximos 30 días</div>
             </div>
         </div>
 
         <div class="col-xl-3 col-sm-6 mb-3 fade-in-up" style="animation-delay: 0.4s;">
             <div class="analytics-stat-card purple">
                 <div class="analytics-icon">
-                    <i class="fas fa-baby"></i>
+                    <i class="fas fa-chart-line"></i>
                 </div>
-                <div class="analytics-label">Nacimientos</div>
-                <div class="analytics-value">{{ summary.births_last_year|default:0 }}</div>
-                <div class="analytics-subtitle">último año</div>
+                <div class="analytics-label">Promedio Familia</div>
+                <div class="analytics-value">{% if total_familias > 0 %}{{ total_personas|divisibleby:total_familias|default:0 }}{% else %}0{% endif %}</div>
+                <div class="analytics-subtitle">personas por hogar</div>
             </div>
         </div>
     </div>
