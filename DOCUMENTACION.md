@@ -263,6 +263,181 @@ crontab -e
 
 ---
 
+### ✅ 5. API REST con JWT (100%)
+
+**Características:**
+- Autenticación JWT (JSON Web Tokens)
+- Endpoints RESTful completos
+- Paginación automática
+- Filtrado y búsqueda
+- Throttling (rate limiting)
+- Documentación automática
+- Permisos por organización
+
+**Endpoints Principales:**
+
+**Autenticación:**
+```bash
+# Obtener token
+POST /api/token/
+Body: {"username": "usuario", "password": "contraseña"}
+Response: {"access": "token...", "refresh": "token..."}
+
+# Refrescar token
+POST /api/token/refresh/
+Body: {"refresh": "token..."}
+Response: {"access": "nuevo_token..."}
+
+# Verificar token
+POST /api/token/verify/
+Body: {"token": "token..."}
+Response: {} (200 OK si es válido)
+```
+
+**Personas:**
+```bash
+# Listar personas (paginado)
+GET /api/v1/persons/
+Headers: Authorization: Bearer {access_token}
+
+# Detalle de persona
+GET /api/v1/persons/{id}/
+
+# Crear persona
+POST /api/v1/persons/
+Body: {datos de persona}
+
+# Actualizar persona
+PUT /api/v1/persons/{id}/
+PATCH /api/v1/persons/{id}/
+
+# Eliminar persona (soft delete)
+DELETE /api/v1/persons/{id}/
+
+# Personas de una familia
+GET /api/v1/persons/by_family/?family_card_id={id}
+```
+
+**Fichas Familiares:**
+```bash
+# Listar fichas
+GET /api/v1/family-cards/
+
+# Detalle con miembros
+GET /api/v1/family-cards/{id}/
+
+# Crear ficha
+POST /api/v1/family-cards/
+
+# Actualizar ficha
+PUT /api/v1/family-cards/{id}/
+
+# Eliminar ficha
+DELETE /api/v1/family-cards/{id}/
+
+# Miembros de una ficha
+GET /api/v1/family-cards/{id}/members/
+```
+
+**Documentos:**
+```bash
+# Listar documentos
+GET /api/v1/documents/
+
+# Documentos por vencer
+GET /api/v1/documents/expiring_soon/
+
+# Documentos de una persona
+GET /api/v1/documents/by_person/?person_id={id}
+
+# Detalle de documento
+GET /api/v1/documents/{id}/
+```
+
+**Filtros y Búsqueda:**
+```bash
+# Filtrar personas por género
+GET /api/v1/persons/?gender=1
+
+# Buscar personas
+GET /api/v1/persons/?search=juan
+
+# Ordenar
+GET /api/v1/persons/?ordering=-created_at
+
+# Paginación
+GET /api/v1/persons/?page=2
+```
+
+**Ejemplo de Uso (Python):**
+```python
+import requests
+
+# 1. Obtener token
+response = requests.post('http://localhost:8000/api/token/', {
+    'username': 'admin',
+    'password': 'password'
+})
+token = response.json()['access']
+
+# 2. Usar token en requests
+headers = {'Authorization': f'Bearer {token}'}
+
+# 3. Listar personas
+persons = requests.get(
+    'http://localhost:8000/api/v1/persons/',
+    headers=headers
+).json()
+
+# 4. Crear persona
+new_person = requests.post(
+    'http://localhost:8000/api/v1/persons/',
+    headers=headers,
+    json={
+        'identification_person': '123456789',
+        'first_name_1': 'Juan',
+        'last_name_1': 'Pérez',
+        'date_birth': '1990-01-01',
+        'gender': 1,
+        'document_type': 1,
+        # ... más campos
+    }
+).json()
+```
+
+**Ejemplo de Uso (JavaScript):**
+```javascript
+// 1. Obtener token
+const response = await fetch('http://localhost:8000/api/token/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+        username: 'admin',
+        password: 'password'
+    })
+});
+const {access} = await response.json();
+
+// 2. Usar token
+const persons = await fetch('http://localhost:8000/api/v1/persons/', {
+    headers: {'Authorization': `Bearer ${access}`}
+}).then(r => r.json());
+```
+
+**Rate Limiting:**
+- Usuarios autenticados: 1000 requests/día
+- Usuarios anónimos: 100 requests/día
+- Tokens de acceso: válidos por 1 hora
+- Tokens de refresco: válidos por 7 días
+
+**Archivos:**
+- `censoProject/settings.py` - Configuración JWT
+- `censoapp/serializers.py` - Serializers
+- `censoapp/viewsets.py` - ViewSets
+- `censoapp/urls.py` - Rutas API
+
+---
+
 ## 📚 GUÍAS DE USO
 
 ### Importación Masiva
@@ -534,19 +709,20 @@ git log --oneline
 
 ## 📈 MÉTRICAS DEL PROYECTO
 
-### Fase 1 Completada (75%)
+### Fase 1 Completada (100%) ✅
 - ✅ Búsqueda Global: 100%
 - ✅ Backups Automatizados: 100%
 - ✅ Dashboard Mejorado: 100%
 - ✅ Sidebar Optimizado: 100%
-- ⏸️ API REST JWT: 0% (pendiente)
+- ✅ API REST JWT: 100%
 
 ### Estadísticas
-- **Tiempo de desarrollo Fase 1:** ~7 horas
-- **Documentos generados:** 20+
-- **Archivos de código:** 15+
+- **Tiempo de desarrollo Fase 1:** ~10 horas
+- **Documentos generados:** 1 archivo maestro consolidado
+- **Archivos de código:** 20+
 - **ROI estimado:** 400% en primer mes
 - **Reducción tiempo de búsqueda:** 70%
+- **Endpoints API:** 20+
 
 ---
 
@@ -580,13 +756,16 @@ Para problemas técnicos o consultas:
 
 ## 📝 NOTAS DE VERSIÓN
 
-### v2.0 - Fase 1 (4 Feb 2026)
+### v2.0 - Fase 1 Completa (4 Feb 2026) ✅
 - ✅ Búsqueda global con autocompletado
 - ✅ Sistema de backups automatizados
 - ✅ Dashboard analítico mejorado
 - ✅ Sidebar sin scroll optimizado
+- ✅ API REST con autenticación JWT
 - ✅ URLs corregidas con reverse()
 - ✅ Documentación consolidada
+- ✅ Serializers y ViewSets completos
+- ✅ 20+ endpoints RESTful
 
 ### v1.0 (Dic 2025)
 - Sistema base funcional

@@ -21,7 +21,7 @@ django-allauth==65.14.0
 django-chartjs==2.3.0
 django-cors-headers==4.3.1
 django-crispy-forms==2.1
-django-filter==23.5
+django-filter==24.3
 django-formtools==2.5.1
 django-otp==1.7.0
 django-qrcode==0.3
@@ -29,6 +29,7 @@ django-ratelimit==4.1.0
 django-redis==5.4.0
 django-simple-history==3.11.0
 djangorestframework==3.16.1
+djangorestframework-simplejwt==5.3.1
 dparse==0.6.4
 et_xmlfile==2.0.0
 filelock==3.20.3

@@ -4,7 +4,10 @@ from rest_framework.documentation import include_docs_urls
 from django.contrib.auth.decorators import login_required
 
 from .models import MaterialConstruction
-from .viewsets import SidewalksViewSet, AssociationViewSet, OrganizationViewSet
+from .viewsets import (
+    SidewalksViewSet, AssociationViewSet, OrganizationViewSet,
+    PersonViewSet, FamilyCardViewSet, GeneratedDocumentViewSet
+)
 from .views import (home, profile, association, CreateAssociation, family_card_index,
                     crear_persona, detalle_ficha, UpdateFamily, get_family_cards, create_family_card,
                     listar_personas, view_persons, UpdatePerson, person_by_gender, DetailPersona, update_family_head,
@@ -25,6 +28,18 @@ from .dashboard_views import (dashboard_analytics, api_gender_distribution, api_
 # Geolocalización
 from .geolocation_views import (map_view, map_sidewalks_data, map_heatmap, map_clusters,
                                 sidewalk_detail_map, update_sidewalk_location)
+
+# ==============================================================================
+# API REST ROUTER
+# ==============================================================================
+
+router = routers.DefaultRouter()
+router.register(r'sidewalks', SidewalksViewSet, basename='sidewalk')
+router.register(r'associations', AssociationViewSet, basename='association')
+router.register(r'organizations', OrganizationViewSet, basename='organization')
+router.register(r'persons', PersonViewSet, basename='person')
+router.register(r'family-cards', FamilyCardViewSet, basename='family-card')
+router.register(r'documents', GeneratedDocumentViewSet, basename='document')
 
 
 urlpatterns = [
@@ -121,4 +136,7 @@ urlpatterns = [
     path('mapa/clusters/', login_required(map_clusters), name='map-clusters'),
     path('mapa/vereda/<int:sidewalk_id>/', login_required(sidewalk_detail_map), name='sidewalk-detail-map'),
     path('api/sidewalk/<int:sidewalk_id>/location/', login_required(update_sidewalk_location), name='update-sidewalk-location'),
+
+    # ----- API REST CON JWT -----
+    path('api/v1/', include(router.urls)),
 ]
