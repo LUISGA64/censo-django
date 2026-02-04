@@ -128,7 +128,7 @@ class PersonListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = ['id', 'identification_person', 'full_name', 'date_birth', 'phone_number']
+        fields = ['id', 'identification_person', 'full_name', 'date_birth', 'cell_phone']
 
     def get_full_name(self, obj):
         return obj.full_name
