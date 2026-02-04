@@ -107,9 +107,9 @@ class PersonViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['gender', 'document_type', 'family_card', 'family_head', 'state']
-    search_fields = ['identification_person', 'first_name_1', 'last_name_1', 'email']
-    ordering_fields = ['id', 'first_name_1', 'date_birth', 'created_at']
-    ordering = ['-created_at']
+    search_fields = ['identification_person', 'first_name_1', 'last_name_1', 'personal_email']
+    ordering_fields = ['id', 'first_name_1', 'last_name_1', 'date_birth', 'identification_person']
+    ordering = ['-id']
 
     def get_queryset(self):
         queryset = Person.objects.filter(state=True)
@@ -166,8 +166,8 @@ class FamilyCardViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization', 'sidewalk_home', 'state']
     search_fields = ['family_card_number', 'address_home']
-    ordering_fields = ['id', 'family_card_number', 'created_at']
-    ordering = ['-created_at']
+    ordering_fields = ['id', 'family_card_number']
+    ordering = ['-id']
 
     def get_queryset(self):
         queryset = FamilyCard.objects.filter(state=True)

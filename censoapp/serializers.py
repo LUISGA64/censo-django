@@ -106,10 +106,10 @@ class PersonSerializer(serializers.ModelSerializer):
             'gender', 'gender_name', 'document_type', 'document_type_name',
             'education_level', 'education_level_name', 'civil_state', 'civil_state_name',
             'family_card', 'family_card_number', 'family_head',
-            'email', 'phone_number', 'occupation',
-            'state', 'created_at'
+            'personal_email', 'cell_phone', 'occupation',
+            'state'
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id']
 
     def get_full_name(self, obj):
         return obj.full_name
@@ -147,9 +147,9 @@ class FamilyCardSerializer(serializers.ModelSerializer):
             'id', 'family_card_number', 'organization', 'organization_name',
             'sidewalk_home', 'sidewalk_name', 'address_home',
             'latitude', 'longitude', 'members_count', 'family_head',
-            'state', 'created_at'
+            'state'
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id']
 
     def get_members_count(self, obj):
         return Person.objects.filter(family_card=obj, state=True).count()
