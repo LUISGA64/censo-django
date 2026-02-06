@@ -74,21 +74,26 @@
 
 **Estado Actual:**
 - ✅ Email configurado en `.env` local
-- ✅ `EMAIL_HOST_USER` y `EMAIL_HOST_PASSWORD` configurados
+- ✅ Credenciales SMTP configuradas
 - ⏳ Backend de email listo para usar
 
 **Tareas Pendientes:**
 
 #### A. Configurar Email en Django (30 min)
 ```python
-# Ya está en .env:
+# Configurar en .env (NO subir a Git):
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=webcenso@gmail.com
-EMAIL_HOST_PASSWORD=hywn djkz scdi xlbi
+EMAIL_HOST_USER=tu_email@gmail.com
+EMAIL_HOST_PASSWORD=tu_app_password_aqui
 ```
+
+**⚠️ IMPORTANTE:** 
+- Las credenciales deben estar SOLO en `.env` local
+- NUNCA subir `.env` a Git
+- Usar variables de entorno en producción
 
 #### B. Crear Sistema de Notificaciones (2-3 días)
 
