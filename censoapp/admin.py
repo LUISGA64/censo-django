@@ -5,7 +5,8 @@ from .models import (
     EducationLevel, SecuritySocial, Handicap, Charge, SystemParameters, MaterialConstruction,
     WaterTreatment, LightingType, WaterSource, CookingFuel, HomeOwnership, FamilyCard, Person,
     MaterialConstructionFamilyCard, UserProfile, DocumentType, BoardPosition, GeneratedDocument,
-    DocumentTemplate, TemplateBlock, TemplateVariable
+    DocumentTemplate, TemplateBlock, TemplateVariable,
+    Notification, NotificationPreference
 )
 from .utils import invalidate_system_parameters_cache
 
@@ -86,7 +87,8 @@ class MaterialConstructionFamilyCardAdmin(SimpleHistoryAdmin):
 # UserProfile admin con gestion de multi-organizacion
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'organization', 'role', 'can_view_all_organizations', 'is_active', 'created_at']
+    list_display = ['user', 'organization', 'role', 'can_view_all_organizations', 'is_active', 'created_at'
+    ]
     list_filter = ['role', 'organization', 'can_view_all_organizations', 'is_active']
     search_fields = ['user__username', 'user__email', 'organization__organization_name']
     readonly_fields = ['created_at', 'updated_at']
@@ -543,3 +545,71 @@ class GeneratedDocumentAdmin(SimpleHistoryAdmin):
 
         return qs.none()
 
+
+# ============================================================================
+# ADMINISTRACIÓN DE NOTIFICACIONES
+# ============================================================================
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'notification_type', 'is_read', 'created_at']
+    list_filter = ['notification_type', 'is_read', 'sent_email', 'created_at']
+    search_fields = ['title', 'message', 'user__username', 'user__email']
+    readonly_fields = ['created_at', 'updated_at', 'read_at', 'email_sent_at']
+    date_hierarchy = 'created_at'
+    list_per_page = 50
+
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('user', 'organization', 'notification_type', 'title', 'message', 'link')
+        }),
+        ('Estado', {
+            'fields': ('is_read', 'read_at', 'sent_email', 'email_sent_at')
+        }),
+        ('Relaciones', {
+            'fields': ('related_person', 'related_document', 'related_family'),
+            'classes': ('collapse',)
+        }),
+        ('Metadatos', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('user', 'organization', 'related_person', 'related_document', 'related_family')
+
+
+@admin.register(NotificationPreference)
+class NotificationPreferenceAdmin(admin.ModelAdmin):
+    list_display = ['user', 'receive_email', 'receive_inapp', 'email_frequency']
+    list_filter = ['receive_email', 'receive_inapp', 'email_frequency']
+    search_fields = ['user__username', 'user__email']
+    list_per_page = 50
+
+    fieldsets = (
+        ('Usuario', {
+            'fields': ('user',)
+        }),
+        ('Canales de Notificación', {
+            'fields': ('receive_email', 'receive_inapp', 'email_frequency')
+        }),
+        ('Tipos de Notificaciones', {
+            'fields': (
+                'notify_document_expiring',
+                'notify_document_expired',
+                'notify_document_generated',
+                'notify_person_created',
+                'notify_family_created',
+                'notify_system_updates',
+                'notify_security_alerts',
+            )
+        }),
+        ('Metadatos', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = ['created_at', 'updated_at']

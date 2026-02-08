@@ -1800,4 +1800,268 @@ class TemplateVariable(models.Model):
             return ''
 
 
+# ============================================================================
+# SISTEMA DE NOTIFICACIONES
+# ============================================================================
+
+class NotificationType(models.TextChoices):
+    """Tipos de notificaciones disponibles"""
+    DOCUMENT_EXPIRING = 'DOC_EXP', 'Documento por vencer'
+    DOCUMENT_EXPIRED = 'DOC_EXPD', 'Documento vencido'
+    DOCUMENT_GENERATED = 'DOC_GEN', 'Documento generado'
+    PERSON_CREATED = 'PER_NEW', 'Persona registrada'
+    PERSON_UPDATED = 'PER_UPD', 'Persona actualizada'
+    FAMILY_CREATED = 'FAM_NEW', 'Familia registrada'
+    FAMILY_UPDATED = 'FAM_UPD', 'Familia actualizada'
+    SYSTEM_UPDATE = 'SYS_UPD', 'Actualización del sistema'
+    SYSTEM_ERROR = 'SYS_ERR', 'Error del sistema'
+    SECURITY_ALERT = 'SEC_ALT', 'Alerta de seguridad'
+    CUSTOM = 'CUSTOM', 'Personalizada'
+
+
+class Notification(models.Model):
+    """
+    Modelo para notificaciones del sistema.
+    Soporta notificaciones in-app y email.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        help_text="Usuario que recibe la notificación"
+    )
+
+    organization = models.ForeignKey(
+        'Organizations',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Organización relacionada"
+    )
+
+    notification_type = models.CharField(
+        max_length=10,
+        choices=NotificationType.choices,
+        default=NotificationType.CUSTOM,
+        help_text="Tipo de notificación"
+    )
+
+    title = models.CharField(
+        max_length=200,
+        help_text="Título de la notificación"
+    )
+
+    message = models.TextField(
+        help_text="Mensaje de la notificación"
+    )
+
+    link = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="URL para redireccionar (opcional)"
+    )
+
+    is_read = models.BooleanField(
+        default=False,
+        help_text="Indica si la notificación ha sido leída"
+    )
+
+    read_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Fecha y hora en que fue leída"
+    )
+
+    sent_email = models.BooleanField(
+        default=False,
+        help_text="Indica si se envió email"
+    )
+
+    email_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Fecha y hora de envío de email"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha de creación"
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="Última actualización"
+    )
+
+    # Campos adicionales para contexto
+    related_person = models.ForeignKey(
+        'Person',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Persona relacionada (opcional)"
+    )
+
+    related_document = models.ForeignKey(
+        'GeneratedDocument',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Documento relacionado (opcional)"
+    )
+
+    related_family = models.ForeignKey(
+        'FamilyCard',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Ficha familiar relacionada (opcional)"
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Notificación'
+        verbose_name_plural = 'Notificaciones'
+        indexes = [
+            models.Index(fields=['user', 'is_read']),
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['notification_type']),
+        ]
+
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
+
+    def mark_as_read(self):
+        """Marca la notificación como leída"""
+        if not self.is_read:
+            from django.utils import timezone
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+
+    def get_icon(self):
+        """Retorna el icono correspondiente al tipo de notificación"""
+        icons = {
+            NotificationType.DOCUMENT_EXPIRING: 'fa-clock',
+            NotificationType.DOCUMENT_EXPIRED: 'fa-exclamation-triangle',
+            NotificationType.DOCUMENT_GENERATED: 'fa-file-pdf',
+            NotificationType.PERSON_CREATED: 'fa-user-plus',
+            NotificationType.PERSON_UPDATED: 'fa-user-edit',
+            NotificationType.FAMILY_CREATED: 'fa-home',
+            NotificationType.FAMILY_UPDATED: 'fa-edit',
+            NotificationType.SYSTEM_UPDATE: 'fa-info-circle',
+            NotificationType.SYSTEM_ERROR: 'fa-exclamation-circle',
+            NotificationType.SECURITY_ALERT: 'fa-shield-alt',
+            NotificationType.CUSTOM: 'fa-bell',
+        }
+        return icons.get(self.notification_type, 'fa-bell')
+
+    def get_color(self):
+        """Retorna el color correspondiente al tipo de notificación"""
+        colors = {
+            NotificationType.DOCUMENT_EXPIRING: 'warning',
+            NotificationType.DOCUMENT_EXPIRED: 'danger',
+            NotificationType.DOCUMENT_GENERATED: 'success',
+            NotificationType.PERSON_CREATED: 'info',
+            NotificationType.PERSON_UPDATED: 'info',
+            NotificationType.FAMILY_CREATED: 'primary',
+            NotificationType.FAMILY_UPDATED: 'primary',
+            NotificationType.SYSTEM_UPDATE: 'info',
+            NotificationType.SYSTEM_ERROR: 'danger',
+            NotificationType.SECURITY_ALERT: 'danger',
+            NotificationType.CUSTOM: 'secondary',
+        }
+        return colors.get(self.notification_type, 'secondary')
+
+
+class NotificationPreference(models.Model):
+    """
+    Preferencias de notificación por usuario.
+    Permite a cada usuario configurar qué notificaciones desea recibir.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notification_preferences',
+        help_text="Usuario"
+    )
+
+    # Canales de notificación
+    receive_email = models.BooleanField(
+        default=True,
+        help_text="Recibir notificaciones por email"
+    )
+
+    receive_inapp = models.BooleanField(
+        default=True,
+        help_text="Recibir notificaciones in-app"
+    )
+
+    # Tipos de notificaciones
+    notify_document_expiring = models.BooleanField(
+        default=True,
+        help_text="Notificar documentos por vencer"
+    )
+
+    notify_document_expired = models.BooleanField(
+        default=True,
+        help_text="Notificar documentos vencidos"
+    )
+
+    notify_document_generated = models.BooleanField(
+        default=False,
+        help_text="Notificar documentos generados"
+    )
+
+    notify_person_created = models.BooleanField(
+        default=False,
+        help_text="Notificar nuevas personas"
+    )
+
+    notify_family_created = models.BooleanField(
+        default=False,
+        help_text="Notificar nuevas familias"
+    )
+
+    notify_system_updates = models.BooleanField(
+        default=True,
+        help_text="Notificar actualizaciones del sistema"
+    )
+
+    notify_security_alerts = models.BooleanField(
+        default=True,
+        help_text="Notificar alertas de seguridad"
+    )
+
+    # Frecuencia
+    email_frequency = models.CharField(
+        max_length=10,
+        choices=[
+            ('INSTANT', 'Inmediato'),
+            ('DAILY', 'Diario'),
+            ('WEEKLY', 'Semanal'),
+            ('NEVER', 'Nunca'),
+        ],
+        default='INSTANT',
+        help_text="Frecuencia de envío de emails"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Preferencia de Notificación'
+        verbose_name_plural = 'Preferencias de Notificación'
+
+    def __str__(self):
+        return f"Preferencias de {self.user.username}"
+
+
+# Signal para crear preferencias automáticamente al crear usuario
+@receiver(post_save, sender=User)
+def create_notification_preferences(sender, instance, created, **kwargs):
+    """Crea preferencias de notificación para nuevos usuarios"""
+    if created:
+        NotificationPreference.objects.get_or_create(user=instance)
 

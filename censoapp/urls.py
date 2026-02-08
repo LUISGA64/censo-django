@@ -28,6 +28,10 @@ from .dashboard_views import (dashboard_analytics, api_gender_distribution, api_
 # Geolocalización
 from .geolocation_views import (map_view, map_sidewalks_data, map_heatmap, map_clusters,
                                 sidewalk_detail_map, update_sidewalk_location)
+# Notificaciones
+from .notification_views import (notifications_list, notification_detail, mark_as_read,
+                                 mark_all_as_read, notifications_unread, notification_preferences,
+                                 delete_notification)
 
 # ==============================================================================
 # API REST ROUTER
@@ -136,6 +140,15 @@ urlpatterns = [
     path('mapa/clusters/', login_required(map_clusters), name='map-clusters'),
     path('mapa/vereda/<int:sidewalk_id>/', login_required(sidewalk_detail_map), name='sidewalk-detail-map'),
     path('api/sidewalk/<int:sidewalk_id>/location/', login_required(update_sidewalk_location), name='update-sidewalk-location'),
+
+    # ----- NOTIFICACIONES -----
+    path('notifications/', login_required(notifications_list), name='notifications-list'),
+    path('notifications/<int:notification_id>/', login_required(notification_detail), name='notification-detail'),
+    path('notifications/<int:notification_id>/mark-read/', login_required(mark_as_read), name='mark-as-read'),
+    path('notifications/mark-all-read/', login_required(mark_all_as_read), name='mark-all-as-read'),
+    path('api/notifications/unread/', login_required(notifications_unread), name='notifications-unread'),
+    path('notifications/<int:notification_id>/delete/', login_required(delete_notification), name='delete-notification'),
+    path('notifications/preferences/', login_required(notification_preferences), name='notification-preferences'),
 
     # ----- API REST CON JWT -----
     path('api/v1/', include(router.urls)),
