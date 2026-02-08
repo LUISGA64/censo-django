@@ -47,6 +47,19 @@ reemplazar_*.py
 eliminar_*.py
 check_*.py
 add_*.py
+limpiar_*.py
+mostrar_*.py
+optimizar_*.py
+agregar_*.py
+pricing_*.py
+
+# Archivos temporales y logs #
+debug.log
+error.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
 
 # Requirements duplicados #
 requirements_fixed.txt
