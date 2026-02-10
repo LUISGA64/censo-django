@@ -1,4 +1,4 @@
-﻿# 🏛️ CensoWeb - Sistema de Gestión de Comunidades
+﻿﻿# 🏛️ CensoWeb - Sistema de Gestión de Comunidades
 
 Sistema web integral para la administración de información de comunidades indígenas.
 
@@ -87,16 +87,23 @@ python manage.py runserver
 
 ### Producción (PythonAnywhere)
 ```bash
-cd ~/censo-django
+# 1. Conectar por SSH y activar entorno
 workon censo-env
+cd ~/censo-django
+
+# 2. Actualizar código
 git pull origin development
+
+# 3. Instalar dependencias y migrar
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
+
+# 4. Recargar aplicación
 touch /var/www/*_pythonanywhere_com_wsgi.py
 ```
 
-Ver [MANUAL_MANTENIMIENTO.md](MANUAL_MANTENIMIENTO.md) para más detalles.
+Ver [DOCUMENTACION_COMPLETA.md](DOCUMENTACION_COMPLETA.md) para deployment detallado.
 
 ## 📖 Documentación Adicional
 

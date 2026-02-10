@@ -64,6 +64,42 @@
   - `scripts/health_check.py`
 - **Commit:** 9c312fd
 
+#### 6. ✅ **Sistema de Notificaciones Completo** (COMPLETADO)
+- **Estado:** ✅ Desplegado en producción
+- **Características:**
+  - Notificaciones in-app con panel interactivo
+  - Envío de emails con plantillas HTML
+  - Preferencias personalizables por usuario
+  - Tipos: documentos, personas, familias, sistema, seguridad
+- **Modelos:** Notification, NotificationPreference
+- **Servicio:** NotificationService con envío de emails
+- **Vistas:** Lista, detalle, preferencias, APIs JSON
+- **Commit:** 05d217c
+
+#### 7. ✅ **Importación Masiva de Datos** (COMPLETADO)
+- **Estado:** ✅ Implementado y funcional
+- **Características:**
+  - Template Excel descargable
+  - Validación de datos antes de importar
+  - Preview de datos a importar
+  - Importación por lotes (fichas familiares y personas)
+  - Reporte de errores detallado con logs
+  - Soporte para Excel (.xlsx)
+  - Manejo de duplicados y validaciones
+- **Archivos:** 
+  - `censoapp/importador_masivo.py` (647 líneas)
+  - Vistas: `importacion_masiva_inicio`, `validar_archivo_importacion`, etc.
+- **URLs:** `/importacion/`, `/importacion/template/`, `/importacion/validar/`
+- **Tecnología:** openpyxl para lectura de Excel
+
+#### 8. ✅ **Reportes de Personas Censadas** (COMPLETADO)
+- **Estado:** ✅ Implementado
+- **Características:**
+  - Exportación de personas a Excel
+  - Formato estructurado con todos los datos
+- **Endpoint:** `/export/personas/excel/`
+- **Función:** `export_persons_excel()`
+
 ---
 
 ## 🚀 EN PROGRESO INMEDIATO
@@ -304,18 +340,25 @@ python manage.py renew_expiring_documents --days=30
 
 ---
 
-### 🔌 **6. API REST Completa** (Mes 2)
+### 🔌 **Mejoras a API REST** (Prioridad: MEDIA)
 
-**Prioridad:** MEDIA  
-**Tiempo:** 1 semana
+**Estado Actual:** 
+- ✅ API REST con JWT implementada
+- ✅ Endpoints: persons, family-cards, documents, organizations, associations, sidewalks
+- ✅ Autenticación JWT funcional
+- ✅ Filtros avanzados con django-filter
+- ✅ Paginación configurada
 
-**Mejoras a API Existente:**
+**Posibles Mejoras Futuras:**
 - [ ] Documentación con Swagger/OpenAPI
-- [ ] Rate limiting
-- [ ] Versionado de API (v1, v2)
-- [ ] Webhooks para eventos
+- [ ] Rate limiting por usuario/IP
+- [ ] Versionado de API (v2, v3)
+- [ ] Webhooks para eventos importantes
 - [ ] OAuth2 para integraciones externas
 - [ ] GraphQL endpoint (opcional)
+
+**Tiempo Estimado:** 1-2 semanas (cuando se requiera)  
+**Impacto:** ⭐⭐⭐ MEDIO
 
 ---
 
