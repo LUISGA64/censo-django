@@ -1,12 +1,6 @@
-﻿﻿# 🏛️ CensoWeb - Sistema de Gestión de Comunidades
+﻿# 🏛️ CensoWeb - Sistema de Gestión de Comunidades
 
-Sistema web integral para la administración de información de comunidades indígenas.
-
-## 📚 Documentación
-
-- 📖 **[MANUAL_MANTENIMIENTO.md](MANUAL_MANTENIMIENTO.md)** - Guía completa de mantenimiento y optimización
-- 🗺️ **[docs/ROADMAP_V2.0_ANALISIS_COMPLETO.md](docs/ROADMAP_V2.0_ANALISIS_COMPLETO.md)** - Roadmap y mejoras futuras
-- 📋 **[docs/ROADMAP_TRACKER.md](docs/ROADMAP_TRACKER.md)** - Seguimiento de tareas
+Sistema web integral para la administración de información de comunidades indígenas y otros tipos de organizaciones.
 
 ## 🚀 Inicio Rápido
 
@@ -68,6 +62,37 @@ python manage.py check --deploy
 python manage.py clearsessions
 ```
 
+## 🔐 Seguridad
+
+### Características de Seguridad Implementadas
+
+- **Autenticación robusta** con django-allauth
+- **Recuperación de contraseñas** privada (solo admins pueden solicitar)
+- **Registro de intentos de login** para detectar ataques de fuerza bruta
+- **Tokens de recuperación** con expiración automática
+- **Seguridad de sesiones** con monitoreo de IP y user agent
+- **Rate limiting** para prevenir ataques
+- **HTTPS obligatorio** en producción
+- **CSRF y XSS protection** habilitados
+- **Headers de seguridad** configurados
+
+### Configuración de Email
+
+El sistema usa Gmail para envío de notificaciones. Configura en `.env`:
+
+```env
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=tu_email@gmail.com
+EMAIL_HOST_PASSWORD=tu_app_password
+DEFAULT_FROM_EMAIL=tu_email@gmail.com
+ADMIN_EMAIL=admin_email@gmail.com
+```
+
+**Importante:** Usa "App Passwords" de Gmail, no tu contraseña regular.
+
 ## 📊 Stack Tecnológico
 
 - **Backend:** Django 6.0.1
@@ -103,13 +128,39 @@ python manage.py collectstatic --noinput
 touch /var/www/*_pythonanywhere_com_wsgi.py
 ```
 
-Ver [DOCUMENTACION_COMPLETA.md](DOCUMENTACION_COMPLETA.md) para deployment detallado.
+### Variables de Entorno Requeridas
 
-## 📖 Documentación Adicional
+Crea un archivo `.env` en la raíz del proyecto:
 
-- 📊 [Roadmap V2.0](docs/ROADMAP_V2.0_ANALISIS_COMPLETO.md)
-- ✅ [Version 1.0 Release](docs/VERSION_1.0_RELEASE.md)
-- 🎯 [Tracker de Progreso](docs/ROADMAP_TRACKER.md)
+```env
+# Django
+SECRET_KEY=tu_secret_key_aqui
+DEBUG=False
+ALLOWED_HOSTS=tudominio.com,www.tudominio.com
+
+# Base de datos (Producción MySQL)
+DB_NAME=tu_base_datos
+DB_USER=tu_usuario
+DB_PASSWORD=tu_password
+DB_HOST=tu_host
+DB_PORT=3306
+
+# Email (Gmail)
+EMAIL_HOST_USER=tu_email@gmail.com
+EMAIL_HOST_PASSWORD=tu_app_password
+ADMIN_EMAIL=admin@tudominio.com
+
+# API
+JWT_SECRET_KEY=tu_jwt_secret_key
+```
+
+## 📱 Optimización Móvil
+
+El sistema está optimizado para dispositivos móviles:
+- Diseño responsive
+- Menú lateral adaptativo
+- Búsqueda optimizada para táctil
+- Formularios adaptados a móviles
 
 ## 🤝 Contribuir
 
@@ -132,5 +183,5 @@ Proyecto propietario - Todos los derechos reservados
 ---
 
 **Versión:** 2.0  
-**Última actualización:** 2026-02-06  
+**Última actualización:** 2026-02-27  
 **Estado:** ✅ En producción

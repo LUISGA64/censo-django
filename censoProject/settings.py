@@ -165,9 +165,48 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+# ==============================================================================
+# DJANGO-ALLAUTH CONFIGURATION (Django-allauth v65.14.1)
+# ==============================================================================
 
-# LOGIN_REDIRECT_URL = 'home'
+# Verificación de email
+ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='optional')
+ACCOUNT_UNIQUE_EMAIL = True
+
+# Métodos de autenticación (nueva sintaxis)
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+
+# Campos requeridos en el signup (nueva sintaxis)
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+
+# Rate Limiting (nueva sintaxis)
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': '5/5m',  # 5 intentos fallidos en 5 minutos
+    'confirm_email': '1/3m',  # 1 confirmación de email cada 3 minutos
+    'manage_email': '10/1h',  # 10 cambios de email por hora
+    'change_password': '5/5m',  # 5 cambios de contraseña cada 5 minutos
+    'reset_password': '5/30m',  # 5 resets de contraseña cada 30 minutos
+    'reset_password_from_key': '20/1d',  # 20 resets con token por día
+    'reauthenticate': '10/5m',  # 10 reautenticaciones cada 5 minutos
+    'signup': '20/1h',  # 20 registros por hora por IP
+}
+
+# Seguridad de contraseñas
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_SESSION_REMEMBER = True
+
+# Redirecciones
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+LOGIN_REDIRECT_URL = reverse_lazy('home')
+ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Cambio de email
+ACCOUNT_CHANGE_EMAIL = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+
+# Plantillas de email personalizadas
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '[Censo Web] '
 
 WSGI_APPLICATION = 'censoProject.wsgi.application'
 
@@ -280,7 +319,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 12,  # Mínimo 12 caracteres (antes 8)
+            'min_length': 12,  # Mínimo 12 caracteres
         }
     },
     {
@@ -291,8 +330,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Políticas adicionales de contraseñas
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',  # Más seguro
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
 # Expiración de contraseñas (opcional - descomentar si se requiere)
 # PASSWORD_EXPIRY_DAYS = 90
+# PASSWORD_RESET_TIMEOUT = 86400  # 24 horas (por defecto en Django 6.0)
 
 
 # Internationalization
@@ -322,22 +370,25 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Test de Correos
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# ==============================================================================
+# EMAIL CONFIGURATION
+# ==============================================================================
 
-# Redirect Predeterminado
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+# Obtener configuración desde .env
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+SERVER_EMAIL = config('SERVER_EMAIL', default=EMAIL_HOST_USER)
 
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
+# Email timeout y retry
+EMAIL_TIMEOUT = 10  # 10 segundos
 
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
-# Evita el mensaje de confirmación para cerrar sesión
-ACCOUNT_LOGOUT_ON_GET = True
+# Para desarrollo, puedes descomentar la siguiente línea para ver emails en consola:
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # MEDIA
 

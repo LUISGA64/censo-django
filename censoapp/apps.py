@@ -6,4 +6,10 @@ class CensoappConfig(AppConfig):
     name = 'censoapp'
     verbose_name = 'Censo Web'
 
+    def ready(self):
+        """Importar señales de seguridad al iniciar la aplicación"""
+        try:
+            import censoapp.security_signals
+        except ImportError:
+            pass
 

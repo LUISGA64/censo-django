@@ -7,6 +7,9 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+# Importar modelos de seguridad
+from .security_models import LoginAttempt, PasswordResetToken, SecurityEvent, SessionSecurity
+
 
 
 class Association(models.Model):

@@ -8,11 +8,17 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from censoapp.password_reset_admin_views import password_reset_request_to_admin
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('censoapp.urls')),
+
+    # Sistema de recuperación personalizado (solo notifica al admin)
+    path('accounts/password/reset/', password_reset_request_to_admin, name='account_reset_password'),
+
+    # Rutas de allauth
     path('accounts/', include('allauth.urls')),
 
     # JWT Authentication

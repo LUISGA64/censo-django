@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
 from simple_history.admin import SimpleHistoryAdmin
 from .models import (
     Association, Organizations, Sidewalks, IdentificationDocumentType, Gender, Eps, Kinship, Occupancy, CivilState,
@@ -8,7 +9,13 @@ from .models import (
     DocumentTemplate, TemplateBlock, TemplateVariable,
     Notification, NotificationPreference
 )
+from .security_models import LoginAttempt, PasswordResetToken, SecurityEvent, SessionSecurity
 from .utils import invalidate_system_parameters_cache
+from .admin_password_reset import CustomUserAdmin
+
+# Desregistrar el admin por defecto de User y registrar el personalizado
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 
 # Register your models here.
 admin.site.register(Association)
@@ -613,3 +620,81 @@ class NotificationPreferenceAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ['created_at', 'updated_at']
+
+
+# ============================================================================
+# ADMINISTRACIÓN DE SEGURIDAD
+# ============================================================================
+
+@admin.register(LoginAttempt)
+class LoginAttemptAdmin(admin.ModelAdmin):
+    """Administración de intentos de login"""
+    list_display = ['username', 'ip_address', 'success', 'timestamp', 'failure_reason']
+    list_filter = ['success', 'timestamp']
+    search_fields = ['username', 'ip_address']
+    readonly_fields = ['username', 'ip_address', 'user_agent', 'success', 'timestamp', 'failure_reason']
+    date_hierarchy = 'timestamp'
+    list_per_page = 100
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(SecurityEvent)
+class SecurityEventAdmin(admin.ModelAdmin):
+    """Administración de eventos de seguridad"""
+    list_display = ['event_type', 'user', 'description', 'ip_address', 'timestamp']
+    list_filter = ['event_type', 'timestamp']
+    search_fields = ['user__username', 'description', 'ip_address']
+    readonly_fields = ['user', 'event_type', 'description', 'ip_address', 'user_agent', 'timestamp', 'metadata']
+    date_hierarchy = 'timestamp'
+    list_per_page = 100
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(SessionSecurity)
+class SessionSecurityAdmin(admin.ModelAdmin):
+    """Administración de sesiones activas"""
+    list_display = ['user', 'ip_address', 'is_active', 'created_at', 'last_activity']
+    list_filter = ['is_active', 'created_at', 'last_activity']
+    search_fields = ['user__username', 'ip_address', 'session_key']
+    readonly_fields = ['user', 'session_key', 'ip_address', 'user_agent', 'created_at', 'last_activity']
+    date_hierarchy = 'created_at'
+    list_per_page = 100
+
+    actions = ['terminate_sessions']
+
+    def terminate_sessions(self, request, queryset):
+        """Terminar sesiones seleccionadas"""
+        count = queryset.update(is_active=False)
+        self.message_user(request, f'{count} sesiones terminadas exitosamente.')
+    terminate_sessions.short_description = 'Terminar sesiones seleccionadas'
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(PasswordResetToken)
+class PasswordResetTokenAdmin(admin.ModelAdmin):
+    """Administración de tokens de recuperación de contraseña"""
+    list_display = ['user', 'created_at', 'used_at', 'ip_address']
+    list_filter = ['created_at', 'used_at']
+    search_fields = ['user__username', 'ip_address', 'token']
+    readonly_fields = ['user', 'token', 'created_at', 'used_at', 'ip_address']
+    date_hierarchy = 'created_at'
+    list_per_page = 100
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
