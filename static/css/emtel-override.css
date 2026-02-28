@@ -1,0 +1,289 @@
+/* ============================================
+   CENSO WEB - ESTILOS GLOBALES EMTEL
+   Aplicación inmediata de estilos empresariales
+   ============================================ */
+
+/* ===== HEADERS DE DASHBOARDS ===== */
+.dashboard-header,
+.analytics-header,
+.map-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%) !important;
+    color: white !important;
+    box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35) !important;
+    padding: 0.75rem !important;
+    border-radius: 0 0 15px 15px !important;
+}
+
+.dashboard-header h3,
+.analytics-header h3,
+.map-header h3 {
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.dashboard-header p,
+.analytics-header p,
+.map-header p {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+}
+
+/* ===== CARDS DE ESTADÍSTICAS ===== */
+.stat-card,
+.analytics-stat-card,
+.kpi-card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    transition: all 0.3s ease !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+}
+
+.stat-card:hover,
+.analytics-stat-card:hover,
+.kpi-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* ===== VALORES Y LABELS ===== */
+.stat-value,
+.analytics-value,
+.kpi-value {
+    color: #344767 !important;
+    font-weight: 700 !important;
+    font-size: 1.75rem !important;
+}
+
+.stat-label,
+.analytics-label,
+.kpi-label {
+    color: #7b809a !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+}
+
+/* ===== ICONOS CON GRADIENTES EMTEL ===== */
+.stat-icon,
+.analytics-icon {
+    background: linear-gradient(135deg, var(--card-color, #2196F3) 0%, var(--card-color-light, #42A5F5) 100%) !important;
+    color: white !important;
+    box-shadow: 0 3px 10px rgba(var(--card-color-rgb, 33, 150, 243), 0.3) !important;
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 22px !important;
+}
+
+/* ===== ALERTAS CON TEXTO BLANCO ===== */
+.alert-info {
+    background: linear-gradient(195deg, #0dcaf0 0%, #0a9bb8 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+}
+
+.alert-success {
+    background: linear-gradient(195deg, #00909E 0%, #006B75 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+}
+
+.alert-warning {
+    background: linear-gradient(195deg, #FFC107 0%, #FFA000 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+}
+
+.alert-danger {
+    background: linear-gradient(195deg, #B0064B 0%, #8A0439 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+}
+
+/* Texto blanco en todas las alertas */
+.alert strong,
+.alert p,
+.alert li,
+.alert span,
+.alert i {
+    color: white !important;
+}
+
+.alert strong {
+    font-weight: 700 !important;
+}
+
+.alert li {
+    font-weight: 600 !important;
+}
+
+/* ===== BOTONES UNIFORMES ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4) !important;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #82D616 0%, #6BB012 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(130, 214, 22, 0.4) !important;
+}
+
+.btn-filter {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-filter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4) !important;
+}
+
+/* ===== CHARTS ===== */
+.chart-card {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+    border-radius: 16px !important;
+}
+
+.chart-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+}
+
+.chart-title {
+    color: #344767 !important;
+    font-weight: 700 !important;
+}
+
+.chart-subtitle {
+    color: #7b809a !important;
+}
+
+/* ===== TABLAS ===== */
+.table thead th {
+    color: #7b809a !important;
+    font-weight: 700 !important;
+}
+
+.table tbody td {
+    color: #344767 !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(33, 150, 243, 0.05) !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .dashboard-header,
+    .analytics-header,
+    .map-header {
+        padding: 0.5rem !important;
+        margin: -1rem -1rem 1rem -1rem !important;
+        border-radius: 0 0 10px 10px !important;
+    }
+
+    .dashboard-header h3,
+    .analytics-header h3,
+    .map-header h3 {
+        font-size: 1rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+
+    .dashboard-header p,
+    .analytics-header p,
+    .map-header p {
+        font-size: 0.75rem !important;
+    }
+
+    .stat-card,
+    .analytics-stat-card,
+    .kpi-card {
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+    }
+
+    .stat-value,
+    .analytics-value,
+    .kpi-value {
+        font-size: 1.35rem !important;
+    }
+
+    .stat-label,
+    .analytics-label,
+    .kpi-label {
+        font-size: 0.65rem !important;
+    }
+
+    .stat-icon,
+    .analytics-icon {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-header,
+    .analytics-header,
+    .map-header {
+        padding: 0.4rem !important;
+    }
+
+    .dashboard-header h3,
+    .analytics-header h3,
+    .map-header h3 {
+        font-size: 0.95rem !important;
+    }
+
+    .dashboard-header p,
+    .analytics-header p,
+    .map-header p {
+        font-size: 0.7rem !important;
+    }
+
+    .stat-card,
+    .analytics-stat-card,
+    .kpi-card {
+        padding: 0.6rem !important;
+    }
+
+    .stat-value,
+    .analytics-value,
+    .kpi-value {
+        font-size: 1.2rem !important;
+    }
+
+    .stat-label,
+    .analytics-label,
+    .kpi-label {
+        font-size: 0.6rem !important;
+    }
+
+    .stat-icon,
+    .analytics-icon {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
+    }
+}
+

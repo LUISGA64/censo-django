@@ -6,13 +6,17 @@
 {% block stylesheets %}
 {{ block.super }}
 <style>
-    /* ===== DASHBOARD MODERNO - COLOR CORPORATIVO #2196F3 ===== */
+    /* ==========================================
+       DASHBOARD PROFESIONAL - CENSO WEB
+       Diseñado desde cero con paleta EMTEL
+       Colores: #1e3c72, #2a5298, #00909E, #7e8ba3
+       ========================================== */
 
-    /* Animaciones */
+    /* Animaciones Suaves */
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(15px);
         }
         to {
             opacity: 1;
@@ -20,663 +24,198 @@
         }
     }
 
-    @keyframes countUp {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
     .fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
+        animation: fadeInUp 0.4s ease-out forwards;
     }
 
-    /* Header del Dashboard */
+    /* ===== HEADER DEL DASHBOARD - COMPACTO ===== */
     .dashboard-header {
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
         color: white;
-        padding: 2rem 0;
-        margin: -1.5rem -1.5rem 2rem -1.5rem;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+        padding: 1.25rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.25);
     }
 
-    .dashboard-header h3 {
-        color: white;
+    .dashboard-header h2 {
+        font-size: 1.5rem;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
+        line-height: 1.2;
     }
 
     .dashboard-header p {
-        opacity: 0.9;
+        font-size: 0.85rem;
+        opacity: 0.95;
         margin: 0;
+        line-height: 1.3;
     }
 
-    /* Tarjetas de Estadísticas */
+    /* ===== CARDS DE ESTADÍSTICAS - COMPACTAS ===== */
     .stat-card {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 3px solid var(--card-color);
         transition: all 0.3s ease;
-        border: 1px solid #F3F4F6;
         height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--card-color, #2196F3) 0%, var(--card-color-light, #42A5F5) 100%);
+        display: flex;
+        flex-direction: column;
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
     }
 
-    .stat-card.blue {
-        --card-color: #2196F3;
-        --card-color-light: #42A5F5;
-    }
-
-    .stat-card.green {
-        --card-color: #4CAF50;
-        --card-color-light: #66BB6A;
-    }
-
-    .stat-card.orange {
-        --card-color: #FF9800;
-        --card-color-light: #FFA726;
-    }
-
-    .stat-card.purple {
-        --card-color: #9C27B0;
-        --card-color-light: #AB47BC;
-    }
-
-    .stat-card.red {
-        --card-color: #F44336;
-        --card-color-light: #EF5350;
-    }
-
-    .stat-card.cyan {
-        --card-color: #00BCD4;
-        --card-color-light: #26C6DA;
-    }
+    /* Colores de Cards */
+    .stat-card.blue { --card-color: #2a5298; }
+    .stat-card.green { --card-color: #00909E; }
+    .stat-card.orange { --card-color: #f39c12; }
+    .stat-card.purple { --card-color: #7e8ba3; }
 
     .stat-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-light) 100%);
+        font-size: 22px;
         color: white;
-        box-shadow: 0 4px 12px rgba(var(--card-color-rgb, 33,150,243), 0.3);
-    }
-
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1F2937;
-        margin: 0.5rem 0;
-        line-height: 1;
+        background: var(--card-color);
+        margin-bottom: 0.75rem;
     }
 
     .stat-label {
-        color: #6B7280;
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .stat-subtitle {
-        color: #9CA3AF;
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-    }
-
-    .stat-trend {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         font-weight: 600;
-        margin-top: 0.5rem;
+        color: #7b809a;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 0.4rem;
+        line-height: 1.2;
     }
 
-    .stat-trend.up {
-        background: #D1FAE5;
-        color: #059669;
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #344767;
+        margin-bottom: 0.4rem;
+        line-height: 1;
     }
 
-    .stat-trend.down {
-        background: #FEE2E2;
-        color: #DC2626;
+    .stat-description {
+        font-size: 0.75rem;
+        color: #7b809a;
+        line-height: 1.4;
     }
 
-    /* Tarjetas de Gráficos */
+    /* ===== CARDS DE GRÁFICOS - COMPACTAS ===== */
     .chart-card {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        border: 1px solid #F3F4F6;
+        border-radius: 10px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         height: 100%;
     }
 
     .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #F3F4F6;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f2f5;
     }
 
     .chart-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #1F2937;
-        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #344767;
+        margin: 0 0 0.4rem 0;
+        line-height: 1.3;
     }
 
     .chart-subtitle {
-        font-size: 0.875rem;
-        color: #6B7280;
-        margin: 0.25rem 0 0 0;
+        font-size: 0.8rem;
+        color: #7b809a;
+        margin: 0;
+        line-height: 1.3;
     }
 
-    /* Info Cards */
-    .info-card {
-        background: #F9FAFB;
-        border-left: 4px solid #2196F3;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
+    .chart-container {
+        position: relative;
+        width: 100%;
     }
 
-    .info-card.success {
-        border-left-color: #4CAF50;
-        background: #F0F9FF;
-    }
-
-    .info-card.warning {
-        border-left-color: #FF9800;
-        background: #FFF7ED;
-    }
-
-    /* Tabla de Veredas */
-    .table-veredas {
-        font-size: 0.9rem;
-    }
-
-    .table-veredas thead th {
-        background: #F9FAFB;
-        color: #374151;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        padding: 0.75rem;
-        border-bottom: 2px solid #E5E7EB;
-    }
-
-    .table-veredas tbody tr {
-        transition: background 0.2s;
-    }
-
-    .table-veredas tbody tr:hover {
-        background: #F9FAFB;
-    }
-
-    .table-veredas tbody td {
-        padding: 0.75rem;
-        vertical-align: middle;
-    }
-
-    .vereda-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-        color: white;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    /* ===== RESPONSIVE COMPLETO PARA TODOS LOS DISPOSITIVOS ===== */
-
-    /* Tablets y pantallas medianas (hasta 991px) */
-    @media (max-width: 991px) {
-        .dashboard-header h3 {
-            font-size: 1.5rem;
-        }
-
-        .dashboard-header .btn {
-            font-size: 0.85rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-        }
-
-        .stat-subtitle {
-            font-size: 0.75rem;
-        }
-
-        .chart-title {
-            font-size: 1rem;
-        }
-
-        .chart-subtitle {
-            font-size: 0.8rem;
-        }
-    }
-
-    /* Tablets en vertical y móviles grandes (hasta 768px) */
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
-        /* Container principal */
-        .container-fluid {
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-        }
-
-        /* Header compacto */
         .dashboard-header {
-            padding: 1.5rem 1rem;
-            margin: -1rem -1rem 1.5rem -1rem;
-            border-radius: 0 0 12px 12px;
-        }
-
-        .dashboard-header h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .dashboard-header p {
-            font-size: 0.85rem;
-        }
-
-        .org-badge {
-            display: block;
-            margin-top: 0.5rem;
-            margin-left: 0 !important;
-        }
-
-        .dashboard-header .btn {
-            font-size: 0.8rem;
-            padding: 0.4rem 0.8rem;
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-
-        .dashboard-header .btn:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Tarjetas de estadísticas */
-        .stat-card {
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon {
-            width: 52px;
-            height: 52px;
-            font-size: 22px;
-            margin-bottom: 0.75rem;
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-        }
-
-        .stat-subtitle {
-            font-size: 0.7rem;
-        }
-
-        /* Gráficos */
-        .chart-card {
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-        }
-
-        .chart-header {
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-        }
-
-        .chart-title {
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .chart-subtitle {
-            font-size: 0.75rem;
-        }
-
-        /* Ajustar altura de gráficos en móviles */
-        #chartPiramide,
-        #chartEdades,
-        #chartVeredas {
-            height: 300px !important;
-        }
-
-        /* Info cards */
-        .info-card {
-            padding: 0.875rem 1rem;
-            font-size: 0.85rem;
-        }
-
-        .info-card h6 {
-            font-size: 0.9rem;
-        }
-
-        /* Tabla de veredas/organizaciones */
-        .table-veredas {
-            font-size: 0.8rem;
-        }
-
-        .table-veredas thead th {
-            font-size: 0.7rem;
-            padding: 0.5rem;
-        }
-
-        .table-veredas tbody td {
-            padding: 0.5rem;
-        }
-
-        /* Espaciado entre filas de gráficos */
-        .row.g-4 {
-            row-gap: 1rem !important;
-        }
-    }
-
-    /* Móviles pequeños (hasta 576px) */
-    @media (max-width: 576px) {
-        /* Header súper compacto */
-        .dashboard-header {
-            padding: 1rem 0.75rem;
-            margin: -0.75rem -0.75rem 1rem -0.75rem;
-        }
-
-        .dashboard-header h3 {
-            font-size: 1.1rem;
-        }
-
-        .dashboard-header p {
-            font-size: 0.75rem;
-        }
-
-        .dashboard-header i {
-            font-size: 0.9rem;
-        }
-
-        /* Tarjetas ultra compactas */
-        .stat-card {
             padding: 1rem;
         }
 
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            font-size: 20px;
-            margin-bottom: 0.5rem;
+        .dashboard-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .dashboard-header p {
+            font-size: 0.8rem;
         }
 
         .stat-value {
             font-size: 1.5rem;
         }
 
-        .stat-label {
-            font-size: 0.7rem;
-        }
-
-        .stat-subtitle {
-            font-size: 0.65rem;
-            margin-top: 0.25rem;
-        }
-
-        .stat-subtitle i {
-            font-size: 0.7rem;
-        }
-
-        /* Gráficos en móviles pequeños */
-        .chart-card {
-            padding: 1rem;
-        }
-
         .chart-title {
-            font-size: 0.875rem;
-        }
-
-        .chart-subtitle {
-            font-size: 0.7rem;
-        }
-
-        /* Altura mínima para gráficos en móviles pequeños */
-        #chartPiramide {
-            height: 280px !important;
-        }
-
-        #chartEdades {
-            height: 250px !important;
-        }
-
-        #chartVeredas {
-            height: 280px !important;
-        }
-
-        /* Botones más pequeños */
-        .btn-sm,
-        .btn {
-            font-size: 0.75rem;
-            padding: 0.375rem 0.75rem;
-        }
-
-        /* Info cards compactas */
-        .info-card {
-            padding: 0.75rem;
-        }
-
-        .info-card h6 {
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .info-card .d-flex {
-            font-size: 0.75rem;
-        }
-
-        /* Tabla ultra compacta */
-        .table-veredas {
-            font-size: 0.75rem;
-        }
-
-        .table-veredas thead th {
-            font-size: 0.65rem;
-            padding: 0.4rem;
-        }
-
-        .table-veredas tbody td {
-            padding: 0.4rem;
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            padding: 0.25rem 0.5rem;
-        }
-    }
-
-    /* Laptops pequeños (992px - 1200px) */
-    @media (min-width: 992px) and (max-width: 1199px) {
-        .stat-value {
-            font-size: 2.25rem;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            font-size: 26px;
-        }
-
-        .chart-title {
-            font-size: 1.05rem;
-        }
-    }
-
-    /* Pantallas extra pequeñas - landscape móvil (hasta 480px) */
-    @media (max-width: 480px) {
-        .dashboard-header h3 {
             font-size: 1rem;
         }
 
-        .stat-value {
-            font-size: 1.35rem;
-        }
-
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            font-size: 18px;
-        }
-
-        /* Ocultar texto largo en móviles muy pequeños */
-        .stat-subtitle {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-    }
-
-    /* Ajustes para modo horizontal en tablets */
-    @media (max-width: 991px) and (orientation: landscape) {
-        .dashboard-header {
+        .stat-card {
             padding: 1rem;
         }
 
-        #chartPiramide,
-        #chartEdades,
-        #chartVeredas {
-            height: 320px !important;
+        .chart-card {
+            padding: 1rem;
         }
-    }
-
-    /* Ocultar hover effects en dispositivos táctiles */
-    @media (hover: none) {
-        .stat-card:hover {
-            transform: none;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-
-        .table-veredas tbody tr:hover {
-            background: transparent;
-        }
-    }
-
-    /* Loading Animation */
-    .chart-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 300px;
-        color: #9CA3AF;
-    }
-
-    .spinner {
-        border: 3px solid #F3F4F6;
-        border-top: 3px solid #2196F3;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* Badge de Organización */
-    .org-badge {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background: rgba(255,255,255,0.2);
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 500;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header del Dashboard -->
+<div class="container-fluid py-3">
+
+    <!-- ==================== HEADER ==================== -->
     <div class="dashboard-header">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-lg-8 col-md-12">
-                    <h3>
-                        <i class="fas fa-chart-line me-2"></i>
-                        Dashboard - Censo Web
-                    </h3>
-                    <p>
-                        <i class="fas fa-calendar-alt me-2"></i>
-                        <span class="d-none d-sm-inline">Última actualización: </span>{{ "now"|date:"d/m/Y H:i" }}
-                        {% if user_organization %}
-                            <span class="org-badge ms-3">
-                                <i class="fas fa-building me-2"></i>
-                                <span class="d-none d-md-inline">{{ user_organization.organization_name }}</span>
-                                <span class="d-md-none">{{ user_organization.organization_name|truncatechars:20 }}</span>
-                            </span>
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="col-lg-4 col-md-12 mt-3 mt-lg-0">
-                    <div class="d-flex flex-column flex-md-row justify-content-lg-end gap-2">
-                        <a href="{% url 'familyCardIndex' %}" class="btn btn-light">
-                            <i class="fas fa-house-user me-2"></i>
-                            <span class="d-none d-sm-inline">Fichas Familiares</span>
-                            <span class="d-sm-none">Fichas</span>
-                        </a>
-                        <a href="{% url 'personas' %}" class="btn btn-light">
-                            <i class="fas fa-users me-2"></i>
-                            Personas
-                        </a>
-                    </div>
-                </div>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>
+                    <i class="fas fa-chart-line me-3"></i>
+                    Dashboard - Censo Web
+                </h2>
+                <p>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Actualizado: {{ "now"|date:"d/m/Y H:i" }}
+                    {% if user_organization %}
+                        <span class="ms-3">
+                            <i class="fas fa-building me-2"></i>
+                            {{ user_organization.organization_name }}
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{% url 'familyCardIndex' %}" class="btn btn-light me-2">
+                    <i class="fas fa-house-user me-2"></i>Fichas
+                </a>
+                <a href="{% url 'personas' %}" class="btn btn-light">
+                    <i class="fas fa-users me-2"></i>Personas
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Tarjetas de Estadísticas Principales -->
-    <div class="row g-4 mb-4">
+    <!-- ==================== ESTADÍSTICAS ==================== -->
+    <div class="row g-3 mb-3">
         <!-- Total Personas -->
         <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s">
             <div class="stat-card blue">
@@ -685,14 +224,14 @@
                 </div>
                 <div class="stat-label">Total Personas</div>
                 <div class="stat-value">{{ total_personas|default:0 }}</div>
-                <div class="stat-subtitle">
+                <div class="stat-description">
                     <i class="fas fa-venus text-danger me-2"></i>{{ total_mujeres|default:0 }} Mujeres
-                    <i class="fas fa-mars text-primary ms-3 me-2"></i>{{ total_hombres|default:0 }} Hombres
+                    <i class="fas fa-mars text-primary ms-2 me-2"></i>{{ total_hombres|default:0 }} Hombres
                 </div>
             </div>
         </div>
 
-        <!-- Total Fichas -->
+        <!-- Fichas Familiares -->
         <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s">
             <div class="stat-card green">
                 <div class="stat-icon">
@@ -700,13 +239,13 @@
                 </div>
                 <div class="stat-label">Fichas Familiares</div>
                 <div class="stat-value">{{ total_fichas|default:0 }}</div>
-                <div class="stat-subtitle">
+                <div class="stat-description">
                     <i class="fas fa-user-tie me-2"></i>{{ total_cabezas|default:0 }} Cabezas de familia
                 </div>
             </div>
         </div>
 
-        <!-- Documentos Generados -->
+        <!-- Documentos -->
         <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s">
             <div class="stat-card orange">
                 <div class="stat-icon">
@@ -714,11 +253,8 @@
                 </div>
                 <div class="stat-label">Documentos Generados</div>
                 <div class="stat-value">{{ total_documentos|default:0 }}</div>
-                <div class="stat-subtitle">
+                <div class="stat-description">
                     <i class="fas fa-check-circle text-success me-2"></i>{{ documentos_vigentes|default:0 }} Vigentes
-                    {% if documentos_vencidos > 0 %}
-                        <i class="fas fa-exclamation-circle text-warning ms-2 me-2"></i>{{ documentos_vencidos }} Vencidos
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -731,268 +267,105 @@
                 </div>
                 <div class="stat-label">Veredas Registradas</div>
                 <div class="stat-value">{{ total_veredas|default:0 }}</div>
-                <div class="stat-subtitle">
+                <div class="stat-description">
                     <i class="fas fa-location-dot me-2"></i>Ubicaciones geográficas
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Gráficos Principales -->
-    <div class="row g-4 mb-4">
+    <!-- ==================== GRÁFICOS PRINCIPALES ==================== -->
+    <div class="row g-3 mb-3">
         <!-- Pirámide Poblacional -->
         <div class="col-lg-8 fade-in-up" style="animation-delay: 0.5s">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-chart-bar text-primary me-2"></i>
-                            Pirámide Poblacional
-                        </h5>
-                        <p class="chart-subtitle">Estructura demográfica por grupos quinquenales de edad y género</p>
-                    </div>
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>
+                        Pirámide Poblacional
+                    </h3>
+                    <p class="chart-subtitle">Distribución por grupos de edad y género</p>
                 </div>
-                <div style="position: relative; height: 450px;">
-                    <canvas id="chartPiramide"></canvas>
+                <div class="chart-container" style="height: 420px;">
+                    <canvas id="piramidePoblacional"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Gráfico de Distribución por Edad -->
+        <!-- Distribución por Edad -->
         <div class="col-lg-4 fade-in-up" style="animation-delay: 0.6s">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-chart-pie text-success me-2"></i>
-                            Distribución por Rangos de Edad
-                        </h5>
-                        <p class="chart-subtitle">Análisis de grupos etarios con porcentajes</p>
-                    </div>
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-pie text-success me-2"></i>
+                        Distribución por Edad
+                    </h3>
+                    <p class="chart-subtitle">Análisis de rangos etarios</p>
                 </div>
-                <div style="position: relative; height: 350px;">
-                    <canvas id="chartEdades"></canvas>
+                <div class="chart-container" style="height: 340px;">
+                    <canvas id="distribucionEdad"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Segunda Fila de Gráficos -->
-    <div class="row g-4">
-        <!-- Gráfico de Veredas -->
+    <!-- ==================== SEGUNDA FILA ==================== -->
+    <div class="row g-3">
+        <!-- Top Veredas -->
         <div class="col-lg-8 fade-in-up" style="animation-delay: 0.7s">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-chart-bar text-warning me-2"></i>
-                            Top 10 Veredas
-                        </h5>
-                        <p class="chart-subtitle">Por número de personas</p>
-                    </div>
+                    <h3 class="chart-title">
+                        <i class="fas fa-map-marker-alt text-warning me-2"></i>
+                        Top 10 Veredas
+                    </h3>
+                    <p class="chart-subtitle">Por número de personas registradas</p>
                 </div>
-                <div style="position: relative; height: 350px;">
-                    <canvas id="chartVeredas"></canvas>
+                <div class="chart-container" style="height: 340px;">
+                    <canvas id="topVeredas"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Tabla de Organizaciones (solo superusuarios) o Resumen -->
+        <!-- Resumen General -->
         <div class="col-lg-4 fade-in-up" style="animation-delay: 0.8s">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            {% if organizaciones_stats %}
-                                <i class="fas fa-building text-cyan me-2"></i>
-                                Organizaciones
-                            {% else %}
-                                <i class="fas fa-info-circle text-info me-2"></i>
-                                Resumen General
-                            {% endif %}
-                        </h5>
-                    </div>
+                    <h3 class="chart-title">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Resumen General
+                    </h3>
                 </div>
-
-                {% if organizaciones_stats %}
-                    <!-- Tabla de Organizaciones -->
-                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-                        <table class="table table-sm table-veredas">
-                            <thead style="position: sticky; top: 0;">
-                                <tr>
-                                    <th>Organización</th>
-                                    <th class="text-center">Personas</th>
-                                    <th class="text-center">Fichas</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for org in organizaciones_stats %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ org.nombre }}</strong>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-primary">{{ org.personas }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-success">{{ org.fichas }}</span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-users text-primary me-2"></i>Total Personas</span>
+                        <strong class="text-primary">{{ total_personas|default:0 }}</strong>
                     </div>
-                {% else %}
-                    <!-- Resumen General -->
-                    <div class="p-3">
-                        <div class="info-card">
-                            <h6 class="mb-3">
-                                <i class="fas fa-chart-pie me-2"></i>
-                                Estadísticas Clave
-                            </h6>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">Promedio personas/ficha:</span>
-                                    <strong class="text-primary">
-                                        {% if total_fichas > 0 %}
-                                            {{ total_personas|floatformat:1 }} / {{ total_fichas }}
-                                            = {{ total_personas|divisibleby:total_fichas|floatformat:1 }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                    </strong>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">Porcentaje mujeres:</span>
-                                    <strong class="text-danger">
-                                        {% if total_personas > 0 %}
-                                            {% widthratio total_mujeres total_personas 100 %}%
-                                        {% else %}
-                                            0%
-                                        {% endif %}
-                                    </strong>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">Porcentaje hombres:</span>
-                                    <strong class="text-primary">
-                                        {% if total_personas > 0 %}
-                                            {% widthratio total_hombres total_personas 100 %}%
-                                        {% else %}
-                                            0%
-                                        {% endif %}
-                                    </strong>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted">Documentos vigentes:</span>
-                                    <strong class="text-success">
-                                        {% if total_documentos > 0 %}
-                                            {% widthratio documentos_vigentes total_documentos 100 %}%
-                                        {% else %}
-                                            0%
-                                        {% endif %}
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-card success mt-3">
-                            <h6 class="mb-2">
-                                <i class="fas fa-lightbulb me-2"></i>
-                                Acceso Rápido
-                            </h6>
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'documents-stats' %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-file-alt me-2"></i>
-                                    Ver Documentos
-                                </a>
-                                <a href="{% url 'familyCardIndex' %}" class="btn btn-sm btn-outline-success">
-                                    <i class="fas fa-house-user me-2"></i>
-                                    Gestionar Fichas
-                                </a>
-                            </div>
-                        </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-house-user text-success me-2"></i>Fichas Familiares</span>
+                        <strong class="text-success">{{ total_fichas|default:0 }}</strong>
                     </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Tercera Fila de Gráficos - Demografía Detallada -->
-    <div class="row g-4 mt-2">
-        <!-- Distribución por Género -->
-        <div class="col-lg-4 fade-in-up" style="animation-delay: 0.9s">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-venus-mars text-primary me-2"></i>
-                            Distribución por Género
-                        </h5>
-                        <p class="chart-subtitle">Balance poblacional</p>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-map-marked-alt text-warning me-2"></i>Veredas</span>
+                        <strong class="text-warning">{{ total_veredas|default:0 }}</strong>
                     </div>
-                </div>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="chartGenero"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Distribución por Estado Civil -->
-        <div class="col-lg-4 fade-in-up" style="animation-delay: 1s">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-heart text-danger me-2"></i>
-                            Estado Civil
-                        </h5>
-                        <p class="chart-subtitle">Estructura familiar</p>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-venus text-danger me-2"></i>Mujeres</span>
+                        <strong class="text-danger">{{ total_mujeres|default:0 }}</strong>
                     </div>
-                </div>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="chartEstadoCivil"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Distribución por Nivel Educativo -->
-        <div class="col-lg-4 fade-in-up" style="animation-delay: 1.1s">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-graduation-cap text-success me-2"></i>
-                            Nivel Educativo
-                        </h5>
-                        <p class="chart-subtitle">Formación académica</p>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-mars text-info me-2"></i>Hombres</span>
+                        <strong class="text-info">{{ total_hombres|default:0 }}</strong>
                     </div>
-                </div>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="chartEducacion"></canvas>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-file-alt text-secondary me-2"></i>Documentos</span>
+                        <strong class="text-secondary">{{ total_documentos|default:0 }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Cuarta Fila - Evolución Poblacional -->
-    <div class="row g-4 mt-2 mb-4">
-        <div class="col-12 fade-in-up" style="animation-delay: 1.2s">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <h5 class="chart-title">
-                            <i class="fas fa-chart-line text-purple me-2"></i>
-                            Evolución Poblacional
-                        </h5>
-                        <p class="chart-subtitle">Crecimiento de la población en los últimos 5 años</p>
-                    </div>
-                </div>
-                <div style="position: relative; height: 350px;">
-                    <canvas id="chartEvolucion"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock content %}
 
@@ -1001,177 +374,101 @@
 <script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Configuración global de Chart.js
-    Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
-    Chart.defaults.plugins.legend.labels.usePointStyle = true;
-    Chart.defaults.plugins.legend.labels.padding = 15;
 
-    // Colores corporativos
-    const colors = {
-        primary: '#2196F3',
-        primaryLight: '#42A5F5',
-        primaryDark: '#1976D2',
-        success: '#4CAF50',
-        warning: '#FF9800',
-        danger: '#F44336',
-        info: '#00BCD4',
-        purple: '#9C27B0',
-        female: '#E91E63',
-        male: '#2196F3'
+    // ==========================================
+    // CONFIGURACIÓN GLOBAL
+    // ==========================================
+    Chart.defaults.font.family = "'Inter', 'Segoe UI', 'Roboto', sans-serif";
+    Chart.defaults.font.size = 13;
+    Chart.defaults.color = '#7b809a';
+
+    // Paleta de Colores EMTEL
+    const COLORS = {
+        primary: '#2a5298',
+        secondary: '#00909E',
+        accent: '#f39c12',
+        light: '#7e8ba3',
+        dark: '#1e3c72',
+        success: '#10b981',
+        danger: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
     };
 
-    // ========================================
-    // VERSIONES DESATURADAS DE LA PALETA CORPORATIVA
-    // Para el gráfico de rangos de edad
-    // Mismos colores pero menos brillantes y más suaves
-    // ========================================
-    const edadColors = {
-        // Azul corporativo desaturado (0-5 años)
-        primary: {
-            bg: 'rgba(33, 150, 243, 0.75)',      // #2196F3 con 75% opacidad
-            border: 'rgba(33, 150, 243, 0.85)',
-            hover: 'rgba(33, 150, 243, 0.9)'
-        },
-        // Verde corporativo desaturado (6-12 años)
-        success: {
-            bg: 'rgba(76, 175, 80, 0.75)',       // #4CAF50 con 75% opacidad
-            border: 'rgba(76, 175, 80, 0.85)',
-            hover: 'rgba(76, 175, 80, 0.9)'
-        },
-        // Naranja corporativo desaturado (13-17 años)
-        warning: {
-            bg: 'rgba(255, 152, 0, 0.75)',       // #FF9800 con 75% opacidad
-            border: 'rgba(255, 152, 0, 0.85)',
-            hover: 'rgba(255, 152, 0, 0.9)'
-        },
-        // Rojo corporativo desaturado (18-29 años)
-        danger: {
-            bg: 'rgba(244, 67, 54, 0.75)',       // #F44336 con 75% opacidad
-            border: 'rgba(244, 67, 54, 0.85)',
-            hover: 'rgba(244, 67, 54, 0.9)'
-        },
-        // Morado corporativo desaturado (30-59 años)
-        purple: {
-            bg: 'rgba(156, 39, 176, 0.75)',      // #9C27B0 con 75% opacidad
-            border: 'rgba(156, 39, 176, 0.85)',
-            hover: 'rgba(156, 39, 176, 0.9)'
-        },
-        // Cyan corporativo desaturado (60+ años)
-        info: {
-            bg: 'rgba(0, 188, 212, 0.75)',       // #00BCD4 con 75% opacidad
-            border: 'rgba(0, 188, 212, 0.85)',
-            hover: 'rgba(0, 188, 212, 0.9)'
-        }
-    };
-
-    // ========================================
+    // ==========================================
     // 1. PIRÁMIDE POBLACIONAL
-    // ========================================
-    const ctxPiramide = document.getElementById('chartPiramide');
-    if (ctxPiramide) {
-        const piramideLabels = {{ piramide_labels|safe }};
-        const hombres = {{ piramide_hombres|safe }};  // Valores negativos
-        const mujeres = {{ piramide_mujeres|safe }};  // Valores positivos
+    // ==========================================
+    const piramide = document.getElementById('piramidePoblacional');
+    if (piramide) {
+        const labels = {{ piramide_labels|safe }};
+        const hombres = {{ piramide_hombres|safe }};
+        const mujeres = {{ piramide_mujeres|safe }};
 
-        new Chart(ctxPiramide, {
+        new Chart(piramide, {
             type: 'bar',
             data: {
-                labels: piramideLabels,
+                labels: labels,
                 datasets: [
                     {
                         label: 'Hombres',
                         data: hombres,
-                        backgroundColor: 'rgba(33, 150, 243, 0.8)',
-                        borderColor: colors.male,
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        barPercentage: 0.9
+                        backgroundColor: COLORS.primary,
+                        borderWidth: 0
                     },
                     {
                         label: 'Mujeres',
                         data: mujeres,
-                        backgroundColor: 'rgba(233, 30, 99, 0.8)',
-                        borderColor: colors.female,
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        barPercentage: 0.9
+                        backgroundColor: COLORS.secondary,
+                        borderWidth: 0
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                indexAxis: 'y',  // Barras horizontales
-                interaction: {
-                    intersect: false,
-                    mode: 'y'
-                },
+                indexAxis: 'y',
                 plugins: {
                     legend: {
                         display: true,
                         position: 'top',
                         labels: {
-                            padding: 15,
-                            font: { size: 12, weight: '600' },
-                            usePointStyle: true
+                            font: { size: 14, weight: '600' },
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        backgroundColor: COLORS.dark,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
                         padding: 12,
-                        titleFont: { size: 13, weight: '600' },
-                        bodyFont: { size: 12 },
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        borderWidth: 1,
+                        cornerRadius: 8,
                         callbacks: {
                             label: function(context) {
-                                const label = context.dataset.label || '';
-                                const value = Math.abs(context.parsed.x);  // Valor absoluto
-                                return label + ': ' + value + ' personas';
+                                return ' ' + context.dataset.label + ': ' + Math.abs(context.parsed.x) + ' personas';
                             }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        stacked: false,
                         grid: {
-                            color: '#F3F4F6',
-                            drawBorder: false
+                            color: 'rgba(0,0,0,0.05)'
                         },
                         ticks: {
                             callback: function(value) {
-                                return Math.abs(value);  // Mostrar valores absolutos
+                                return Math.abs(value);
                             },
-                            padding: 10,
-                            font: { size: 11 },
-                            color: '#6B7280'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Número de Personas',
-                            font: { size: 12, weight: '600' },
-                            color: '#374151',
-                            padding: 10
+                            font: { size: 12, weight: '500' }
                         }
                     },
                     y: {
-                        stacked: false,
                         grid: {
-                            display: false,
-                            drawBorder: false
+                            display: false
                         },
                         ticks: {
-                            padding: 10,
-                            font: { size: 11, weight: '600' },
-                            color: '#374151'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Grupos de Edad',
-                            font: { size: 12, weight: '600' },
-                            color: '#374151',
-                            padding: 10
+                            font: { size: 12, weight: '600' }
                         }
                     }
                 }
@@ -1179,84 +476,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ========================================
-    // 2. GRÁFICO DE DISTRIBUCIÓN POR EDAD
-    // Con paleta corporativa desaturada (menos brillante)
-    // ========================================
-    const ctxEdades = document.getElementById('chartEdades');
-    if (ctxEdades) {
-        const edadesLabels = {{ edades_labels|safe }};
-        const edadesData = {{ edades_data|safe }};
+    // ==========================================
+    // 2. DISTRIBUCIÓN POR EDAD
+    // ==========================================
+    const edades = document.getElementById('distribucionEdad');
+    if (edades) {
+        const labels = {{ edades_labels|safe }};
+        const data = {{ edades_data|safe }};
 
-        // Paleta corporativa desaturada (75% opacidad)
-        const edadesPalette = [
-            edadColors.primary.bg,    // 0-5 años: Azul corporativo suave
-            edadColors.success.bg,    // 6-12 años: Verde corporativo suave
-            edadColors.warning.bg,    // 13-17 años: Naranja corporativo suave
-            edadColors.danger.bg,     // 18-29 años: Rojo corporativo suave
-            edadColors.purple.bg,     // 30-59 años: Morado corporativo suave
-            edadColors.info.bg        // 60+ años: Cyan corporativo suave
-        ];
-
-        // Colores para hover (90% opacidad - ligeramente más visibles)
-        const edadesHoverColors = [
-            edadColors.primary.hover,
-            edadColors.success.hover,
-            edadColors.warning.hover,
-            edadColors.danger.hover,
-            edadColors.purple.hover,
-            edadColors.info.hover
-        ];
-
-        // Colores de borde (85% opacidad)
-        const edadesBorderColors = [
-            edadColors.primary.border,
-            edadColors.success.border,
-            edadColors.warning.border,
-            edadColors.danger.border,
-            edadColors.purple.border,
-            edadColors.info.border
-        ];
-
-        new Chart(ctxEdades, {
+        new Chart(edades, {
             type: 'doughnut',
             data: {
-                labels: edadesLabels,
+                labels: labels,
                 datasets: [{
-                    data: edadesData,
-                    backgroundColor: edadesPalette,
-                    hoverBackgroundColor: edadesHoverColors,
-                    borderColor: edadesBorderColors,
-                    borderWidth: 2,
-                    hoverBorderColor: '#ffffff',
-                    hoverBorderWidth: 3,
-                    hoverOffset: 12
+                    data: data,
+                    backgroundColor: [
+                        COLORS.dark,
+                        COLORS.primary,
+                        COLORS.secondary,
+                        COLORS.light,
+                        COLORS.accent,
+                        '#6c757d'
+                    ],
+                    borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '65%',
                 plugins: {
                     legend: {
                         position: 'bottom',
                         labels: {
+                            font: { size: 12, weight: '600' },
                             padding: 12,
-                            font: { size: 11, weight: '600' },
-                            color: '#374151',
                             usePointStyle: true,
-                            pointStyle: 'circle',
                             generateLabels: function(chart) {
                                 const data = chart.data;
                                 return data.labels.map((label, i) => {
                                     const value = data.datasets[0].data[i];
                                     const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    const percent = ((value / total) * 100).toFixed(1);
                                     return {
-                                        text: `${label} años: ${value} (${percentage}%)`,
+                                        text: `${label}: ${value} (${percent}%)`,
                                         fillStyle: data.datasets[0].backgroundColor[i],
-                                        strokeStyle: data.datasets[0].borderColor[i],
-                                        lineWidth: 2,
                                         hidden: false,
                                         index: i
                                     };
@@ -1265,63 +528,41 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(55, 65, 81, 0.95)',
-                        padding: 14,
-                        bodyFont: { size: 13, weight: '600' },
-                        titleFont: { size: 14, weight: '700' },
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                        borderWidth: 1,
-                        cornerRadius: 8,
-                        displayColors: true,
-                        boxPadding: 6,
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.parsed || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return ` ${label}: ${value} personas (${percentage}%)`;
-                            },
-                            title: function(context) {
-                                return 'Rango de Edad';
-                            }
-                        }
+                        backgroundColor: COLORS.dark,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        cornerRadius: 8
                     }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 1200,
-                    easing: 'easeInOutQuart'
                 }
             }
         });
     }
 
-    // ========================================
-    // 3. GRÁFICO DE TOP VEREDAS
-    // ========================================
-    const ctxVeredas = document.getElementById('chartVeredas');
-    if (ctxVeredas) {
-        const veredasNombres = {{ veredas_nombres|safe }};
-        const veredasValores = {{ veredas_valores|safe }};
+    // ==========================================
+    // 3. TOP VEREDAS
+    // ==========================================
+    const veredas = document.getElementById('topVeredas');
+    if (veredas) {
+        const labels = {{ veredas_nombres|safe }};
+        const data = {{ veredas_valores|safe }};
 
-        const gradientBar = ctxVeredas.getContext('2d').createLinearGradient(0, 0, 500, 0);
-        gradientBar.addColorStop(0, colors.primary);
-        gradientBar.addColorStop(1, colors.primaryLight);
+        // Gradiente
+        const ctx = veredas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 400, 0);
+        gradient.addColorStop(0, COLORS.primary);
+        gradient.addColorStop(1, COLORS.secondary);
 
-        new Chart(ctxVeredas, {
+        new Chart(veredas, {
             type: 'bar',
             data: {
-                labels: veredasNombres,
+                labels: labels,
                 datasets: [{
                     label: 'Personas',
-                    data: veredasValores,
-                    backgroundColor: gradientBar,
-                    borderColor: colors.primaryDark,
-                    borderWidth: 0,
-                    borderRadius: 8,
-                    barPercentage: 0.7
+                    data: data,
+                    backgroundColor: gradient,
+                    borderRadius: 6,
+                    borderWidth: 0
                 }]
             },
             options: {
@@ -1333,352 +574,53 @@ document.addEventListener('DOMContentLoaded', function() {
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        padding: 12,
-                        bodyFont: { size: 13, weight: '600' }
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#F3F4F6',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            padding: 10,
-                            font: { size: 11 },
-                            color: '#6B7280'
-                        }
-                    },
-                    y: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            padding: 10,
-                            font: { size: 11 },
-                            color: '#374151',
-                            autoSkip: false
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Animación de conteo en las tarjetas
-    const animateValue = (element, start, end, duration) => {
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            element.textContent = Math.floor(progress * (end - start) + start).toLocaleString();
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            }
-        };
-        window.requestAnimationFrame(step);
-    };
-
-    // Animar valores de las tarjetas
-    document.querySelectorAll('.stat-value').forEach(el => {
-        const value = parseInt(el.textContent.replace(/,/g, ''));
-        if (!isNaN(value)) {
-            animateValue(el, 0, value, 1500);
-        }
-    });
-
-    // ========================================
-    // 4. GRÁFICO DE DISTRIBUCIÓN POR GÉNERO
-    // ========================================
-    const ctxGenero = document.getElementById('chartGenero');
-    if (ctxGenero) {
-        const generoLabels = {{ genero_labels|safe }};
-        const generoData = {{ genero_data|safe }};
-
-        new Chart(ctxGenero, {
-            type: 'doughnut',
-            data: {
-                labels: generoLabels,
-                datasets: [{
-                    data: generoData,
-                    backgroundColor: [
-                        colors.primary,
-                        'rgba(236, 72, 153, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        colors.success
-                    ],
-                    borderColor: '#ffffff',
-                    borderWidth: 3,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '60%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: { size: 12, weight: '600' },
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return ` ${context.label}: ${context.parsed} (${percentage}%)`;
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 1000
-                }
-            }
-        });
-    }
-
-    // ========================================
-    // 5. GRÁFICO DE ESTADO CIVIL
-    // ========================================
-    const ctxEstadoCivil = document.getElementById('chartEstadoCivil');
-    if (ctxEstadoCivil) {
-        const estadoCivilLabels = {{ estado_civil_labels|safe }};
-        const estadoCivilData = {{ estado_civil_data|safe }};
-
-        new Chart(ctxEstadoCivil, {
-            type: 'bar',
-            data: {
-                labels: estadoCivilLabels,
-                datasets: [{
-                    label: 'Personas',
-                    data: estadoCivilData,
-                    backgroundColor: [
-                        colors.primary,
-                        colors.success,
-                        colors.warning,
-                        colors.danger,
-                        'rgba(139, 92, 246, 0.8)'
-                    ],
-                    borderRadius: 8,
-                    barThickness: 40
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        backgroundColor: COLORS.dark,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
                         padding: 12,
                         cornerRadius: 8
                     }
                 },
                 scales: {
-                    y: {
+                    x: {
                         beginAtZero: true,
                         grid: {
-                            color: '#F3F4F6',
-                            drawBorder: false
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            font: { size: 12, weight: '500' }
                         }
                     },
-                    x: {
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-    }
-
-    // ========================================
-    // 6. GRÁFICO DE NIVEL EDUCATIVO
-    // ========================================
-    const ctxEducacion = document.getElementById('chartEducacion');
-    if (ctxEducacion) {
-        const educacionLabels = {{ educacion_labels|safe }};
-        const educacionData = {{ educacion_data|safe }};
-
-        new Chart(ctxEducacion, {
-            type: 'pie',
-            data: {
-                labels: educacionLabels,
-                datasets: [{
-                    data: educacionData,
-                    backgroundColor: [
-                        colors.primary,
-                        colors.success,
-                        colors.warning,
-                        colors.danger,
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(0, 188, 212, 0.8)',
-                        'rgba(233, 30, 99, 0.8)',
-                        'rgba(66, 165, 245, 0.8)'
-                    ],
-                    borderWidth: 3,
-                    borderColor: '#ffffff',
-                    hoverOffset: 12
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 10,
-                            font: { size: 10, weight: '500' }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return ` ${context.label}: ${context.parsed} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // ========================================
-    // 7. GRÁFICO DE EVOLUCIÓN POBLACIONAL
-    // ========================================
-    const ctxEvolucion = document.getElementById('chartEvolucion');
-    if (ctxEvolucion) {
-        const evolucionLabels = {{ evolucion_labels|safe }};
-        const evolucionData = {{ evolucion_data|safe }};
-
-        new Chart(ctxEvolucion, {
-            type: 'line',
-            data: {
-                labels: evolucionLabels,
-                datasets: [{
-                    label: 'Población',
-                    data: evolucionData,
-                    borderColor: colors.primary,
-                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointBackgroundColor: colors.primary,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: colors.primaryDark,
-                    pointHoverBorderWidth: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        cornerRadius: 8,
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 13 }
-                    }
-                },
-                scales: {
                     y: {
-                        beginAtZero: true,
                         grid: {
-                            color: '#F3F4F6',
-                            drawBorder: false
+                            display: false
+                        },
+                        ticks: {
+                            font: { size: 12, weight: '600' }
                         }
-                    },
-                    x: {
-                        grid: { display: false }
                     }
-                },
-                animation: {
-                    duration: 1500,
-                    easing: 'easeInOutQuart'
                 }
             }
         });
     }
 
-    // ========================================
-    // RESPONSIVE: Ajustar gráficos al redimensionar ventana
-    // ========================================
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-            // Ajustar tamaño de fuentes según ancho de pantalla
-            const width = window.innerWidth;
-
-            // Chart.js se redibuja automáticamente
-            // Pero podemos ajustar configuraciones si es necesario
-            if (width <= 576) {
-                // Móviles pequeños
-                Chart.defaults.font.size = 9;
-                Chart.defaults.plugins.legend.labels.font.size = 9;
-            } else if (width <= 768) {
-                // Tablets y móviles grandes
-                Chart.defaults.font.size = 10;
-                Chart.defaults.plugins.legend.labels.font.size = 10;
-            } else {
-                // Desktop
-                Chart.defaults.font.size = 11;
-                Chart.defaults.plugins.legend.labels.font.size = 11;
-            }
-        }, 250);
+    // Animación de conteo en las cards
+    document.querySelectorAll('.stat-value').forEach(el => {
+        const value = parseInt(el.textContent.replace(/,/g, ''));
+        if (!isNaN(value) && value > 0) {
+            let current = 0;
+            const increment = value / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= value) {
+                    el.textContent = value.toLocaleString('es-CO');
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.floor(current).toLocaleString('es-CO');
+                }
+            }, 30);
+        }
     });
-
-    // ========================================
-    // DETECCIÓN DE ORIENTACIÓN EN MÓVILES
-    // ========================================
-    if (window.matchMedia("(max-width: 768px)").matches) {
-        window.addEventListener('orientationchange', function() {
-            setTimeout(function() {
-                // Forzar redibujado de gráficos
-                Chart.instances.forEach(function(chart) {
-                    chart.resize();
-                });
-            }, 100);
-        });
-    }
-
-    // ========================================
-    // OPTIMIZACIÓN DE PERFORMANCE EN MÓVILES
-    // ========================================
-    if ('ontouchstart' in window) {
-        // Dispositivo táctil detectado
-        // Reducir animaciones para mejor performance
-        document.querySelectorAll('.stat-card').forEach(card => {
-            card.style.transition = 'all 0.2s ease';
-        });
-    }
 });
 </script>
 {% endblock javascripts %}

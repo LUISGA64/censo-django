@@ -6,27 +6,104 @@
 {% block stylesheets %}
 {{ block.super }}
 <style>
+    /* Header Estilo EMTEL */
     .map-header {
-        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
         color: white;
-        padding: 2rem;
-        margin: -1.5rem -1.5rem 2rem -1.5rem;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+        padding: 0.75rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35);
+    }
+
+    .map-header h3 {
+        color: white;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .map-header p {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.8rem;
+        margin: 0;
     }
 
     .map-container {
         background: white;
-        border-radius: 16px;
+        border-radius: 12px;
         padding: 0;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
         overflow: hidden;
     }
 
     .folium-map-wrapper {
         width: 100%;
-        min-height: 600px;
+        min-height: 500px;
+    }
+
+    /* Alert Success con texto blanco (Estilo EMTEL) */
+    .alert-success {
+        background: linear-gradient(195deg, #00909E 0%, #006B75 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 144, 158, 0.3);
+    }
+
+    .alert-success strong,
+    .alert-success p,
+    .alert-success i {
+        color: white !important;
+        font-weight: 700 !important;
+    }
+
+    .alert-success p {
+        font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .map-header {
+            padding: 0.5rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .map-header h3 {
+            font-size: 1rem;
+        }
+
+        .map-header p {
+            font-size: 0.75rem;
+        }
+
+        .folium-map-wrapper {
+            min-height: 400px;
+        }
+
+        .alert-success p {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .map-header h3 {
+            font-size: 0.95rem;
+        }
+
+        .map-header p {
+            font-size: 0.7rem;
+        }
+
+        .folium-map-wrapper {
+            min-height: 350px;
+        }
+
+        .alert-success p {
+            font-size: 0.75rem;
+        }
     }
 </style>
 {% endblock stylesheets %}

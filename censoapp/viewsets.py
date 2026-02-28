@@ -84,7 +84,7 @@ from rest_framework import status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
+# from django_filters.rest_framework import DjangoFilterBackend  # COMENTADO: Incompatibilidad con Django 6.0
 from .serializers import (
     PersonSerializer, PersonListSerializer,
     FamilyCardSerializer, FamilyCardDetailSerializer,
@@ -105,8 +105,8 @@ class PersonViewSet(viewsets.ModelViewSet):
     destroy: Eliminar persona (soft delete)
     """
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['gender', 'document_type', 'family_card', 'family_head', 'state']
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]  # Removido DjangoFilterBackend
+    # filterset_fields = ['gender', 'document_type', 'family_card', 'family_head', 'state']  # Requiere DjangoFilterBackend
     search_fields = ['identification_person', 'first_name_1', 'last_name_1', 'personal_email']
     ordering_fields = ['id', 'first_name_1', 'last_name_1', 'date_birth', 'identification_person']
     ordering = ['-id']
@@ -163,8 +163,8 @@ class FamilyCardViewSet(viewsets.ModelViewSet):
     destroy: Eliminar ficha (soft delete)
     """
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['organization', 'sidewalk_home', 'state']
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]  # Removido DjangoFilterBackend
+    # filterset_fields = ['organization', 'sidewalk_home', 'state']  # Requiere DjangoFilterBackend
     search_fields = ['family_card_number', 'address_home']
     ordering_fields = ['id', 'family_card_number']
     ordering = ['-id']
@@ -214,8 +214,8 @@ class GeneratedDocumentViewSet(viewsets.ModelViewSet):
     queryset = GeneratedDocument.objects.all()
     serializer_class = GeneratedDocumentSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['person', 'document_type', 'status']
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]  # Removido DjangoFilterBackend
+    # filterset_fields = ['person', 'document_type', 'status']  # Requiere DjangoFilterBackend
     search_fields = ['document_number', 'person__identification_person']
     ordering_fields = ['id', 'issue_date', 'expiration_date', 'created_at']
     ordering = ['-created_at']

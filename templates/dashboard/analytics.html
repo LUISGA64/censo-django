@@ -6,7 +6,7 @@
 {% block stylesheets %}
 {{ block.super }}
 <style>
-    /* ===== DASHBOARD ANALÍTICO - ESTILOS CORPORATIVOS ===== */
+    /* ===== DASHBOARD ANALÍTICO - ESTILOS EMTEL ===== */
 
     @keyframes fadeInUp {
         from {
@@ -23,34 +23,36 @@
         animation: fadeInUp 0.6s ease-out forwards;
     }
 
-    /* Header del Dashboard Analítico */
+    /* Header del Dashboard Analítico (Estilo EMTEL) */
     .analytics-header {
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
         color: white;
-        padding: 2rem;
-        margin: -1.5rem -1.5rem 2rem -1.5rem;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+        padding: 0.75rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35);
     }
 
     .analytics-header h3 {
         color: white;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
+        font-size: 1.25rem;
     }
 
     .analytics-header p {
-        opacity: 0.9;
+        color: rgba(255, 255, 255, 0.85);
+        opacity: 1;
         margin: 0;
-        font-size: 0.95rem;
+        font-size: 0.8rem;
     }
 
-    /* Tarjetas de Estadísticas */
+    /* Tarjetas de Estadísticas (Estilo EMTEL) */
     .analytics-stat-card {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         transition: all 0.3s ease;
         border: 1px solid #F3F4F6;
         height: 100%;
@@ -64,40 +66,69 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
+        height: 3px;
         background: linear-gradient(90deg, var(--card-color, #2196F3) 0%, var(--card-color-light, #42A5F5) 100%);
     }
 
     .analytics-stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
+    /* Colores EMTEL */
     .analytics-stat-card.blue {
         --card-color: #2196F3;
         --card-color-light: #42A5F5;
+        --card-color-rgb: 33, 150, 243;
     }
 
     .analytics-stat-card.green {
-        --card-color: #4CAF50;
-        --card-color-light: #66BB6A;
+        --card-color: #00909E;
+        --card-color-light: #00BCD4;
+        --card-color-rgb: 0, 144, 158;
     }
 
     .analytics-stat-card.orange {
         --card-color: #FF9800;
         --card-color-light: #FFA726;
+        --card-color-rgb: 255, 152, 0;
     }
 
     .analytics-stat-card.purple {
         --card-color: #9C27B0;
         --card-color-light: #AB47BC;
+        --card-color-rgb: 156, 39, 176;
     }
 
     .analytics-icon {
-        width: 56px;
-        height: 56px;
+        width: 48px;
+        height: 48px;
         border-radius: 12px;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(135deg, var(--card-color, #2196F3) 0%, var(--card-color-light, #42A5F5) 100%);
+        color: white;
+        box-shadow: 0 3px 10px rgba(var(--card-color-rgb, 33, 150, 243), 0.3);
+    }
+
+    .analytics-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #344767;
+        margin: 0.25rem 0;
+        line-height: 1;
+    }
+
+    .analytics-label {
+        color: #7b809a;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
         align-items: center;
         justify-content: center;
         font-size: 24px;

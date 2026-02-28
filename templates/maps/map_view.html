@@ -10,41 +10,55 @@
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
 <style>
+    /* Header Estilo EMTEL */
     .map-header {
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
         color: white;
-        padding: 2rem;
-        margin: -1.5rem -1.5rem 2rem -1.5rem;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+        padding: 0.75rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35);
+    }
+
+    .map-header h3 {
+        color: white;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .map-header p {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.8rem;
+        margin: 0;
     }
 
     #map {
-        height: 600px;
-        border-radius: 16px;
+        height: 500px;
+        border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 1;
     }
 
     .map-controls {
         background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
     }
 
     .stat-mini-card {
         background: white;
-        border-left: 4px solid #2196F3;
-        padding: 1rem;
+        border-left: 3px solid #2196F3;
+        padding: 0.75rem;
         border-radius: 8px;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .stat-mini-card h3 {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 700;
         color: #2196F3;
         margin: 0;
@@ -53,7 +67,7 @@
     .stat-mini-card p {
         margin: 0;
         color: #6B7280;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     .leaflet-popup-content {
@@ -62,7 +76,7 @@
 
     .map-legend {
         background: white;
-        padding: 1rem;
+        padding: 0.75rem;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
@@ -78,6 +92,60 @@
         height: 20px;
         border-radius: 50%;
         margin-right: 10px;
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .map-header {
+            padding: 0.5rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .map-header h3 {
+            font-size: 1rem;
+        }
+
+        .map-header p {
+            font-size: 0.75rem;
+        }
+
+        #map {
+            height: 400px;
+        }
+
+        .stat-mini-card h3 {
+            font-size: 1.25rem;
+        }
+
+        .stat-mini-card p {
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .map-header h3 {
+            font-size: 0.95rem;
+        }
+
+        .map-header p {
+            font-size: 0.7rem;
+        }
+
+        #map {
+            height: 350px;
+        }
+
+        .stat-mini-card {
+            padding: 0.6rem;
+        }
+
+        .stat-mini-card h3 {
+            font-size: 1.1rem;
+        }
+
+        .stat-mini-card p {
+            font-size: 0.7rem;
+        }
+    }
     }
 </style>
 {% endblock stylesheets %}
