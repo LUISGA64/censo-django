@@ -5,19 +5,38 @@
 
 {% block stylesheets %}
     {{ block.super }}
+    {% include 'censo/partials/header_styles.html' %}
     <style>
         /* ===================================
-           DISEÑO PROFESIONAL CORPORATIVO
-           Color principal: #2196F3
+           DISEÑO EMTEL CORPORATIVO
+           Azul: #1e3c72, Verde: #82D616, Turquesa: #00909E
            =================================== */
 
+        /* Profile header con gradiente corporativo */
         .profile-header {
-            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
             border-radius: 12px;
             padding: 2rem;
             margin-top: 0;
-            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 4px 20px rgba(30, 60, 114, 0.3);
+        }
+
+        .profile-header h3 {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-header p {
+            color: white !important;
+            opacity: 0.95;
+        }
+
+        .profile-header strong {
+            color: white !important;
+            font-weight: 700;
         }
 
         .avatar-container {
@@ -48,15 +67,21 @@
         }
 
         .breadcrumb-item a {
-            color: #2196F3;
+            color: #1e3c72;
             text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #152d5a;
+            text-decoration: underline;
         }
 
         .breadcrumb-item.active {
             color: #374151;
         }
 
-        /* Tabs profesionales */
+        /* Tabs con verde corporativo */
         .nav-pills-custom {
             background: white;
             border-radius: 8px;
@@ -68,19 +93,19 @@
             color: #6B7280;
             border-radius: 6px;
             padding: 0.75rem 1.5rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
 
         .nav-pills-custom .nav-link:hover {
             background: #F3F4F6;
-            color: #2196F3;
+            color: #82D616;
         }
 
         .nav-pills-custom .nav-link.active {
-            background: #2196F3;
+            background: linear-gradient(135deg, #82D616 0%, #9AE034 100%);
             color: white;
-            box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 2px 6px rgba(130, 214, 22, 0.35);
         }
 
         /* Cards de información */
@@ -98,15 +123,15 @@
 
         .info-card-header {
             background: #F9FAFB;
-            border-bottom: 2px solid #2196F3;
+            border-bottom: 2px solid #82D616;
             padding: 1rem;
-            font-weight: 600;
-            color: #1F2937;
+            font-weight: 700;
+            color: #1e3c72;
             border-radius: 8px 8px 0 0;
         }
 
         .info-card-header i {
-            color: #2196F3;
+            color: #82D616;
             margin-right: 0.5rem;
         }
 
@@ -120,8 +145,8 @@
 
         .info-label {
             color: #6B7280;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
@@ -130,48 +155,55 @@
 
         .info-label i {
             margin-right: 0.5rem;
-            color: #9CA3AF;
+            color: #82D616;
         }
 
         .info-value {
-            color: #1F2937;
-            font-size: 0.95rem;
-            font-weight: 500;
+            color: #344767;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.5;
         }
 
-        /* Badge personalizado */
+        /* Badge personalizado con turquesa */
         .badge-custom {
-            background: #E3F2FD;
-            color: #1976D2;
+            background: linear-gradient(135deg, #00909E 0%, #0dcaf0 100%);
+            color: white;
             padding: 0.5rem 1rem;
             border-radius: 6px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.875rem;
+            box-shadow: 0 2px 6px rgba(0, 144, 158, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .badge-family-head {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #82D616 0%, #9AE034 100%);
             color: white;
             padding: 0.35rem 0.6rem;
             border-radius: 4px;
             font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(130, 214, 22, 0.3);
         }
 
-        /* Botones */
+        /* Botones con estilo header */
         .btn-action {
-            background: white;
-            color: #2196F3;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e3c72;
             border: 2px solid white;
             padding: 0.625rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 500;
+            border-radius: 8px;
+            font-weight: 700;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .btn-action:hover {
-            background: rgba(255, 255, 255, 0.9);
-            color: #1976D2;
-            transform: translateY(-1px);
+            background: white;
+            color: #152d5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
 
         /* Lista de miembros de familia */
@@ -195,13 +227,14 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #E3F2FD;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #2196F3;
-            font-weight: 600;
+            color: #00909E;
+            font-weight: 700;
             margin-right: 1rem;
+            border: 2px solid #0dcaf0;
         }
 
         /* Empty state */

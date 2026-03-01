@@ -5,36 +5,20 @@
 
 {% block stylesheets %}
 {{ block.super }}
+{% include 'censo/partials/header_styles.html' %}
 <style>
-    /* Header de página mejorado */
-    .page-header {
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px rgba(33, 150, 243, 0.2);
-    }
+    /* ==========================================
+       ASOCIACIONES - DISEÑO EMTEL MODERNO
+       ========================================== */
 
-    .page-header h3 {
-        font-weight: 600;
-        margin: 0;
-        font-size: 1.75rem;
-    }
-
-    .page-header p {
-        margin: 0.5rem 0 0 0;
-        opacity: 0.95;
-        font-size: 0.95rem;
-    }
-
-    /* Barra de búsqueda mejorada */
-    .search-box {
+    /* Barra de búsqueda premium */
+    .search-container {
         background: white;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
+        border-radius: 12px;
+        padding: 1.25rem;
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
     }
 
     .search-input-group {
@@ -46,460 +30,579 @@
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #6c757d;
+        color: #1e3c72;
         z-index: 10;
+        font-size: 1.1rem;
     }
 
     .search-input {
-        padding-left: 2.75rem;
-        border: 2px solid #e9ecef;
-        border-radius: 0.5rem;
-        height: 45px;
-        transition: all 0.3s;
+        padding-left: 3rem;
+        padding-right: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        height: 48px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        width: 100%;
     }
 
     .search-input:focus {
-        border-color: #2196F3;
-        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.1);
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 0.25rem rgba(30, 60, 114, 0.1);
+        outline: none;
     }
 
-    /* Cards de asociación mejorados */
-    .association-card {
+    .btn-search {
+        height: 48px;
+        padding: 0 2rem;
+        font-weight: 600;
+        border-radius: 10px;
+        background: #1e3c72;
         border: none;
-        border-radius: 0.75rem;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-search:hover {
+        background: #152d5a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+
+    /* Cards de asociación - Diseño moderno compacto */
+    .association-card {
         background: white;
-        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 1.25rem;
         transition: all 0.3s ease;
     }
 
     .association-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
     }
 
+    /* Header de card compacto */
     .association-header {
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
-        padding: 1.5rem;
+        padding: 1rem 1.25rem;
         display: flex;
         align-items: center;
-        gap: 1.25rem;
+        gap: 1rem;
+        border-bottom: 3px solid rgba(255,255,255,0.2);
     }
 
-    .association-avatar {
-        width: 70px;
-        height: 70px;
+    .association-icon {
+        width: 50px;
+        height: 50px;
         background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
+        font-size: 1.5rem;
         flex-shrink: 0;
-        border: 3px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
     .association-logo {
-        width: 70px;
-        height: 70px;
+        width: 50px;
+        height: 50px;
         object-fit: contain;
-        border-radius: 0.5rem;
+        border-radius: 8px;
         background: white;
         padding: 0.25rem;
         border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
+    .association-title {
+        flex: 1;
+    }
+
     .association-title h4 {
         margin: 0 0 0.25rem 0;
-        font-weight: 600;
-        font-size: 1.35rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        line-height: 1.3;
     }
 
     .association-subtitle {
-        opacity: 0.95;
-        font-size: 0.9rem;
+        opacity: 0.9;
+        font-size: 0.85rem;
         margin: 0;
+        font-weight: 500;
     }
 
+    /* Body de card compacto */
     .association-body {
-        padding: 1.5rem;
+        padding: 1rem 1.25rem;
     }
 
-    .section-title {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e9ecef;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1.05rem;
-    }
-
-    .section-title i {
-        color: #2196F3;
-        font-size: 1.1rem;
-    }
-
-    .info-item {
-        margin-bottom: 0.85rem;
-        display: flex;
-        align-items: flex-start;
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 0.75rem;
     }
 
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+
+    .info-item:hover {
+        background: #f9fafb;
+    }
+
     .info-item i {
-        width: 24px;
-        color: #6c757d;
+        width: 20px;
+        color: #1e3c72;
         font-size: 0.95rem;
-        margin-top: 0.15rem;
+        margin-top: 0.2rem;
         flex-shrink: 0;
+    }
+
+    .info-content {
+        flex: 1;
+        min-width: 0;
     }
 
     .info-label {
         font-weight: 600;
-        color: #495057;
-        min-width: 100px;
+        color: #344767;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.15rem;
     }
 
     .info-value {
-        color: #6c757d;
-        flex: 1;
+        color: #6B7280;
+        font-size: 0.9rem;
+        word-break: break-word;
     }
 
     .info-value a {
-        color: #2196F3;
+        color: #00909E;
         text-decoration: none;
         transition: color 0.2s;
+        font-weight: 500;
     }
 
     .info-value a:hover {
-        color: #1976D2;
+        color: #007a85;
         text-decoration: underline;
     }
 
-    /* Badge de documento */
-    .doc-badge {
-        background: rgba(33, 150, 243, 0.1);
-        color: #2196F3;
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.375rem;
+    /* Sección de organizaciones */
+    .organizations-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid #e5e7eb;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .section-header i {
+        color: #1e3c72;
+        font-size: 1rem;
+    }
+
+    .section-header h5 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #344767;
+    }
+
+    .org-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .org-badge {
+        background: #e3f2fd;
+        color: #1e3c72;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
         font-size: 0.85rem;
-        font-weight: 500;
-        display: inline-block;
-    }
-
-    /* Empty state */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        color: #dee2e6;
-        margin-bottom: 1rem;
-    }
-
-    .empty-state h5 {
-        color: #6c757d;
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-state p {
-        color: #adb5bd;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Paginación mejorada */
-    .pagination {
-        margin-top: 2rem;
-        justify-content: center;
-    }
-
-    .pagination .page-link {
-        border: 1px solid #dee2e6;
-        color: #2196F3;
-        padding: 0.5rem 0.75rem;
-        margin: 0 0.15rem;
-        border-radius: 0.375rem;
-        transition: all 0.2s;
-    }
-
-    .pagination .page-link:hover {
-        background-color: #2196F3;
-        color: white;
-        border-color: #2196F3;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #2196F3;
-        border-color: #2196F3;
-    }
-
-    /* Estadísticas */
-    .stats-badge {
-        background: rgba(33, 150, 243, 0.1);
-        color: #2196F3;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
         font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .org-badge:hover {
+        background: #1e3c72;
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .org-badge i {
+        font-size: 0.75rem;
+    }
+
+    /* Botón ver detalle */
+    .btn-view-detail {
+        background: white;
+        border: 2px solid #1e3c72;
+        color: #1e3c72;
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
     }
 
+    .btn-view-detail:hover {
+        background: #1e3c72;
+        color: white;
+        transform: translateX(3px);
+    }
+
+    /* Empty state mejorado */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: #344767;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        color: #6B7280;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Stats card - Fondo de color con contraste sobre header azul */
+    .stats-mini {
+        background: linear-gradient(135deg, #00909E 0%, #0dcaf0 100%);
+        border-radius: 10px;
+        padding: 0.75rem 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-mini::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .stats-mini i {
+        font-size: 1.75rem;
+        color: white;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        position: relative;
+        z-index: 1;
+    }
+
+    .stats-mini-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .stats-mini-content h6 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .stats-mini-content p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        opacity: 0.95;
+    }
+
+    /* Paginación mejorada */
+    .pagination {
+        gap: 0.5rem;
+    }
+
+    .pagination .page-link {
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        color: #1e3c72;
+        padding: 0.5rem 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .pagination .page-link:hover {
+        background: #e3f2fd;
+        border-color: #1e3c72;
+        color: #1e3c72;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #1e3c72;
+        border-color: #1e3c72;
+        color: white;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
-        .page-header {
-            padding: 1.5rem 0;
-        }
-
-        .page-header h3 {
-            font-size: 1.35rem;
-        }
-
         .association-header {
-            flex-direction: column;
-            text-align: center;
+            padding: 0.875rem 1rem;
         }
 
-        .association-avatar,
+        .association-icon,
         .association-logo {
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
         }
 
-        .info-label {
-            min-width: auto;
+        .association-title h4 {
+            font-size: 1rem;
         }
 
-        .info-item {
-            flex-direction: column;
-            gap: 0.25rem;
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-search {
+            width: 100%;
+            margin-top: 0.75rem;
         }
     }
 </style>
 {% endblock stylesheets %}
 
 {% block content %}
-<div class="container-fluid px-4 py-3">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="d-flex justify-content-between align-items-center px-4">
+<div class="container-fluid py-4">
+    <!-- Header Estandarizado -->
+    <div class="page-header-censo">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h3>
-                    <i class="fas fa-building me-2"></i>
+                <h2 class="mb-2">
+                    <i class="fas fa-sitemap me-2"></i>
                     Asociaciones de Cabildos
-                </h3>
+                </h2>
                 <p class="mb-0">
                     <i class="fas fa-info-circle me-1"></i>
-                    Gestión y visualización de asociaciones registradas en el sistema
+                    Gestión de asociaciones y resguardos indígenas
                 </p>
             </div>
-            {% if total_associations %}
-            <div class="stats-badge d-none d-md-inline-flex">
-                <i class="fas fa-chart-bar"></i>
-                <span>{{ total_associations }} Asociación{{ total_associations|pluralize:"es" }}</span>
+            <div class="mt-3 mt-md-0">
+                <div class="stats-mini">
+                    <i class="fas fa-building"></i>
+                    <div class="stats-mini-content">
+                        <h6>{{ total_associations|default:0 }}</h6>
+                        <p>Asociaciones</p>
+                    </div>
+                </div>
             </div>
-            {% endif %}
         </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="search-box">
-        <form method="get" action="{% url 'association' %}" class="row g-3 align-items-end">
-            <div class="col-md-10">
-                <label for="search" class="form-label fw-semibold">
-                    <i class="fas fa-search me-1"></i>
-                    Buscar Asociación
-                </label>
-                <div class="search-input-group">
-                    <i class="fas fa-search"></i>
-                    <input
-                        type="text"
-                        class="form-control search-input"
-                        id="search"
-                        name="search"
-                        value="{{ search_query }}"
-                        placeholder="Buscar por nombre, identificación o correo..."
-                        autocomplete="off"
-                    >
+    <!-- Barra de Búsqueda -->
+    <div class="search-container">
+        <form method="get" action="{% url 'association' %}">
+            <div class="row align-items-center">
+                <div class="col-md-10">
+                    <div class="search-input-group">
+                        <i class="fas fa-search"></i>
+                        <input
+                            type="text"
+                            name="search"
+                            id="search"
+                            class="form-control search-input"
+                            placeholder="Buscar por nombre, identificación o email..."
+                            value="{{ search_query|default:'' }}"
+                        >
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-1"></i>
-                        Buscar
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-search w-100">
+                        <i class="fas fa-search me-2"></i>Buscar
                     </button>
-                    {% if search_query %}
-                    <a href="{% url 'association' %}" class="btn btn-outline-secondary" title="Limpiar búsqueda">
-                        <i class="fas fa-times"></i>
-                    </a>
-                    {% endif %}
                 </div>
             </div>
         </form>
-
-        {% if search_query %}
-        <div class="mt-2">
-            <small class="text-muted">
-                <i class="fas fa-filter me-1"></i>
-                Mostrando resultados para: <strong>"{{ search_query }}"</strong>
-            </small>
-        </div>
-        {% endif %}
     </div>
 
-    <!-- Associations List -->
+    <!-- Listado de Asociaciones -->
     {% if associations %}
         <div class="row">
-            {% for object in associations %}
+            {% for association in associations %}
             <div class="col-12">
-                <div class="association-card">
-                    <!-- Header -->
+                <div class="association-card fade-in-up">
+                    <!-- Header de Card -->
                     <div class="association-header">
-                        <div class="association-avatar">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="association-title flex-grow-1">
-                            <h4>{{ object.association_name }}</h4>
-                            <p class="association-subtitle mb-1">
-                                <i class="fas fa-building me-1"></i>
-                                Asociación de Cabildos Indígenas
-                            </p>
-                            <span class="doc-badge">
-                                {{ object.association_type_document }}: {{ object.association_identification }}
-                            </span>
-                        </div>
-                        {% if object.association_logo %}
-                        <div class="ms-auto d-none d-md-block">
-                            <img src="{{ object.association_logo.url }}"
-                                 alt="Logo {{ object.association_name }}"
-                                 class="association-logo"
-                                 loading="lazy">
-                        </div>
+                        {% if association.association_logo %}
+                            <img src="{{ association.association_logo.url }}"
+                                 alt="{{ association.association_name }}"
+                                 class="association-logo">
+                        {% else %}
+                            <div class="association-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
                         {% endif %}
+
+                        <div class="association-title">
+                            <h4>{{ association.association_name }}</h4>
+                            <p class="association-subtitle">
+                                <i class="fas fa-id-card me-1"></i>
+                                {{ association.association_identification|default:"Sin identificación" }}
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Body -->
+                    <!-- Body de Card -->
                     <div class="association-body">
-                        <div class="row g-4">
-                            <!-- Información General -->
-                            <div class="col-lg-6">
-                                <div class="section-title">
-                                    <i class="fas fa-info-circle"></i>
-                                    Información General
-                                </div>
-
-                                <div class="info-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <div>
-                                        <div class="info-label">Dirección</div>
-                                        <div class="info-value">{{ object.association_address|default:"No registrada" }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <i class="fas fa-map"></i>
-                                    <div>
-                                        <div class="info-label">Departamento</div>
-                                        <div class="info-value">{{ object.association_departament|default:"No registrado" }}</div>
+                        <!-- Grid de información -->
+                        <div class="info-grid">
+                            <!-- Email -->
+                            {% if association.association_email %}
+                            <div class="info-item">
+                                <i class="fas fa-envelope"></i>
+                                <div class="info-content">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">
+                                        <a href="mailto:{{ association.association_email }}">
+                                            {{ association.association_email }}
+                                        </a>
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
 
-                            <!-- Información de Contacto -->
-                            <div class="col-lg-6">
-                                <div class="section-title">
-                                    <i class="fas fa-address-book"></i>
-                                    Información de Contacto
+                            <!-- Teléfono -->
+                            {% if association.association_phone %}
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <div class="info-content">
+                                    <div class="info-label">Teléfono</div>
+                                    <div class="info-value">{{ association.association_phone }}</div>
                                 </div>
+                            </div>
+                            {% endif %}
 
-                                <div class="info-item">
-                                    <i class="fas fa-phone"></i>
-                                    <div>
-                                        <div class="info-label">Teléfono Fijo</div>
-                                        <div class="info-value">
-                                            <a href="tel:{{ object.association_phone }}">{{ object.association_phone|default:"No registrado" }}</a>
-                                        </div>
-                                    </div>
+                            <!-- Dirección -->
+                            {% if association.association_address %}
+                            <div class="info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="info-content">
+                                    <div class="info-label">Dirección</div>
+                                    <div class="info-value">{{ association.association_address }}</div>
                                 </div>
+                            </div>
+                            {% endif %}
 
-                                <div class="info-item">
-                                    <i class="fas fa-mobile-alt"></i>
-                                    <div>
-                                        <div class="info-label">Teléfono Móvil</div>
-                                        <div class="info-value">
-                                            <a href="tel:{{ object.association_phone_mobile }}">{{ object.association_phone_mobile|default:"No registrado" }}</a>
-                                        </div>
-                                    </div>
+                            <!-- Representante Legal -->
+                            {% if association.legal_representative %}
+                            <div class="info-item">
+                                <i class="fas fa-user-tie"></i>
+                                <div class="info-content">
+                                    <div class="info-label">Representante Legal</div>
+                                    <div class="info-value">{{ association.legal_representative }}</div>
                                 </div>
+                            </div>
+                            {% endif %}
 
-                                <div class="info-item">
-                                    <i class="fas fa-envelope"></i>
-                                    <div>
-                                        <div class="info-label">Correo Electrónico</div>
-                                        <div class="info-value">
-                                            <a href="mailto:{{ object.association_email }}">{{ object.association_email|default:"No registrado" }}</a>
-                                        </div>
+                            <!-- Fecha de Fundación -->
+                            {% if association.founding_date %}
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <div class="info-content">
+                                    <div class="info-label">Fecha de Fundación</div>
+                                    <div class="info-value">{{ association.founding_date|date:"d/m/Y" }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Estado -->
+                            <div class="info-item">
+                                <i class="fas fa-{{ association.is_active|yesno:'check-circle,times-circle' }}"></i>
+                                <div class="info-content">
+                                    <div class="info-label">Estado</div>
+                                    <div class="info-value">
+                                        <span class="badge bg-{{ association.is_active|yesno:'success,secondary' }}">
+                                            {{ association.is_active|yesno:"Activo,Inactivo" }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Organizaciones de esta Asociación -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="section-title">
-                                    <i class="fas fa-building"></i>
-                                    Organizaciones / Resguardos
-                                </div>
-
-                                {% with organizations=object.organizations_set.all %}
-                                {% if organizations %}
-                                <div class="row g-3">
-                                    {% for org in organizations %}
-                                    <div class="col-md-6 col-lg-4">
-                                        <div class="card h-100 border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <h6 class="card-title text-primary mb-2">
-                                                    <i class="fas fa-landmark me-2"></i>
-                                                    {{ org.organization_name }}
-                                                </h6>
-                                                <p class="card-text small text-muted mb-2">
-                                                    <i class="fas fa-map-pin me-1"></i>
-                                                    {{ org.organization_territory }}
-                                                </p>
-                                                <p class="card-text small text-muted mb-3">
-                                                    <i class="fas fa-id-card me-1"></i>
-                                                    {{ org.organization_type_identification }}: {{ org.organization_identification }}
-                                                </p>
-                                                <a href="{% url 'organization-detail' org.id %}"
-                                                   class="btn btn-sm btn-primary w-100">
-                                                    <i class="fas fa-eye me-1"></i>
-                                                    Ver Detalles
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% else %}
-                                <div class="alert alert-info mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    No hay organizaciones registradas para esta asociación.
-                                </div>
-                                {% endif %}
-                                {% endwith %}
+                        <!-- Sección de Organizaciones -->
+                        {% if association.organization_set.exists %}
+                        <div class="organizations-section">
+                            <div class="section-header">
+                                <i class="fas fa-landmark"></i>
+                                <h5>Organizaciones Asociadas ({{ association.organization_set.count }})</h5>
                             </div>
+                            <div class="org-list">
+                                {% for org in association.organization_set.all|slice:":5" %}
+                                <span class="org-badge" title="{{ org.organization_name }}">
+                                    <i class="fas fa-building"></i>
+                                    {{ org.organization_name }}
+                                </span>
+                                {% endfor %}
+                                {% if association.organization_set.count > 5 %}
+                                <span class="org-badge">
+                                    <i class="fas fa-plus"></i>
+                                    {{ association.organization_set.count|add:"-5" }} más
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Botón Ver Detalle -->
+                        <div class="mt-3 text-end">
+                            <a href="{% url 'organization-detail' association.id %}" class="btn-view-detail">
+                                Ver Detalles
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -507,18 +610,18 @@
             {% endfor %}
         </div>
 
-        <!-- Pagination -->
+        <!-- Paginación -->
         {% if associations.has_other_pages %}
-        <nav aria-label="Paginación de asociaciones">
-            <ul class="pagination">
+        <nav aria-label="Paginación">
+            <ul class="pagination justify-content-center mt-4">
                 {% if associations.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Primera">
+                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ associations.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Anterior">
+                    <a class="page-link" href="?page={{ associations.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
                         <i class="fas fa-angle-left"></i>
                     </a>
                 </li>
@@ -531,19 +634,21 @@
                     </li>
                     {% elif num > associations.number|add:'-3' and num < associations.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            {{ num }}
+                        </a>
                     </li>
                     {% endif %}
                 {% endfor %}
 
                 {% if associations.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ associations.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Siguiente">
+                    <a class="page-link" href="?page={{ associations.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
                         <i class="fas fa-angle-right"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ associations.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Última">
+                    <a class="page-link" href="?page={{ associations.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
@@ -555,20 +660,20 @@
     {% else %}
         <!-- Empty State -->
         <div class="empty-state">
-            <i class="fas fa-building"></i>
-            <h5>No se encontraron asociaciones</h5>
-            <p>
-                {% if search_query %}
-                    No hay resultados que coincidan con tu búsqueda "{{ search_query }}".
-                {% else %}
-                    No hay asociaciones registradas en el sistema.
-                {% endif %}
-            </p>
+            <i class="fas fa-sitemap"></i>
+            <h4>No se encontraron asociaciones</h4>
             {% if search_query %}
-            <a href="{% url 'association' %}" class="btn btn-outline-primary">
-                <i class="fas fa-list me-1"></i>
-                Ver Todas las Asociaciones
+            <p>No hay resultados para "{{ search_query }}"</p>
+            <a href="{% url 'association' %}" class="btn btn-primary">
+                <i class="fas fa-redo me-2"></i>Ver Todas
             </a>
+            {% else %}
+            <p>Aún no hay asociaciones registradas en el sistema</p>
+            {% if user.is_superuser %}
+            <a href="{% url 'createAssociation' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Crear Primera Asociación
+            </a>
+            {% endif %}
             {% endif %}
         </div>
     {% endif %}
@@ -602,3 +707,4 @@
     });
 </script>
 {% endblock javascripts %}
+

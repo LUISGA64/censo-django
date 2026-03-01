@@ -92,6 +92,7 @@
         margin-bottom: 0.5rem;
         line-height: 1.2;
         text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: white !important;
     }
 
     .dashboard-header p {
@@ -99,6 +100,41 @@
         opacity: 0.95;
         margin: 0;
         line-height: 1.4;
+        color: white !important;
+    }
+
+    .dashboard-header i,
+    .dashboard-header span,
+    .dashboard-header a {
+        color: white !important;
+    }
+
+    .dashboard-header .btn {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 2px solid rgba(255, 255, 255, 1) !important;
+        color: var(--censo-primary) !important;
+        font-weight: 700;
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-header .btn:hover {
+        background: white !important;
+        border: 2px solid white !important;
+        color: var(--censo-primary-dark) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .dashboard-header .btn i {
+        color: var(--censo-primary) !important;
+        margin-right: 0.5rem;
+    }
+
+    .dashboard-header .btn:hover i {
+        color: var(--censo-primary-dark) !important;
     }
 
     /* ===== CARDS DE ESTADÍSTICAS - DISEÑO PREMIUM ===== */
@@ -392,7 +428,13 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="stat-label">Promedio por Familia</div>
-                <div class="stat-value">{% if total_fichas %}{{ total_personas|default:0|floatformat:1|divisibleby:total_fichas }}{% else %}0{% endif %}</div>
+                <div class="stat-value">
+                    {% if total_fichas and total_fichas > 0 %}
+                        {% widthratio total_personas total_fichas 1 %}.{% widthratio total_personas total_fichas 10 %}
+                    {% else %}
+                        0.0
+                    {% endif %}
+                </div>
                 <div class="stat-description">
                     <i class="fas fa-home me-2"></i>Personas por hogar
                 </div>
@@ -504,7 +546,7 @@
                         <span><i class="fas fa-home me-2" style="color: var(--censo-primary);"></i>Promedio Personas/Hogar</span>
                         <strong style="color: var(--censo-primary); font-size: 1.15rem;">
                             {% if total_fichas and total_fichas > 0 %}
-                                {{ total_personas|floatformat:1|default:0|divisibleby:total_fichas|floatformat:1 }}
+                                {% widthratio total_personas total_fichas 1 %}.{% widthratio total_personas total_fichas 10 %}
                             {% else %}
                                 0.0
                             {% endif %}
@@ -604,7 +646,7 @@
                                 <div class="text-end">
                                     <div style="color: var(--censo-success); font-weight: 600;">
                                         {% if total_fichas and total_fichas > 0 %}
-                                            {{ total_personas|floatformat:1|default:0|divisibleby:total_fichas|floatformat:1 }}
+                                            {% widthratio total_personas total_fichas 1 %}.{% widthratio total_personas total_fichas 10 %}
                                         {% else %}
                                             0.0
                                         {% endif %}

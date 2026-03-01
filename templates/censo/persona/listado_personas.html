@@ -5,24 +5,12 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+    {% include 'censo/partials/header_styles.html' %}
     <style>
         /* ===================================
            ESTILO PROFESIONAL CORPORATIVO
-           Color principal: #2196F3 (Material Blue)
            =================================== */
 
-        /* Header Card */
-        .card-header-custom {
-            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-            color: white;
-            border-radius: 8px 8px 0 0;
-            padding: 1.5rem;
-        }
-
-        .card-header-custom h3 {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
 
         /* Tabla */
         .table-hover tbody tr:hover {
@@ -359,37 +347,28 @@
 
     <div class="container-fluid py-4">
         <!-- Header Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header-custom">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <div>
-                                <h3 class="mb-2">
-                                    <i class="fas fa-users me-2"></i>
-                                    Gestión de Personas
-                                </h3>
-                                <p class="mb-0" style="opacity: 0.9; font-size: 0.95rem;">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Registro y gestión de miembros de la comunidad indígena
-                                </p>
-                            </div>
-                            <div class="mt-3 mt-md-0">
-                                <a href="{% url 'familyCardIndex' %}" class="btn btn-header-action me-2">
-                                    <i class="fas fa-home me-2"></i>
-                                    Fichas Familiares
-                                </a>
-                                <a href="{% url 'export-persons-excel' %}" class="btn btn-success me-2" title="Exportar a Excel">
-                                    <i class="fas fa-file-excel me-2"></i>
-                                    Exportar Excel
-                                </a>
-                                <a href="#" class="btn btn-header-primary" id="btnNewPerson">
-                                    <i class="fas fa-user-plus me-2"></i>
-                                    Nueva Persona
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+        <div class="page-header-censo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-users me-2"></i>
+                        Gestión de Personas
+                    </h2>
+                    <p class="mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Registro y gestión de miembros de la comunidad indígena
+                    </p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'familyCardIndex' %}" class="btn me-2">
+                        <i class="fas fa-home"></i>Fichas Familiares
+                    </a>
+                    <a href="{% url 'export-persons-excel' %}" class="btn btn-success me-2" title="Exportar a Excel">
+                        <i class="fas fa-file-excel"></i>Exportar
+                    </a>
+                    <a href="#" class="btn" id="btnNewPerson">
+                        <i class="fas fa-user-plus"></i>Nueva Persona
+                    </a>
                 </div>
             </div>
         </div>

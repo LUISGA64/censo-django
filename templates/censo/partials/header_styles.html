@@ -1,0 +1,102 @@
+<!-- Header Corporativo Estandarizado -->
+{% load static %}
+
+<style>
+    /* ===== HEADER CORPORATIVO ESTANDARIZADO ===== */
+    .page-header-censo {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+        color: white;
+        padding: 1.5rem 1.75rem;
+        margin: -1.5rem -1.5rem 1.75rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(30, 60, 114, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header-censo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .page-header-censo h2,
+    .page-header-censo h1,
+    .page-header-censo h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: white !important;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header-censo p,
+    .page-header-censo span,
+    .page-header-censo i,
+    .page-header-censo a {
+        font-size: 0.9rem;
+        opacity: 0.95;
+        margin: 0;
+        line-height: 1.4;
+        color: white !important;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header-censo .btn {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 2px solid rgba(255, 255, 255, 1) !important;
+        color: var(--censo-primary, #1e3c72) !important;
+        font-weight: 700;
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header-censo .btn:hover {
+        background: white !important;
+        border: 2px solid white !important;
+        color: var(--censo-primary-dark, #152d5a) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .page-header-censo .btn i {
+        color: var(--censo-primary, #1e3c72) !important;
+        margin-right: 0.5rem;
+    }
+
+    .page-header-censo .btn:hover i {
+        color: var(--censo-primary-dark, #152d5a) !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-header-censo {
+            padding: 1rem;
+        }
+
+        .page-header-censo h2,
+        .page-header-censo h1,
+        .page-header-censo h3 {
+            font-size: 1.25rem;
+        }
+
+        .page-header-censo p,
+        .page-header-censo span {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+

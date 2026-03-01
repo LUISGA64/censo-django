@@ -7,24 +7,14 @@
 
 {% block stylesheets %}
     {{ block.super }}
+    {% include 'censo/partials/header_styles.html' %}
     <style>
         /* ===================================
-           DISEÑO PROFESIONAL CORPORATIVO
-           Color principal: #2196F3
+           DISEÑO EMTEL CORPORATIVO
+           Azul Principal: #1e3c72
+           Verde Acento: #82D616
            =================================== */
 
-        .card-header-custom {
-            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-            color: white;
-            border-radius: 8px 8px 0 0;
-            padding: 1.5rem;
-        }
-
-        .card-header-custom h4 {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
 
         /* Breadcrumb profesional */
         .breadcrumb {
@@ -41,13 +31,13 @@
         }
 
         .breadcrumb-item a {
-            color: #2196F3;
+            color: #1e3c72;
             text-decoration: none;
             transition: all 0.2s;
         }
 
         .breadcrumb-item a:hover {
-            color: #1976D2;
+            color: #152d5a;
             text-decoration: underline;
         }
 
@@ -56,7 +46,7 @@
             font-weight: 500;
         }
 
-        /* Tabs profesionales */
+        /* Tabs profesionales con verde */
         .nav-pills-custom .nav-link {
             background: white;
             color: #374151;
@@ -64,21 +54,21 @@
             border-radius: 8px;
             padding: 0.75rem 1.5rem;
             margin-right: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
 
         .nav-pills-custom .nav-link:hover {
             background: #F3F4F6;
-            border-color: #2196F3;
-            color: #2196F3;
+            border-color: #82D616;
+            color: #82D616;
         }
 
         .nav-pills-custom .nav-link.active {
-            background: #2196F3;
+            background: linear-gradient(135deg, #82D616 0%, #9AE034 100%);
             color: white;
-            border-color: #2196F3;
-            box-shadow: 0 4px 6px rgba(33, 150, 243, 0.25);
+            border-color: #82D616;
+            box-shadow: 0 4px 6px rgba(130, 214, 22, 0.35);
         }
 
         .nav-pills-custom .nav-link i {
@@ -87,26 +77,41 @@
 
         /* Secciones del formulario */
         .section-title {
-            color: #2196F3;
-            font-weight: 600;
+            color: #1e3c72;
+            font-weight: 700;
             font-size: 1.125rem;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: #82D616;
         }
 
         /* Info box */
         .info-box {
-            background: #E3F2FD;
-            border-left: 4px solid #2196F3;
+            background: linear-gradient(135deg, #E8F7D1 0%, #F0FADC 100%);
+            border-left: 4px solid #82D616;
             padding: 1rem;
-            border-radius: 4px;
+            border-radius: 8px;
             margin-bottom: 1.5rem;
+            box-shadow: 0 2px 6px rgba(130, 214, 22, 0.15);
         }
 
         .info-box i {
-            color: #2196F3;
+            color: #82D616;
             margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #374151;
+            font-weight: 500;
         }
 
         /* Campos modificados */
@@ -121,7 +126,7 @@
             top: 0;
             bottom: 0;
             width: 3px;
-            background: #2196F3;
+            background: #82D616;
             border-radius: 2px;
         }
 
@@ -150,34 +155,54 @@
             font-size: 0.75rem;
         }
 
-        /* Botones */
+        /* Botones - Verde Corporativo */
         .btn-save {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #82D616 0%, #9AE034 100%);
             color: white;
             border: none;
             padding: 0.75rem 2rem;
-            font-weight: 500;
-            border-radius: 6px;
+            font-weight: 700;
+            border-radius: 8px;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(130, 214, 22, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .btn-save:hover {
-            background: #388E3C;
+            background: linear-gradient(135deg, #6BB012 0%, #82D616 100%);
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(130, 214, 22, 0.4);
         }
 
         .btn-save:disabled {
             background: #9CA3AF;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #6B7280;
+            border: 2px solid #E5E7EB;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #F9FAFB;
+            border-color: #1e3c72;
+            color: #1e3c72;
+            transform: translateY(-2px);
         }
 
         /* Labels */
         .form-label {
-            font-weight: 500;
-            color: #374151;
+            font-weight: 600;
+            color: #344767;
             margin-bottom: 0.5rem;
         }
 
@@ -188,11 +213,11 @@
             margin-left: 0.2rem;
         }
 
-        /* Inputs focus */
+        /* Inputs focus con verde */
         .form-control:focus,
         .form-select:focus {
-            border-color: #2196F3;
-            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.15);
+            border-color: #82D616;
+            box-shadow: 0 0 0 0.25rem rgba(130, 214, 22, 0.15);
         }
 
         /* Badge de info */
@@ -245,34 +270,31 @@
             </ol>
         </nav>
 
+        <!-- Header Estandarizado -->
+        <div class="page-header-censo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Ficha Familiar
+                    </h2>
+                    <p class="mb-0">
+                        <i class="fas fa-home me-1"></i>
+                        Ficha #{{ object.family_card_number }} - {{ total_members }} miembro{{ total_members|pluralize }}
+                    </p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'detailFamilyCard' object.pk %}" class="btn">
+                        <i class="fas fa-eye"></i>Ver Detalle
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Card Principal -->
-        <div class="row">
+        <div class="row mt-4">
             <div class="col-12">
                 <div class="card shadow-sm border-0">
-                    <!-- Header -->
-                    <div class="card-header-custom">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <div>
-                                <h4 class="mb-2">
-                                    <i class="fas fa-edit me-2"></i>
-                                    Editar Ficha Familiar
-                                </h4>
-                                <p class="mb-0" style="opacity: 0.9; font-size: 0.95rem;">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Ficha #{{ object.family_card_number }} -
-                                    {{ total_members }} miembro{{ total_members|pluralize }}
-                                </p>
-                            </div>
-                            <div class="mt-3 mt-md-0">
-                                <a href="{% url 'detailFamilyCard' object.pk %}"
-                                   class="btn btn-light">
-                                    <i class="fas fa-eye me-2"></i>
-                                    Ver Detalle
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="card-body p-4">
                         <!-- Info box -->
                         <div class="info-box">

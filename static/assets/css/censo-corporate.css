@@ -1566,7 +1566,7 @@ a:hover {
 
 .page-header {
     background: var(--gradient-primary);
-    color: white;
+    color: white !important;
     padding: 2rem;
     border-radius: var(--radius-xl);
     margin-bottom: 2rem;
@@ -1575,9 +1575,51 @@ a:hover {
 
 .page-header h1,
 .page-header h2,
-.page-header h3 {
-    color: white;
+.page-header h3,
+.page-header h4,
+.page-header h5,
+.page-header h6 {
+    color: white !important;
     margin-bottom: 0.5rem;
+}
+
+.page-header p,
+.page-header span,
+.page-header i,
+.page-header a {
+    color: white !important;
+}
+
+/* Headers con gradiente - Aplicar a cualquier elemento con bg-gradient-primary */
+.bg-gradient-primary,
+.bg-gradient-primary *,
+[style*="background: var(--censo-gradient-primary)"],
+[style*="background: var(--gradient-primary)"] {
+    color: white !important;
+}
+
+.bg-gradient-primary h1,
+.bg-gradient-primary h2,
+.bg-gradient-primary h3,
+.bg-gradient-primary h4,
+.bg-gradient-primary h5,
+.bg-gradient-primary h6,
+.bg-gradient-primary p,
+.bg-gradient-primary span,
+.bg-gradient-primary i,
+.bg-gradient-primary a {
+    color: white !important;
+}
+
+/* Card headers con gradiente o color primario */
+.card-header.bg-primary,
+.card-header.bg-gradient-primary {
+    color: white !important;
+}
+
+.card-header.bg-primary *,
+.card-header.bg-gradient-primary * {
+    color: white !important;
 }
 
 /* ============================================
@@ -1626,6 +1668,27 @@ a:hover {
     border-bottom: 2px solid var(--color-primary);
 }
 
+/* Card headers con fondo oscuro o de color - texto blanco */
+.card-header.bg-primary,
+.card-header.bg-secondary,
+.card-header.bg-success,
+.card-header.bg-warning,
+.card-header.bg-danger,
+.card-header.bg-info,
+.card-header.bg-dark {
+    color: white !important;
+}
+
+.card-header.bg-primary *,
+.card-header.bg-secondary *,
+.card-header.bg-success *,
+.card-header.bg-warning *,
+.card-header.bg-danger *,
+.card-header.bg-info *,
+.card-header.bg-dark * {
+    color: white !important;
+}
+
 /* ============================================
    TABLES - ESTILOS MEJORADOS
    ============================================ */
@@ -1660,6 +1723,84 @@ a:hover {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: white;
+}
+
+/* ============================================
+   STATS BADGES - TURQUESA (Para Headers)
+   ============================================ */
+
+/* Stats card con fondo turquesa - Contrasta perfectamente con headers azules */
+.stats-mini {
+    background: var(--gradient-secondary);
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-mini::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.stats-mini i {
+    font-size: 1.75rem;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    position: relative;
+    z-index: 1;
+}
+
+.stats-mini-content {
+    position: relative;
+    z-index: 1;
+}
+
+.stats-mini-content h6 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.stats-mini-content p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    opacity: 0.95;
+}
+
+/* Variantes de color para stats-mini */
+.stats-mini.success {
+    background: var(--gradient-success);
+}
+
+.stats-mini.warning {
+    background: var(--gradient-warning);
+}
+
+.stats-mini.danger {
+    background: var(--gradient-danger);
+}
+
+.stats-mini.primary {
+    background: var(--gradient-primary);
 }
 
 /* ============================================

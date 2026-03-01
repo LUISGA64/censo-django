@@ -6,24 +6,12 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+    {% include 'censo/partials/header_styles.html' %}
     <style>
         /* ===================================
            ESTILO PROFESIONAL CORPORATIVO
-           Color principal: #2196F3 (Material Blue)
            =================================== */
 
-        /* Header Card */
-        .card-header-custom {
-            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-            color: white;
-            border-radius: 8px 8px 0 0;
-            padding: 1.5rem;
-        }
-
-        .card-header-custom h3 {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
 
         /* Tabla */
         .table-hover tbody tr:hover {
@@ -41,13 +29,16 @@
             font-size: 0.9rem;
         }
 
-        /* Badge de miembros */
+        /* Badge de miembros - Alto contraste */
         .badge-members {
-            background: #E3F2FD;
-            color: #1976D2;
+            background: linear-gradient(135deg, #00909E 0%, #0dcaf0 100%);
+            color: white;
             padding: 0.5rem 0.75rem;
             border-radius: 6px;
-            font-weight: 600;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 6px rgba(0, 144, 158, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         /* Dropdown de acciones profesional y responsive */
@@ -56,31 +47,32 @@
         }
 
         .btn-actions {
-            background: #2196F3;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 6px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             font-size: 0.875rem;
             white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(30, 60, 114, 0.3);
         }
 
         .btn-actions:hover {
-            background: #1976D2;
+            background: linear-gradient(135deg, #152d5a 0%, #1e3c72 100%);
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(30, 60, 114, 0.4);
         }
 
         .btn-actions:focus {
-            background: #1976D2;
+            background: linear-gradient(135deg, #152d5a 0%, #1e3c72 100%);
             color: white;
-            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(30, 60, 114, 0.25);
         }
 
         /* Dropdown menu mejorado */
@@ -337,35 +329,27 @@
 
     <div class="container-fluid py-4">
         <!-- Header Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header-custom">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <div>
-                                <h3 class="mb-2">
-                                    <i class="fas fa-home me-2"></i>
-                                    Gestión de Fichas Familiares
-                                </h3>
-                                <p class="mb-0" style="opacity: 0.9; font-size: 0.95rem;">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Registro y gestión de familias de la comunidad indígena
-                                </p>
-                            </div>
-                            <div class="mt-3 mt-md-0">
-                                <a href="{% url 'personas' %}" class="btn btn-header-action me-2">
-                                    <i class="fas fa-users me-2"></i>
-                                    Ver Personas
-                                </a>
-                                {% if user.is_superuser or request.user_role != 'VIEWER' %}
-                                <a href="{% url 'createFamilyCard' %}" class="btn btn-header-primary">
-                                    <i class="fas fa-plus-circle me-2"></i>
-                                    Nueva Ficha
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+        <div class="page-header-censo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-home me-2"></i>
+                        Gestión de Fichas Familiares
+                    </h2>
+                    <p class="mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Registro y gestión de familias de la comunidad indígena
+                    </p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'personas' %}" class="btn me-2">
+                        <i class="fas fa-users"></i>Ver Personas
+                    </a>
+                    {% if user.is_superuser or request.user_role != 'VIEWER' %}
+                    <a href="{% url 'createFamilyCard' %}" class="btn">
+                        <i class="fas fa-plus-circle"></i>Nueva Ficha
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
