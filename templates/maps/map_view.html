@@ -167,7 +167,7 @@
         margin-right: 0.5rem;
     }
 
-    /* Mejorar botones de navegación */
+    /* Botones Modernos */
     .btn-modern {
         border-radius: 8px;
         padding: 0.6rem 1.2rem;
@@ -179,6 +179,252 @@
     .btn-modern:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Botón Pantalla Completa */
+    .btn-fullscreen {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e3c72;
+    }
+
+    .btn-fullscreen:hover {
+        background: #1e3c72;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .btn-fullscreen i {
+        margin-right: 0.5rem;
+    }
+
+    /* Modo Pantalla Completa */
+    .fullscreen-mode {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: white;
+        margin: 0 !important;
+    }
+
+    .fullscreen-mode #map {
+        height: 100vh !important;
+        border-radius: 0 !important;
+        min-height: 100vh !important;
+    }
+
+    /* Header Flotante en Pantalla Completa */
+    .fullscreen-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.95) 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+    }
+
+    .fullscreen-mode .fullscreen-header {
+        display: block;
+        animation: slideInDown 0.5s ease;
+    }
+
+    .fullscreen-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .fullscreen-header p {
+        margin: 0;
+        font-size: 0.75rem;
+        opacity: 0.9;
+        color: white;
+    }
+
+    /* Leyenda Flotante en Pantalla Completa */
+    .fullscreen-legend {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+        min-width: 200px;
+    }
+
+    .fullscreen-mode .fullscreen-legend {
+        display: block;
+        animation: slideInUp 0.5s ease;
+    }
+
+    .fullscreen-legend h6 {
+        margin: 0 0 0.75rem 0;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1e3c72;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #1e3c72;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Selector de Estilos Flotante */
+    .fullscreen-style-selector {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.75rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+    }
+
+    .fullscreen-mode .fullscreen-style-selector {
+        display: block;
+        animation: slideInRight 0.5s ease;
+    }
+
+    .fullscreen-style-btn {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        margin-bottom: 0.3rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #666;
+        display: block;
+        width: 100%;
+        text-align: left;
+    }
+
+    .fullscreen-style-btn:last-child {
+        margin-bottom: 0;
+    }
+
+    .fullscreen-style-btn.active {
+        border-color: #1e3c72;
+        background: #1e3c72;
+        color: white;
+    }
+
+    .fullscreen-style-btn:hover:not(.active) {
+        border-color: #2196F3;
+        background: #f0f7ff;
+    }
+
+    /* Botón Salir de Pantalla Completa */
+    .btn-exit-fullscreen {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: rgba(239, 83, 80, 0.95);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4);
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: none;
+    }
+
+    .fullscreen-mode .btn-exit-fullscreen {
+        display: block;
+        animation: slideInLeft 0.5s ease;
+    }
+
+    .btn-exit-fullscreen:hover {
+        background: rgba(211, 47, 47, 0.95);
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(239, 83, 80, 0.5);
+    }
+
+    .btn-exit-fullscreen i {
+        margin-right: 0.5rem;
+    }
+
+    /* Animaciones */
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Ocultar elementos en modo pantalla completa */
+    .fullscreen-mode .map-sidebar-container {
+        display: none !important;
     }
 
     /* Responsive */
@@ -322,9 +568,61 @@
     </div>
 
     <!-- Mapa y Controles con Flexbox -->
-    <div class="map-row-container">
+    <div class="map-row-container" id="mapContainer">
         <!-- Mapa Principal (flex: 1, ocupa todo el espacio disponible) -->
-        <div class="map-main-container">
+        <div class="map-main-container" style="position: relative;">
+            <!-- Botón Pantalla Completa -->
+            <button class="btn-fullscreen" id="btnFullscreen" title="Ver en pantalla completa">
+                <i class="fas fa-expand"></i>
+                <span class="d-none d-md-inline">Pantalla Completa</span>
+            </button>
+
+            <!-- Header Flotante (solo visible en pantalla completa) -->
+            <div class="fullscreen-header">
+                <h4><i class="fas fa-map-marked-alt me-2"></i>CENSO WEB</h4>
+                <p>Mapa Geográfico de Veredas</p>
+            </div>
+
+            <!-- Selector de Estilos Flotante (solo visible en pantalla completa) -->
+            <div class="fullscreen-style-selector">
+                <button class="fullscreen-style-btn active" data-style="voyager">
+                    <i class="fas fa-map me-1"></i> Voyager
+                </button>
+                <button class="fullscreen-style-btn" data-style="positron">
+                    <i class="fas fa-sun me-1"></i> Positron
+                </button>
+                <button class="fullscreen-style-btn" data-style="dark">
+                    <i class="fas fa-moon me-1"></i> Dark
+                </button>
+            </div>
+
+            <!-- Leyenda Flotante (solo visible en pantalla completa) -->
+            <div class="fullscreen-legend">
+                <h6><i class="fas fa-info-circle me-2"></i>Leyenda</h6>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #F44336;"></div>
+                    <span>> 100 personas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF9800;"></div>
+                    <span>50-100 personas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>20-50 personas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>< 20 personas</span>
+                </div>
+            </div>
+
+            <!-- Botón Salir de Pantalla Completa -->
+            <button class="btn-exit-fullscreen" id="btnExitFullscreen" title="Salir de pantalla completa (ESC)">
+                <i class="fas fa-times"></i>
+                Salir (ESC)
+            </button>
+
             <div id="map"></div>
         </div>
 
@@ -455,10 +753,100 @@ document.addEventListener('DOMContentLoaded', function() {
             // Agregar nueva capa
             currentLayer = mapStyles[style].addTo(map);
 
-            // Actualizar botones activos
-            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+            // Actualizar botones activos (sidebar y fullscreen)
+            document.querySelectorAll('.style-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
+
+            // Sincronizar el otro selector
+            const otherSelector = this.classList.contains('style-btn') ? '.fullscreen-style-btn' : '.style-btn';
+            document.querySelectorAll(otherSelector).forEach(b => {
+                if (b.getAttribute('data-style') === style) {
+                    b.classList.add('active');
+                }
+            });
         });
+    });
+
+    // Selector de estilos en modo fullscreen
+    document.querySelectorAll('.fullscreen-style-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const style = this.getAttribute('data-style');
+
+            // Remover capa actual
+            map.removeLayer(currentLayer);
+
+            // Agregar nueva capa
+            currentLayer = mapStyles[style].addTo(map);
+
+            // Actualizar botones activos
+            document.querySelectorAll('.style-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Sincronizar selector del sidebar
+            document.querySelectorAll('.style-btn').forEach(b => {
+                if (b.getAttribute('data-style') === style) {
+                    b.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // ===== MODO PANTALLA COMPLETA =====
+    const mapContainer = document.getElementById('mapContainer');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const btnExitFullscreen = document.getElementById('btnExitFullscreen');
+    let isFullscreen = false;
+
+    // Función para entrar en modo pantalla completa
+    function enterFullscreen() {
+        mapContainer.classList.add('fullscreen-mode');
+        isFullscreen = true;
+
+        // Actualizar ícono del botón
+        btnFullscreen.innerHTML = '<i class="fas fa-compress"></i> <span class="d-none d-md-inline">Salir</span>';
+
+        // Invalidar el tamaño del mapa para que se adapte
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        console.log('✅ Modo pantalla completa activado');
+    }
+
+    // Función para salir del modo pantalla completa
+    function exitFullscreen() {
+        mapContainer.classList.remove('fullscreen-mode');
+        isFullscreen = false;
+
+        // Restaurar ícono del botón
+        btnFullscreen.innerHTML = '<i class="fas fa-expand"></i> <span class="d-none d-md-inline">Pantalla Completa</span>';
+
+        // Invalidar el tamaño del mapa para que se adapte
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        console.log('✅ Modo normal restaurado');
+    }
+
+    // Toggle pantalla completa
+    function toggleFullscreen() {
+        if (isFullscreen) {
+            exitFullscreen();
+        } else {
+            enterFullscreen();
+        }
+    }
+
+    // Event listeners
+    btnFullscreen.addEventListener('click', toggleFullscreen);
+    btnExitFullscreen.addEventListener('click', exitFullscreen);
+
+    // Salir con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isFullscreen) {
+            exitFullscreen();
+        }
     });
 
     // Escala
