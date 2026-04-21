@@ -84,14 +84,20 @@
     .legend-item {
         display: flex;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .legend-item:last-child {
+        margin-bottom: 0;
     }
 
     .legend-color {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
-        margin-right: 10px;
+        margin-right: 8px;
+        flex-shrink: 0;
     }
 
     /* Alerta de Éxito */
@@ -176,6 +182,28 @@
     }
 
     /* Responsive */
+    @media (max-width: 991px) {
+        .map-row-container {
+            flex-direction: column;
+        }
+
+        .map-sidebar-container {
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .map-style-selector,
+        .map-controls {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        #map {
+            min-height: 500px;
+        }
+    }
+
     @media (max-width: 768px) {
         .map-header {
             padding: 0.5rem;
@@ -191,7 +219,7 @@
         }
 
         #map {
-            height: 400px;
+            min-height: 400px;
         }
 
         .stat-mini-card h3 {
@@ -200,6 +228,15 @@
 
         .stat-mini-card p {
             font-size: 0.75rem;
+        }
+
+        .map-sidebar-container {
+            flex-direction: column;
+        }
+
+        .map-style-selector,
+        .map-controls {
+            width: 100%;
         }
     }
 
@@ -213,7 +250,7 @@
         }
 
         #map {
-            height: 350px;
+            min-height: 350px;
         }
 
         .stat-mini-card {
@@ -284,13 +321,15 @@
         </div>
     </div>
 
-    <!-- Mapa y Controles -->
-    <div class="row">
-        <div class="col-lg-9 mb-4">
+    <!-- Mapa y Controles con Flexbox -->
+    <div class="map-row-container">
+        <!-- Mapa Principal (flex: 1, ocupa todo el espacio disponible) -->
+        <div class="map-main-container">
             <div id="map"></div>
         </div>
 
-        <div class="col-lg-3">
+        <!-- Sidebar con Controles (ancho fijo 280px) -->
+        <div class="map-sidebar-container">
             <!-- Selector de Estilos de Mapa -->
             <div class="map-style-selector">
                 <h6>
@@ -298,40 +337,38 @@
                     Estilo del Mapa
                 </h6>
                 <button class="style-btn active" data-style="voyager">
-                    <i class="fas fa-map"></i>
-                    Voyager (Claro)
+                    <i class="fas fa-map me-1"></i>
+                    Voyager
                 </button>
                 <button class="style-btn" data-style="positron">
-                    <i class="fas fa-sun"></i>
-                    Positron (Blanco)
+                    <i class="fas fa-sun me-1"></i>
+                    Positron
                 </button>
                 <button class="style-btn" data-style="dark">
-                    <i class="fas fa-moon"></i>
-                    Dark Matter (Oscuro)
+                    <i class="fas fa-moon me-1"></i>
+                    Dark Matter
                 </button>
             </div>
 
-            <!-- Controles -->
+            <!-- Controles de Navegación -->
             <div class="map-controls">
-                <h6 class="mb-3">
+                <h6>
                     <i class="fas fa-layer-group me-2"></i>
-                    Opciones de Visualización
+                    Otras Vistas
                 </h6>
 
-                <div class="mb-3">
-                    <a href="{% url 'map-clusters' %}" class="btn btn-primary btn-modern btn-sm w-100 mb-2">
-                        <i class="fas fa-object-group me-2"></i>
-                        Ver Clusters
-                    </a>
-                    <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-modern btn-sm w-100">
-                        <i class="fas fa-fire me-2"></i>
-                        Mapa de Calor
-                    </a>
-                </div>
+                <a href="{% url 'map-clusters' %}" class="btn btn-primary btn-modern btn-sm w-100 mb-2">
+                    <i class="fas fa-object-group me-2"></i>
+                    Ver Clusters
+                </a>
+                <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-modern btn-sm w-100">
+                    <i class="fas fa-fire me-2"></i>
+                    Mapa de Calor
+                </a>
 
-                <hr>
+                <hr style="margin: 0.75rem 0;">
 
-                <h6 class="mb-3">
+                <h6 style="margin-top: 0.5rem;">
                     <i class="fas fa-info-circle me-2"></i>
                     Leyenda
                 </h6>
