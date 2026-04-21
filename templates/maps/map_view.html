@@ -74,6 +74,28 @@
         font-family: 'Open Sans', sans-serif;
     }
 
+    /* Labels de marcadores (cantidad de personas) */
+    .marker-label {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .marker-label::before {
+        display: none !important;
+    }
+
+    /* Popup personalizado */
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .custom-popup .leaflet-popup-tip {
+        background: white;
+    }
+
     .map-legend {
         background: white;
         padding: 0.75rem;
@@ -856,74 +878,145 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('{% url "map-sidewalks-data" %}')
         .then(response => response.json())
         .then(data => {
-            if (data.features.length === 0) {
+            console.log('📊 Datos recibidos:', data);
+
+            if (!data.features || data.features.length === 0) {
+                console.warn('⚠️ No hay veredas con ubicación GPS');
                 alert('No hay veredas con ubicación GPS registrada');
                 return;
             }
 
-            // Crear capa GeoJSON
-            L.geoJSON(data, {
+            console.log(`✅ Cargando ${data.features.length} veredas`);
+
+            // Crear capa GeoJSON con marcadores mejorados
+            const geojsonLayer = L.geoJSON(data, {
                 pointToLayer: function(feature, latlng) {
                     const props = feature.properties;
+                    const personas = props.personas || 0;
+
+                    console.log(`📍 Marcador: ${props.name} - ${personas} personas`);
 
                     // Color según población
                     let color = '#2196F3'; // Azul (< 20)
-                    if (props.personas > 100) {
+                    if (personas > 100) {
                         color = '#F44336'; // Rojo
-                    } else if (props.personas > 50) {
+                    } else if (personas > 50) {
                         color = '#FF9800'; // Naranja
-                    } else if (props.personas > 20) {
+                    } else if (personas > 20) {
                         color = '#4CAF50'; // Verde
                     }
 
-                    return L.circleMarker(latlng, {
-                        radius: Math.min(props.personas / 5 + 5, 30),
+                    // Radio proporcional a población (mínimo 8, máximo 30)
+                    const radius = Math.max(8, Math.min(personas / 5 + 8, 30));
+
+                    // Crear marcador circular
+                    const marker = L.circleMarker(latlng, {
+                        radius: radius,
                         fillColor: color,
                         color: '#fff',
                         weight: 2,
                         opacity: 1,
                         fillOpacity: 0.7
                     });
+
+                    // Agregar label con la cantidad de personas (siempre visible)
+                    const labelContent = `<div style="
+                        background: ${color};
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        font-weight: bold;
+                        font-size: 11px;
+                        white-space: nowrap;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                        text-align: center;
+                        min-width: 24px;
+                    ">${personas}</div>`;
+
+                    marker.bindTooltip(labelContent, {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'marker-label',
+                        offset: [0, 0]
+                    });
+
+                    return marker;
                 },
                 onEachFeature: function(feature, layer) {
                     const props = feature.properties;
+                    const personas = props.personas || 0;
+                    const fichas = props.fichas || 0;
 
+                    // Popup detallado (aparece al hacer click)
                     const popupContent = `
-                        <div style="min-width: 200px;">
-                            <h6 style="color: #2196F3; margin-bottom: 10px;">
-                                <i class="fas fa-map-marker-alt"></i> ${props.name}
+                        <div style="min-width: 220px; font-family: 'Open Sans', sans-serif;">
+                            <h6 style="color: #1e3c72; margin-bottom: 10px; font-weight: 700; font-size: 1.1rem;">
+                                <i class="fas fa-map-marker-alt me-2"></i>${props.name}
                             </h6>
-                            <p style="margin: 5px 0;">
-                                <strong>Fichas Familiares:</strong> ${props.fichas}
-                            </p>
-                            <p style="margin: 5px 0;">
-                                <strong>Personas:</strong> ${props.personas}
-                            </p>
-                            ${props.description ? `<p style="margin: 5px 0; font-size: 0.9em; color: #666;">${props.description}</p>` : ''}
-                            <hr style="margin: 10px 0;">
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <p style="margin: 5px 0; display: flex; justify-content: space-between;">
+                                    <span><i class="fas fa-users" style="color: #2196F3;"></i> <strong>Personas:</strong></span>
+                                    <span style="font-weight: 700; color: #2196F3;">${personas}</span>
+                                </p>
+                                <p style="margin: 5px 0; display: flex; justify-content: space-between;">
+                                    <span><i class="fas fa-home" style="color: #4CAF50;"></i> <strong>Fichas:</strong></span>
+                                    <span style="font-weight: 700; color: #4CAF50;">${fichas}</span>
+                                </p>
+                            </div>
+                            ${props.description ? `<p style="margin: 5px 0; font-size: 0.85em; color: #666; font-style: italic;">${props.description}</p>` : ''}
                             <a href="/mapa/vereda/${props.id}/"
-                               class="btn btn-primary btn-sm"
-                               style="text-decoration: none;">
-                                Ver Detalle <i class="fas fa-arrow-right"></i>
+                               class="btn btn-primary btn-sm w-100"
+                               style="text-decoration: none; margin-top: 10px;">
+                                <i class="fas fa-arrow-right me-2"></i>Ver Detalle Completo
                             </a>
                         </div>
                     `;
 
-                    layer.bindPopup(popupContent);
-                    layer.bindTooltip(props.name, {
-                        permanent: false,
-                        direction: 'top'
+                    layer.bindPopup(popupContent, {
+                        maxWidth: 300,
+                        className: 'custom-popup'
+                    });
+
+                    // Tooltip con nombre al pasar el mouse
+                    layer.on('mouseover', function() {
+                        this.bindTooltip(`<strong>${props.name}</strong><br>${personas} personas`, {
+                            permanent: false,
+                            direction: 'top',
+                            offset: [0, -10]
+                        }).openTooltip();
                     });
                 }
             }).addTo(map);
 
-            // Ajustar zoom a los marcadores
-            const bounds = L.geoJSON(data).getBounds();
-            map.fitBounds(bounds, { padding: [50, 50] });
+            // Ajustar zoom automáticamente a los marcadores
+            try {
+                const bounds = geojsonLayer.getBounds();
+                console.log('🎯 Ajustando zoom a marcadores:', bounds);
+
+                // Si solo hay un marcador, hacer zoom pero no demasiado cerca
+                if (data.features.length === 1) {
+                    map.setView(bounds.getCenter(), 13);
+                } else {
+                    // Múltiples marcadores: ajustar a todos con padding
+                    map.fitBounds(bounds, {
+                        padding: [50, 50],
+                        maxZoom: 15,
+                        animate: true,
+                        duration: 1
+                    });
+                }
+
+                console.log('✅ Zoom ajustado correctamente');
+            } catch (error) {
+                console.error('❌ Error ajustando zoom:', error);
+                // Fallback: centrar en Colombia
+                map.setView([4.5709, -74.2973], 6);
+            }
         })
         .catch(error => {
-            console.error('Error cargando datos:', error);
-            alert('Error al cargar los datos del mapa');
+            console.error('❌ Error cargando datos del mapa:', error);
+            alert('Error al cargar los datos del mapa. Por favor, recarga la página.');
         });
 });
 </script>
