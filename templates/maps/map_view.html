@@ -156,40 +156,148 @@
     }
 
     #map {
-        height: 500px;
+        height: 100%;
+        min-height: 650px;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 1;
     }
 
-    .map-controls {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        margin-bottom: 1rem;
+    /* Contenedor principal - Mapa a ancho completo */
+    .map-row-container {
+        position: relative;
+        width: 100%;
     }
 
-    .stat-mini-card {
+    .map-main-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Selector de Estilos Flotante (sobre el mapa - esquina superior izquierda) */
+    .map-style-control {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
         background: white;
-        border-left: 3px solid #2196F3;
-        padding: 0.75rem;
+        padding: 8px;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .style-control-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #e0e0e0;
+        background: white;
         border-radius: 8px;
-        margin-bottom: 0.75rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #666;
     }
 
-    .stat-mini-card h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2196F3;
-        margin: 0;
+    .style-control-btn:hover {
+        border-color: #1e3c72;
+        background: #f0f7ff;
+        color: #1e3c72;
+        transform: scale(1.05);
     }
 
-    .stat-mini-card p {
-        margin: 0;
-        color: #6B7280;
+    .style-control-btn.active {
+        border-color: #1e3c72;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+    }
+
+    /* Leyenda Flotante (sobre el mapa - esquina inferior derecha) */
+    .map-legend-control {
+        position: absolute;
+        bottom: 30px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        padding: 12px;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        min-width: 140px;
+    }
+
+    .legend-header {
         font-size: 0.8rem;
+        font-weight: 700;
+        color: #1e3c72;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+    }
+
+    .legend-items {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    .legend-color {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Botón Pantalla Completa */
+    .btn-fullscreen {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        color: #1e3c72;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+        background: #1e3c72;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Ocultar elementos obsoletos del sidebar */
+    .map-controls,
+    .map-sidebar-container,
+    .map-style-selector {
+        display: none !important;
     }
 
     .leaflet-popup-content {
@@ -311,7 +419,50 @@
         margin-right: 0.5rem;
     }
 
-    /* Botones Modernos */
+    /* Modo Pantalla Completa */
+    .fullscreen-mode {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: white;
+        margin: 0 !important;
+    }
+
+    .fullscreen-mode #map {
+        height: 100vh !important;
+        border-radius: 0 !important;
+        min-height: 100vh !important;
+    }
+
+    /* Ocultar controles normales en modo pantalla completa */
+    .fullscreen-mode .map-style-control,
+    .fullscreen-mode .map-legend-control,
+    .fullscreen-mode .btn-fullscreen {
+        display: none !important;
+    }
+
+    /* Header Flotante en Pantalla Completa */
+    .fullscreen-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.95) 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+    }
+
+    .fullscreen-mode .fullscreen-header {
+        display: block;
+        animation: slideInDown 0.5s ease;
+    }
     .btn-modern {
         border-radius: 8px;
         padding: 0.6rem 1.2rem;
@@ -573,22 +724,6 @@
 
     /* Responsive */
     @media (max-width: 991px) {
-        .map-row-container {
-            flex-direction: column;
-        }
-
-        .map-sidebar-container {
-            width: 100%;
-            flex-direction: row;
-            flex-wrap: wrap;
-        }
-
-        .map-style-selector,
-        .map-controls {
-            flex: 1;
-            min-width: 280px;
-        }
-
         #map {
             min-height: 500px;
         }
@@ -610,6 +745,10 @@
         .action-btn {
             flex: 1;
         }
+
+        .map-legend-control {
+            bottom: 50px;
+        }
     }
 
     @media (max-width: 768px) {
@@ -623,7 +762,7 @@
         }
 
         #map {
-            min-height: 400px;
+            min-height: 450px;
         }
 
         .stats-bar {
@@ -644,13 +783,28 @@
             font-size: 1.25rem;
         }
 
-        .map-sidebar-container {
-            flex-direction: column;
+        .style-control-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
         }
 
-        .map-style-selector,
-        .map-controls {
-            width: 100%;
+        .map-legend-control {
+            padding: 10px;
+            min-width: 120px;
+        }
+
+        .legend-header {
+            font-size: 0.75rem;
+        }
+
+        .legend-item {
+            font-size: 0.7rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
         }
     }
 
@@ -660,7 +814,7 @@
         }
 
         #map {
-            min-height: 350px;
+            min-height: 400px;
         }
 
         .stat-value {
@@ -678,6 +832,33 @@
         .action-btn {
             justify-content: center;
             min-width: 44px;
+        }
+
+        .style-control-btn {
+            width: 34px;
+            height: 34px;
+            font-size: 0.9rem;
+        }
+
+        .map-legend-control {
+            padding: 8px;
+            min-width: 110px;
+            bottom: 40px;
+        }
+
+        .legend-header {
+            font-size: 0.7rem;
+            margin-bottom: 6px;
+        }
+
+        .legend-item {
+            font-size: 0.65rem;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
         }
     }
     }
@@ -749,15 +930,52 @@
         </div>
     </div>
 
-    <!-- Mapa y Controles con Flexbox -->
+    <!-- Mapa a Ancho Completo con Controles Flotantes -->
     <div class="map-row-container" id="mapContainer">
-        <!-- Mapa Principal (flex: 1, ocupa todo el espacio disponible) -->
-        <div class="map-main-container" style="position: relative;">
+        <div class="map-main-container" style="position: relative; width: 100%;">
             <!-- Botón Pantalla Completa -->
             <button class="btn-fullscreen" id="btnFullscreen" title="Ver en pantalla completa">
                 <i class="fas fa-expand"></i>
-                <span class="d-none d-md-inline">Pantalla Completa</span>
             </button>
+
+            <!-- Selector de Estilos Flotante (sobre el mapa) -->
+            <div class="map-style-control">
+                <button class="style-control-btn active" data-style="voyager" title="Voyager (Claro)">
+                    <i class="fas fa-map"></i>
+                </button>
+                <button class="style-control-btn" data-style="positron" title="Positron (Minimalista)">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="style-control-btn" data-style="dark" title="Dark Matter (Oscuro)">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <!-- Leyenda Flotante (sobre el mapa) -->
+            <div class="map-legend-control">
+                <div class="legend-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <span>Leyenda</span>
+                </div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F44336;"></div>
+                        <span>> 100</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF9800;"></div>
+                        <span>50-100</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4CAF50;"></div>
+                        <span>20-50</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2196F3;"></div>
+                        <span>< 20</span>
+                    </div>
+                </div>
+            </div>
 
             <!-- Header Flotante (solo visible en pantalla completa) -->
             <div class="fullscreen-header">
@@ -765,7 +983,7 @@
                 <p>Mapa Geográfico de Veredas</p>
             </div>
 
-            <!-- Selector de Estilos Flotante (solo visible en pantalla completa) -->
+            <!-- Selector de Estilos Flotante para Fullscreen -->
             <div class="fullscreen-style-selector">
                 <button class="fullscreen-style-btn active" data-style="voyager">
                     <i class="fas fa-map me-1"></i> Voyager
@@ -778,7 +996,7 @@
                 </button>
             </div>
 
-            <!-- Leyenda Flotante (solo visible en pantalla completa) -->
+            <!-- Leyenda Flotante para Fullscreen -->
             <div class="fullscreen-legend">
                 <h6><i class="fas fa-info-circle me-2"></i>Leyenda</h6>
                 <div class="legend-item">
@@ -806,56 +1024,6 @@
             </button>
 
             <div id="map"></div>
-        </div>
-
-        <!-- Sidebar con Controles (ancho fijo 280px) -->
-        <div class="map-sidebar-container">
-            <!-- Selector de Estilos de Mapa -->
-            <div class="map-style-selector">
-                <h6>
-                    <i class="fas fa-palette me-2"></i>
-                    Estilo del Mapa
-                </h6>
-                <button class="style-btn active" data-style="voyager">
-                    <i class="fas fa-map me-1"></i>
-                    Voyager
-                </button>
-                <button class="style-btn" data-style="positron">
-                    <i class="fas fa-sun me-1"></i>
-                    Positron
-                </button>
-                <button class="style-btn" data-style="dark">
-                    <i class="fas fa-moon me-1"></i>
-                    Dark Matter
-                </button>
-            </div>
-
-            <!-- Leyenda -->
-            <div class="map-controls">
-                <h6>
-                    <i class="fas fa-info-circle me-2"></i>
-                    Leyenda
-                </h6>
-
-                <div class="map-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #F44336;"></div>
-                        <span>> 100 personas</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #FF9800;"></div>
-                        <span>50-100 personas</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #4CAF50;"></div>
-                        <span>20-50 personas</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #2196F3;"></div>
-                        <span>< 20 personas</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -908,8 +1076,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     L.control.layers(baseMaps).addTo(map);
 
-    // Selector de estilos personalizado
-    document.querySelectorAll('.style-btn').forEach(btn => {
+    // Selector de estilos flotante (sobre el mapa)
+    document.querySelectorAll('.style-control-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const style = this.getAttribute('data-style');
 
@@ -919,12 +1087,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Agregar nueva capa
             currentLayer = mapStyles[style].addTo(map);
 
-            // Actualizar botones activos (sidebar y fullscreen)
-            document.querySelectorAll('.style-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
+            // Actualizar botones activos (controles flotantes y fullscreen)
+            document.querySelectorAll('.style-control-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
 
             // Sincronizar el otro selector
-            const otherSelector = this.classList.contains('style-btn') ? '.fullscreen-style-btn' : '.style-btn';
+            const otherSelector = this.classList.contains('style-control-btn') ? '.fullscreen-style-btn' : '.style-control-btn';
             document.querySelectorAll(otherSelector).forEach(b => {
                 if (b.getAttribute('data-style') === style) {
                     b.classList.add('active');
@@ -945,11 +1113,11 @@ document.addEventListener('DOMContentLoaded', function() {
             currentLayer = mapStyles[style].addTo(map);
 
             // Actualizar botones activos
-            document.querySelectorAll('.style-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.style-control-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
 
-            // Sincronizar selector del sidebar
-            document.querySelectorAll('.style-btn').forEach(b => {
+            // Sincronizar selector flotante
+            document.querySelectorAll('.style-control-btn').forEach(b => {
                 if (b.getAttribute('data-style') === style) {
                     b.classList.add('active');
                 }
