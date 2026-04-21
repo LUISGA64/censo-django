@@ -1,0 +1,222 @@
+{% load static %}
+{% load widget_tweaks %}
+
+<!-- Formulario Moderno de Ficha Familiar con Tailwind + Alpine.js -->
+<div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto"
+     x-data="{
+        hasLocation: {{ form.instance.latitude|yesno:'true,false' }},
+        showLocationHelp: false,
+        isSubmitting: false
+     }">
+
+    <!-- Header del formulario -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <i class="fas fa-home text-primary-600"></i>
+            {% if form.instance.pk %}
+                Editar Ficha Familiar
+            {% else %}
+                Nueva Ficha Familiar
+            {% endif %}
+        </h2>
+        <p class="text-gray-600 mt-2">Complete la información de la vivienda y ubicación</p>
+    </div>
+
+    <form method="post" id="familyCardForm" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Información básica -->
+        <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-6 border border-primary-100">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-info-circle text-primary-600"></i>
+                Información Básica
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Resguardo -->
+                <div class="md:col-span-2">
+                    <label for="{{ form.organization.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ form.organization.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.organization|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    {% if form.organization.errors %}
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.organization.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Vereda -->
+                <div>
+                    <label for="{{ form.sidewalk_home.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ form.sidewalk_home.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.sidewalk_home|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    {% if form.sidewalk_home.errors %}
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.sidewalk_home.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Zona -->
+                <div>
+                    <label for="{{ form.zone.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ form.zone.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.zone|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    {% if form.zone.errors %}
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.zone.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Dirección -->
+                <div class="md:col-span-2">
+                    <label for="{{ form.address_home.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ form.address_home.label }}
+                    </label>
+                    {{ form.address_home|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    {% if form.address_home.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.address_home.help_text }}</p>
+                    {% endif %}
+                    {% if form.address_home.errors %}
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.address_home.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Geolocalización -->
+        <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-6 border border-green-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-green-600"></i>
+                    Geolocalización (Opcional)
+                </h3>
+                <button type="button"
+                        @click="showLocationHelp = !showLocationHelp"
+                        class="text-sm text-green-600 hover:text-green-700 font-medium">
+                    <i class="fas fa-question-circle"></i>
+                    ¿Cómo obtener coordenadas?
+                </button>
+            </div>
+
+            <!-- Ayuda de geolocalización -->
+            <div x-show="showLocationHelp"
+                 x-transition
+                 class="mb-4 p-4 bg-white rounded-lg border border-green-200">
+                <p class="text-sm text-gray-700 mb-2">
+                    <strong>Para obtener coordenadas GPS:</strong>
+                </p>
+                <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                    <li>Abra Google Maps en su celular</li>
+                    <li>Mantenga presionado el lugar en el mapa</li>
+                    <li>Las coordenadas aparecerán arriba</li>
+                    <li>Copie y pegue aquí</li>
+                </ul>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Latitud -->
+                <div>
+                    <label for="{{ form.latitude.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-crosshairs text-green-600"></i>
+                        {{ form.latitude.label }}
+                    </label>
+                    {{ form.latitude|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm transition-colors duration-200" }}
+                    {% if form.latitude.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.latitude.help_text }}</p>
+                    {% endif %}
+                    {% if form.latitude.errors %}
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.latitude.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Longitud -->
+                <div>
+                    <label for="{{ form.longitude.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-crosshairs text-green-600"></i>
+                        {{ form.longitude.label }}
+                    </label>
+                    {{ form.longitude|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm transition-colors duration-200" }}
+                    {% if form.longitude.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.longitude.help_text }}</p>
+                    {% endif %}
+                    {% if form.longitude.errors %}
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.longitude.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Errores generales del formulario -->
+        {% if form.non_field_errors %}
+            <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+                <div class="flex">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-red-800">Errores en el formulario</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Botones de acción -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+            <a href="{% url 'censo:familyCardIndex' %}"
+               class="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    @click="isSubmitting = true"
+                    :disabled="isSubmitting"
+                    class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-save mr-2"></i>
+                <span x-show="!isSubmitting">
+                    {% if form.instance.pk %}
+                        Actualizar Ficha
+                    {% else %}
+                        Crear Ficha
+                    {% endif %}
+                </span>
+                <span x-show="isSubmitting" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Guardando...
+                </span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('familyCardForm').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+});
+</script>
+

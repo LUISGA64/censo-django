@@ -3,10 +3,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-# from rest_framework_simplejwt.views import (  # COMENTADO: No instalado
-#     TokenObtainPairView,
-#     TokenRefreshView,
-#     TokenVerifyView,
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 from censoapp.password_reset_admin_views import password_reset_request_to_admin
 
 
@@ -20,10 +21,10 @@ urlpatterns = [
     # Rutas de allauth
     path('accounts/', include('allauth.urls')),
 
-    # JWT Authentication - COMENTADO: No instalado
-    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    # JWT Authentication
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
 
 if settings.DEBUG:

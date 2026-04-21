@@ -1,40 +1,114 @@
-# Django #
+# ============================================
+# PYTHON
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ============================================
+# DJANGO
+# ============================================
 *.log
 *.pot
 *.pyc
-__pycache__
 db.sqlite3
+db.sqlite3-journal
 db.censoweb
 db.censoWeb
 db.censo_Web*
 identifier.sqlite
-media
+/media
+/staticfiles
+/static/CACHE
 
 # Static files recolectados (generados con collectstatic)
 staticfiles/
 !staticfiles/.gitkeep
 
-# Database files #
+# ============================================
+# VIRTUAL ENVIRONMENTS
+# ============================================
+venv/
+env/
+ENV/
+.venv
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.local
+.env.production
+.env.pythonanywhere
+*.env.backup
+
+# ============================================
+# DATABASE FILES
+# ============================================
 *.db
 *.sqlite
 *.sqlite3
 db.*
 
-# Backup files #
+# ============================================
+# BACKUP FILES
+# ============================================
 *.bak
+*.backup
 backup*.json
 *_backup.json
 backups/*.json
+backups/*.sqlite.gz
 
-# Test files #
-test_*.py
-*_test.py
-test*.py
-debug*.py
+# ============================================
+# IDE & EDITORS
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# TESTING & COVERAGE
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+test-results/
+coverage.xml
+
+# ⚠️ NOTE: NO excluir archivos test_*.py de Git
+# Comentado para permitir tests en repositorio
+# test_*.py
+# *_test.py
 test*.pdf
 *_test.pdf
 
-# Utility scripts (temporary) #
+# ============================================
+# UTILITY SCRIPTS (TEMPORARY - Solo desarrollo)
+# ============================================
 crear_*.py
 activar_*.py
 corregir_*.py
@@ -187,7 +261,12 @@ censoProject/local_settings.py
 
 # Archivos de documentación importantes (PERMITIR)
 !README.md
-!*.md
+!README_QUICK_START.md
+!docs/technical/*.md
+!docs/deployment/*.md
+
+# Documentación de desarrollo archivada (IGNORAR)
+docs/archive/
 
 # Archivos de backup
 *.bak

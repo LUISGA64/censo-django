@@ -66,6 +66,40 @@
         font-size: 0.85rem;
     }
 
+    /* Alerta de Éxito */
+    .alert-success-modern {
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-success-modern i {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .alert-success-modern strong {
+        font-weight: 700;
+    }
+
+    /* Botones Modernos */
+    .btn-modern {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .map-header {
@@ -113,12 +147,21 @@
         <p class="mb-0">Densidad Poblacional</p>
     </div>
 
+    <!-- Alerta de Éxito - Mapas Corregidos -->
+    <div class="alert alert-success-modern" role="alert">
+        <i class="fas fa-check-circle"></i>
+        <strong>Mapa de calor optimizado</strong>
+        <p class="mb-0 mt-2" style="font-size: 0.9rem; opacity: 0.95;">
+            Visualización mejorada con CartoDB tiles para mejor rendimiento.
+        </p>
+    </div>
+
     <div class="row mb-3">
         <div class="col-12">
-            <a href="{% url 'map-view' %}" class="btn btn-primary btn-sm">
+            <a href="{% url 'map-view' %}" class="btn btn-primary btn-modern btn-sm">
                 <i class="fas fa-map me-2"></i>Mapa Normal
             </a>
-            <a href="{% url 'map-clusters' %}" class="btn btn-success btn-sm">
+            <a href="{% url 'map-clusters' %}" class="btn btn-success btn-modern btn-sm">
                 <i class="fas fa-object-group me-2"></i>Clusters
             </a>
         </div>

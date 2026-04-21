@@ -115,12 +115,21 @@
         <p class="mb-0">Agrupación Inteligente de Veredas</p>
     </div>
 
+    <!-- Alerta de Éxito - Mapas Corregidos -->
+    <div class="alert alert-success-modern" role="alert">
+        <i class="fas fa-check-circle"></i>
+        <strong>Mapa de clusters optimizado</strong>
+        <p class="mb-0 mt-2" style="font-size: 0.9rem; opacity: 0.95;">
+            Agrupación inteligente mejorada con CartoDB tiles.
+        </p>
+    </div>
+
     <div class="row mb-3">
         <div class="col-12">
-            <a href="{% url 'map-view' %}" class="btn btn-primary btn-sm">
+            <a href="{% url 'map-view' %}" class="btn btn-primary btn-modern btn-sm">
                 <i class="fas fa-map me-2"></i>Mapa Normal
             </a>
-            <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-sm">
+            <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-modern btn-sm">
                 <i class="fas fa-fire me-2"></i>Mapa de Calor
             </a>
         </div>

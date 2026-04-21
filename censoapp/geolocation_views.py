@@ -104,7 +104,8 @@ def map_heatmap(request):
     m = folium.Map(
         location=[4.5709, -74.2973],  # Colombia center
         zoom_start=6,
-        tiles='OpenStreetMap'
+        tiles='CartoDB positron',
+        attr='&copy; OpenStreetMap contributors &copy; CARTO'
     )
 
     # Obtener datos para heatmap
@@ -166,7 +167,8 @@ def map_clusters(request):
     m = folium.Map(
         location=[4.5709, -74.2973],
         zoom_start=6,
-        tiles='OpenStreetMap'
+        tiles='CartoDB positron',
+        attr='&copy; OpenStreetMap contributors &copy; CARTO'
     )
 
     # Crear cluster de marcadores con estilos personalizados (azul en lugar de verde)

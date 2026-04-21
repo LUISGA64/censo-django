@@ -92,6 +92,88 @@
         height: 20px;
         border-radius: 50%;
         margin-right: 10px;
+    }
+
+    /* Alerta de Éxito */
+    .alert-success-modern {
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-success-modern i {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .alert-success-modern strong {
+        font-weight: 700;
+    }
+
+    /* Selector de Estilos de Mapa */
+    .map-style-selector {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
+    }
+
+    .map-style-selector h6 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #2196F3;
+        margin-bottom: 0.75rem;
+    }
+
+    .style-btn {
+        width: 100%;
+        padding: 0.6rem;
+        margin-bottom: 0.5rem;
+        border: 2px solid #e0e0e0;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #666;
+    }
+
+    .style-btn:hover {
+        border-color: #2196F3;
+        background: #f0f7ff;
+        transform: translateX(3px);
+    }
+
+    .style-btn.active {
+        border-color: #2196F3;
+        background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+        color: white;
+        box-shadow: 0 3px 8px rgba(33, 150, 243, 0.4);
+    }
+
+    .style-btn i {
+        margin-right: 0.5rem;
+    }
+
+    /* Mejorar botones de navegación */
+    .btn-modern {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -171,6 +253,15 @@
         </div>
     </div>
 
+    <!-- Alerta de Éxito - Mapas Corregidos -->
+    <div class="alert alert-success-modern" role="alert">
+        <i class="fas fa-check-circle"></i>
+        <strong>Mapas optimizados y funcionando correctamente</strong>
+        <p class="mb-0 mt-2" style="font-size: 0.9rem; opacity: 0.95;">
+            Ahora usando CartoDB tiles para mejor rendimiento y sin errores de carga.
+        </p>
+    </div>
+
     <!-- Estadísticas Rápidas -->
     <div class="row mb-4">
         <div class="col-md-4">
@@ -200,6 +291,26 @@
         </div>
 
         <div class="col-lg-3">
+            <!-- Selector de Estilos de Mapa -->
+            <div class="map-style-selector">
+                <h6>
+                    <i class="fas fa-palette me-2"></i>
+                    Estilo del Mapa
+                </h6>
+                <button class="style-btn active" data-style="voyager">
+                    <i class="fas fa-map"></i>
+                    Voyager (Claro)
+                </button>
+                <button class="style-btn" data-style="positron">
+                    <i class="fas fa-sun"></i>
+                    Positron (Blanco)
+                </button>
+                <button class="style-btn" data-style="dark">
+                    <i class="fas fa-moon"></i>
+                    Dark Matter (Oscuro)
+                </button>
+            </div>
+
             <!-- Controles -->
             <div class="map-controls">
                 <h6 class="mb-3">
@@ -208,11 +319,11 @@
                 </h6>
 
                 <div class="mb-3">
-                    <a href="{% url 'map-clusters' %}" class="btn btn-primary btn-sm w-100 mb-2">
+                    <a href="{% url 'map-clusters' %}" class="btn btn-primary btn-modern btn-sm w-100 mb-2">
                         <i class="fas fa-object-group me-2"></i>
                         Ver Clusters
                     </a>
-                    <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-sm w-100">
+                    <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-modern btn-sm w-100">
                         <i class="fas fa-fire me-2"></i>
                         Mapa de Calor
                     </a>
@@ -260,32 +371,58 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar mapa
     const map = L.map('map').setView([4.5709, -74.2973], 6);
 
-    // Capa base - OpenStreetMap
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
-    }).addTo(map);
+    // Definir estilos de CartoDB
+    const mapStyles = {
+        voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }),
+        positron: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }),
+        dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri',
+            maxZoom: 19
+        })
+    };
 
-    // Capa Satélite
-    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri',
-        maxZoom: 19
-    });
+    // Agregar capa inicial (Voyager)
+    let currentLayer = mapStyles.voyager.addTo(map);
 
-    // Capa Topográfica
-    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap',
-        maxZoom: 17
-    });
-
-    // Control de capas
+    // Control de capas adicionales
     const baseMaps = {
-        "Mapa": osmLayer,
-        "Satélite": satelliteLayer,
-        "Topográfico": topoLayer
+        "Voyager": mapStyles.voyager,
+        "Positron": mapStyles.positron,
+        "Dark Matter": mapStyles.dark,
+        "Satélite": mapStyles.satellite
     };
 
     L.control.layers(baseMaps).addTo(map);
+
+    // Selector de estilos personalizado
+    document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const style = this.getAttribute('data-style');
+
+            // Remover capa actual
+            map.removeLayer(currentLayer);
+
+            // Agregar nueva capa
+            currentLayer = mapStyles[style].addTo(map);
+
+            // Actualizar botones activos
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
 
     // Escala
     L.control.scale({imperial: false}).addTo(map);

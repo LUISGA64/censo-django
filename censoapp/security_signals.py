@@ -16,12 +16,21 @@ def get_client_ip(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
+    
+    # Si no hay IP (ej: en tests), usar IP de prueba
+    if not ip:
+        ip = '127.0.0.1'
+    
     return ip
 
 
 @receiver(user_logged_in)
 def log_user_login(sender, request, user, **kwargs):
     """Registra login exitoso"""
+    # Verificar que el request tenga META (en tests puede no tenerlo)
+    if not hasattr(request, 'META'):
+        return
+    
     ip_address = get_client_ip(request)
     user_agent = request.META.get('HTTP_USER_AGENT', '')
 
