@@ -20,17 +20,139 @@
         box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35);
     }
 
+    /* Header Compacto */
+    .map-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.25);
+    }
+
     .map-header h3 {
         color: white;
         font-weight: 700;
-        font-size: 1.25rem;
-        margin-bottom: 0.15rem;
+        font-size: 1.3rem;
     }
 
-    .map-header p {
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 0.8rem;
-        margin: 0;
+    /* Barra de Estadísticas Horizontal Moderna */
+    .stats-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-primary .stat-icon {
+        background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+        color: white;
+    }
+
+    .stat-success .stat-icon {
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        color: white;
+    }
+
+    .stat-warning .stat-icon {
+        background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
+        color: white;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-primary .stat-value {
+        color: #2196F3;
+    }
+
+    .stat-success .stat-value {
+        color: #4CAF50;
+    }
+
+    .stat-warning .stat-value {
+        color: #FF9800;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6B7280;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Controles de Navegación Integrados */
+    .map-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        color: #1e3c72;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: #1e3c72;
+        border-color: #1e3c72;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+
+    .action-btn i {
+        font-size: 1rem;
     }
 
     #map {
@@ -470,32 +592,56 @@
         #map {
             min-height: 500px;
         }
+
+        .stats-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .stat-item {
+            width: 100%;
+        }
+
+        .map-actions {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .action-btn {
+            flex: 1;
+        }
     }
 
     @media (max-width: 768px) {
         .map-header {
-            padding: 0.5rem;
+            padding: 0.75rem 1rem;
             border-radius: 0 0 10px 10px;
         }
 
         .map-header h3 {
-            font-size: 1rem;
-        }
-
-        .map-header p {
-            font-size: 0.75rem;
+            font-size: 1.1rem;
         }
 
         #map {
             min-height: 400px;
         }
 
-        .stat-mini-card h3 {
-            font-size: 1.25rem;
+        .stats-bar {
+            padding: 1rem;
         }
 
-        .stat-mini-card p {
-            font-size: 0.75rem;
+        .stat-item {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .stat-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
         }
 
         .map-sidebar-container {
@@ -510,27 +656,28 @@
 
     @media (max-width: 576px) {
         .map-header h3 {
-            font-size: 0.95rem;
-        }
-
-        .map-header p {
-            font-size: 0.7rem;
+            font-size: 1rem;
         }
 
         #map {
             min-height: 350px;
         }
 
-        .stat-mini-card {
-            padding: 0.6rem;
-        }
-
-        .stat-mini-card h3 {
+        .stat-value {
             font-size: 1.1rem;
         }
 
-        .stat-mini-card p {
+        .stat-label {
             font-size: 0.7rem;
+        }
+
+        .action-btn span {
+            display: none;
+        }
+
+        .action-btn {
+            justify-content: center;
+            min-width: 44px;
         }
     }
     }
@@ -539,53 +686,66 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Header -->
+    <!-- Header Compacto -->
     <div class="map-header">
-        <div class="row">
-            <div class="col-12">
-                <h3 class="mb-2">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h3 class="mb-0">
                     <i class="fas fa-map-marked-alt me-2"></i>
                     Mapa Geográfico de Veredas
                 </h3>
-                <p class="mb-0">Visualización territorial y distribución poblacional</p>
+            </div>
+            <div class="col-md-6 text-end">
                 {% if organization %}
-                    <p class="mb-0 mt-2">
-                        <i class="fas fa-building me-2"></i>
-                        <strong>{{ organization.organization_name }}</strong>
-                    </p>
+                    <small class="text-white-50">
+                        <i class="fas fa-building me-1"></i>
+                        {{ organization.organization_name }}
+                    </small>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Alerta de Éxito - Mapas Corregidos -->
-    <div class="alert alert-success-modern" role="alert">
-        <i class="fas fa-check-circle"></i>
-        <strong>Mapas optimizados y funcionando correctamente</strong>
-        <p class="mb-0 mt-2" style="font-size: 0.9rem; opacity: 0.95;">
-            Ahora usando CartoDB tiles para mejor rendimiento y sin errores de carga.
-        </p>
-    </div>
+    <!-- Barra de Estadísticas Compacta (Horizontal) -->
+    <div class="stats-bar mb-4">
+        <div class="stat-item stat-primary">
+            <div class="stat-icon">
+                <i class="fas fa-map-pin"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ total_veredas }}</div>
+                <div class="stat-label">Veredas</div>
+            </div>
+        </div>
+        <div class="stat-item stat-success">
+            <div class="stat-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ veredas_con_ubicacion }}</div>
+                <div class="stat-label">Con GPS</div>
+            </div>
+        </div>
+        <div class="stat-item stat-warning">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ total_veredas|add:"-"|add:veredas_con_ubicacion|default:0 }}</div>
+                <div class="stat-label">Sin GPS</div>
+            </div>
+        </div>
 
-    <!-- Estadísticas Rápidas -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="stat-mini-card">
-                <h3>{{ total_veredas }}</h3>
-                <p><i class="fas fa-map-pin me-2"></i>Veredas Registradas</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-mini-card" style="border-left-color: #4CAF50;">
-                <h3 style="color: #4CAF50;">{{ veredas_con_ubicacion }}</h3>
-                <p><i class="fas fa-map-marker-alt me-2"></i>Con Ubicación GPS</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-mini-card" style="border-left-color: #FF9800;">
-                <h3 style="color: #FF9800;">{{ total_veredas|add:"-"|add:veredas_con_ubicacion|default:0 }}</h3>
-                <p><i class="fas fa-exclamation-triangle me-2"></i>Sin Ubicación</p>
-            </div>
+        <!-- Controles de Navegación Integrados -->
+        <div class="map-actions">
+            <a href="{% url 'map-clusters' %}" class="action-btn" title="Vista de Clusters">
+                <i class="fas fa-object-group"></i>
+                <span>Clusters</span>
+            </a>
+            <a href="{% url 'map-heatmap' %}" class="action-btn" title="Mapa de Calor">
+                <i class="fas fa-fire"></i>
+                <span>Calor</span>
+            </a>
         </div>
     </div>
 
@@ -670,25 +830,9 @@
                 </button>
             </div>
 
-            <!-- Controles de Navegación -->
+            <!-- Leyenda -->
             <div class="map-controls">
                 <h6>
-                    <i class="fas fa-layer-group me-2"></i>
-                    Otras Vistas
-                </h6>
-
-                <a href="{% url 'map-clusters' %}" class="btn btn-primary btn-modern btn-sm w-100 mb-2">
-                    <i class="fas fa-object-group me-2"></i>
-                    Ver Clusters
-                </a>
-                <a href="{% url 'map-heatmap' %}" class="btn btn-warning btn-modern btn-sm w-100">
-                    <i class="fas fa-fire me-2"></i>
-                    Mapa de Calor
-                </a>
-
-                <hr style="margin: 0.75rem 0;">
-
-                <h6 style="margin-top: 0.5rem;">
                     <i class="fas fa-info-circle me-2"></i>
                     Leyenda
                 </h6>
