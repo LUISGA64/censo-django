@@ -147,9 +147,26 @@ def map_heatmap(request):
     # Obtener HTML del mapa
     map_html = m._repr_html_()
 
+    # Calcular estadísticas
+    if organization:
+        total_veredas = Sidewalks.objects.filter(organization_id=organization).count()
+        veredas_con_ubicacion = Sidewalks.objects.filter(
+            organization_id=organization,
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).count()
+    else:
+        total_veredas = Sidewalks.objects.count()
+        veredas_con_ubicacion = Sidewalks.objects.filter(
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).count()
+
     context = {
         'map_html': map_html,
         'organization': organization,
+        'total_veredas': total_veredas,
+        'veredas_con_ubicacion': veredas_con_ubicacion,
     }
 
     return render(request, 'maps/heatmap.html', context)
@@ -298,9 +315,26 @@ def map_clusters(request):
     # Obtener HTML del mapa
     map_html = m._repr_html_()
 
+    # Calcular estadísticas
+    if organization:
+        total_veredas = Sidewalks.objects.filter(organization_id=organization).count()
+        veredas_con_ubicacion = Sidewalks.objects.filter(
+            organization_id=organization,
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).count()
+    else:
+        total_veredas = Sidewalks.objects.count()
+        veredas_con_ubicacion = Sidewalks.objects.filter(
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).count()
+
     context = {
         'map_html': map_html,
         'organization': organization,
+        'total_veredas': total_veredas,
+        'veredas_con_ubicacion': veredas_con_ubicacion,
     }
 
     return render(request, 'maps/clusters.html', context)
