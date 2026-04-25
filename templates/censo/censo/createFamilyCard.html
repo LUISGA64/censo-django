@@ -1,0 +1,424 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block title %}Nueva Ficha Familiar{% endblock %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <style>
+        /* ===================================
+           DISEÑO PROFESIONAL CORPORATIVO
+           Color principal: #2196F3
+           =================================== */
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: #6B7280;
+            font-size: 1.2rem;
+        }
+
+        .breadcrumb-item a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: #374151;
+        }
+
+        /* Header Card */
+        .card-header-custom {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem;
+        }
+
+        .card-header-custom h4 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Info box */
+        .info-box {
+            background: #E3F2FD;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box i {
+            color: #2196F3;
+            margin-right: 0.5rem;
+        }
+
+        /* Section title */
+        .section-title {
+            color: #2196F3;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E5E7EB;
+            margin-top: 2rem;
+        }
+
+        .section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+        }
+
+        /* Botones */
+        .btn-save {
+            background: #82D616;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: #6BB012;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(130, 214, 22, 0.4);
+        }
+
+        .btn-save:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Formularios */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.15);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .asteriskField {
+            color: #EF4444;
+            font-weight: bold;
+            margin-left: 0.2rem;
+        }
+
+        /* Campos validados */
+        .form-control.is-valid,
+        .form-select.is-valid {
+            border-color: #4CAF50;
+        }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #EF4444;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-header-custom {
+                padding: 1rem;
+            }
+
+            .card-header-custom h4 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'home' %}">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'familyCardIndex' %}">
+                        <i class="fas fa-house-user"></i> Fichas Familiares
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-plus"></i> Nueva Ficha
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Card Principal -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <!-- Header -->
+                    <div class="card-header-custom">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div>
+                                <h4 class="mb-2">
+                                    <i class="fas fa-folder-plus me-2"></i>
+                                    Nueva Ficha Familiar
+                                </h4>
+                                <p class="mb-0" style="opacity: 0.9; font-size: 0.95rem;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Complete la información de la vivienda y del cabeza de familia
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Info box -->
+                        <div class="info-box">
+                            <div>
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>Instrucciones:</strong>
+                            </div>
+                            <ul class="mb-0 mt-2" style="padding-left: 1.5rem;">
+                                <li>Los campos marcados con <span class="text-danger fw-bold">*</span> son obligatorios</li>
+                                <li>El cabeza de familia debe ser mayor de 18 años</li>
+                                <li>Verifique que el documento de identidad no esté registrado previamente</li>
+                            </ul>
+                        </div>
+
+                        <!-- Formulario -->
+                        <form method="post" id="familyCardForm" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Sección: Datos de la Vivienda -->
+                            <div class="section-title">
+                                <i class="fas fa-home"></i>
+                                Datos de la Vivienda
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    {{ family_card_form.sidewalk_home|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ family_card_form.zone|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ family_card_form.organization|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <!-- Sección: Datos del Cabeza de Familia -->
+                            <div class="section-title">
+                                <i class="fas fa-user-tie"></i>
+                                Datos del Cabeza de Familia
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    {{ person_form.first_name_1|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.first_name_2|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.last_name_1|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.last_name_2|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.document_type|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.identification_person|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.date_birth|as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ person_form.gender|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.kinship|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.civil_state|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.education_level|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.occupation|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.social_insurance|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.eps|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.handicap|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.cell_phone|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ person_form.personal_email|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <!-- Botones de Acción -->
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                <a href="{% url 'familyCardIndex' %}"
+                                   class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Volver al Listado
+                                </a>
+                                <button type="submit"
+                                        class="btn btn-save"
+                                        id="submitBtn">
+                                    <i class="fas fa-save me-2"></i>
+                                    Guardar Ficha Familiar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('familyCardForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Validación de edad al cambiar fecha de nacimiento
+            const birthDateInput = document.querySelector('input[name="date_birth"]');
+            if (birthDateInput) {
+                birthDateInput.addEventListener('change', function() {
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+
+                    if (age < 18) {
+                        this.setCustomValidity('El cabeza de familia debe ser mayor de 18 años');
+                        this.classList.add('is-invalid');
+                        this.classList.remove('is-valid');
+
+                        let feedback = this.parentElement.querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            this.parentElement.appendChild(feedback);
+                        }
+                        feedback.textContent = `El cabeza de familia debe ser mayor de 18 años (edad actual: ${age} años)`;
+                    } else {
+                        this.setCustomValidity('');
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                });
+            }
+
+            // Validación de documento en tiempo real
+            const documentInput = document.querySelector('input[name="identification_person"]');
+            if (documentInput) {
+                documentInput.addEventListener('blur', function() {
+                    if (this.value && this.value.length < 6) {
+                        this.setCustomValidity('El documento debe tener al menos 6 caracteres');
+                        this.classList.add('is-invalid');
+
+                        let feedback = this.parentElement.querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            this.parentElement.appendChild(feedback);
+                        }
+                        feedback.textContent = 'El documento debe tener al menos 6 caracteres';
+                    } else {
+                        this.setCustomValidity('');
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            }
+
+            // Prevenir doble envío con spinner
+            form.addEventListener('submit', function(e) {
+                if (submitBtn.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Validar formulario antes de enviar
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    form.classList.add('was-validated');
+
+                    const firstInvalid = form.querySelector('.is-invalid, :invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                    }
+                    return false;
+                }
+
+                // Deshabilitar botón y mostrar spinner
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+                // Timeout de seguridad
+                setTimeout(function() {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }, 10000);
+            });
+
+            // Marcar campos modificados
+            const allInputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+            allInputs.forEach(function(input) {
+                input.addEventListener('change', function() {
+                    if (this.value) {
+                        this.classList.add('modified');
+                    }
+                });
+            });
+
+            // Auto-focus en el primer campo
+            const firstInput = form.querySelector('select, input:not([type="hidden"])');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+    </script>
+{% endblock javascripts %}
+

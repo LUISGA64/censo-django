@@ -1,0 +1,1335 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Veredas - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<style>
+    /* Header Estilo EMTEL */
+    .map-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+        color: white;
+        padding: 0.75rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35);
+    }
+
+    /* Header Compacto */
+    .map-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 3px 15px rgba(30, 60, 114, 0.25);
+    }
+
+    .map-header h3 {
+        color: white;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    /* Barra de Estadísticas Horizontal Moderna */
+    .stats-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-primary .stat-icon {
+        background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+        color: white;
+    }
+
+    .stat-success .stat-icon {
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        color: white;
+    }
+
+    .stat-warning .stat-icon {
+        background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
+        color: white;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-primary .stat-value {
+        color: #2196F3;
+    }
+
+    .stat-success .stat-value {
+        color: #4CAF50;
+    }
+
+    .stat-warning .stat-value {
+        color: #FF9800;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6B7280;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Controles de Navegación Integrados */
+    .map-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        color: #1e3c72;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: #1e3c72;
+        border-color: #1e3c72;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+
+    .action-btn i {
+        font-size: 1rem;
+    }
+
+    #map {
+        height: 100%;
+        min-height: 650px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1;
+    }
+
+    /* Contenedor principal - Mapa a ancho completo */
+    .map-row-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .map-main-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Selector de Estilos Flotante (sobre el mapa - esquina superior izquierda) */
+    .map-style-control {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: white;
+        padding: 8px;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .style-control-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #e0e0e0;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #666;
+    }
+
+    .style-control-btn:hover {
+        border-color: #1e3c72;
+        background: #f0f7ff;
+        color: #1e3c72;
+        transform: scale(1.05);
+    }
+
+    .style-control-btn.active {
+        border-color: #1e3c72;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+    }
+
+    /* Leyenda Flotante (sobre el mapa - esquina inferior derecha) */
+    .map-legend-control {
+        position: absolute;
+        bottom: 30px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        padding: 12px;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        min-width: 140px;
+    }
+
+    .legend-header {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #1e3c72;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+    }
+
+    .legend-items {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    .legend-color {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Botón Pantalla Completa */
+    .btn-fullscreen {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        color: #1e3c72;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-fullscreen:hover {
+        background: #1e3c72;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Ocultar elementos obsoletos del sidebar */
+    .map-controls,
+    .map-sidebar-container,
+    .map-style-selector {
+        display: none !important;
+    }
+
+    .leaflet-popup-content {
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    /* Labels de marcadores (cantidad de personas) */
+    .marker-label {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .marker-label::before {
+        display: none !important;
+    }
+
+    /* Popup personalizado */
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .custom-popup .leaflet-popup-tip {
+        background: white;
+    }
+
+    .map-legend {
+        background: white;
+        padding: 0.75rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .legend-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+
+    /* Alerta de Éxito */
+    .alert-success-modern {
+        background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-success-modern i {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .alert-success-modern strong {
+        font-weight: 700;
+    }
+
+    /* Selector de Estilos de Mapa */
+    .map-style-selector {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
+    }
+
+    .map-style-selector h6 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #2196F3;
+        margin-bottom: 0.75rem;
+    }
+
+    .style-btn {
+        width: 100%;
+        padding: 0.6rem;
+        margin-bottom: 0.5rem;
+        border: 2px solid #e0e0e0;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #666;
+    }
+
+    .style-btn:hover {
+        border-color: #2196F3;
+        background: #f0f7ff;
+        transform: translateX(3px);
+    }
+
+    .style-btn.active {
+        border-color: #2196F3;
+        background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+        color: white;
+        box-shadow: 0 3px 8px rgba(33, 150, 243, 0.4);
+    }
+
+    .style-btn i {
+        margin-right: 0.5rem;
+    }
+
+    /* Modo Pantalla Completa */
+    .fullscreen-mode {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: white;
+        margin: 0 !important;
+    }
+
+    .fullscreen-mode #map {
+        height: 100vh !important;
+        border-radius: 0 !important;
+        min-height: 100vh !important;
+    }
+
+    /* Ocultar controles normales en modo pantalla completa */
+    .fullscreen-mode .map-style-control,
+    .fullscreen-mode .map-legend-control,
+    .fullscreen-mode .btn-fullscreen {
+        display: none !important;
+    }
+
+    /* Header Flotante en Pantalla Completa */
+    .fullscreen-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.95) 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+    }
+
+    .fullscreen-mode .fullscreen-header {
+        display: block;
+        animation: slideInDown 0.5s ease;
+    }
+    .btn-modern {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Botón Pantalla Completa */
+    .btn-fullscreen {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e3c72;
+    }
+
+    .btn-fullscreen:hover {
+        background: #1e3c72;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .btn-fullscreen i {
+        margin-right: 0.5rem;
+    }
+
+    /* Modo Pantalla Completa */
+    .fullscreen-mode {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: white;
+        margin: 0 !important;
+    }
+
+    .fullscreen-mode #map {
+        height: 100vh !important;
+        border-radius: 0 !important;
+        min-height: 100vh !important;
+    }
+
+    /* Header Flotante en Pantalla Completa */
+    .fullscreen-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.95) 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+    }
+
+    .fullscreen-mode .fullscreen-header {
+        display: block;
+        animation: slideInDown 0.5s ease;
+    }
+
+    .fullscreen-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .fullscreen-header p {
+        margin: 0;
+        font-size: 0.75rem;
+        opacity: 0.9;
+        color: white;
+    }
+
+    /* Leyenda Flotante en Pantalla Completa */
+    .fullscreen-legend {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+        min-width: 200px;
+    }
+
+    .fullscreen-mode .fullscreen-legend {
+        display: block;
+        animation: slideInUp 0.5s ease;
+    }
+
+    .fullscreen-legend h6 {
+        margin: 0 0 0.75rem 0;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1e3c72;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #1e3c72;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Selector de Estilos Flotante */
+    .fullscreen-style-selector {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.75rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        display: none;
+    }
+
+    .fullscreen-mode .fullscreen-style-selector {
+        display: block;
+        animation: slideInRight 0.5s ease;
+    }
+
+    .fullscreen-style-btn {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        margin-bottom: 0.3rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #666;
+        display: block;
+        width: 100%;
+        text-align: left;
+    }
+
+    .fullscreen-style-btn:last-child {
+        margin-bottom: 0;
+    }
+
+    .fullscreen-style-btn.active {
+        border-color: #1e3c72;
+        background: #1e3c72;
+        color: white;
+    }
+
+    .fullscreen-style-btn:hover:not(.active) {
+        border-color: #2196F3;
+        background: #f0f7ff;
+    }
+
+    /* Botón Salir de Pantalla Completa */
+    .btn-exit-fullscreen {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: rgba(239, 83, 80, 0.95);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4);
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: none;
+    }
+
+    .fullscreen-mode .btn-exit-fullscreen {
+        display: block;
+        animation: slideInLeft 0.5s ease;
+    }
+
+    .btn-exit-fullscreen:hover {
+        background: rgba(211, 47, 47, 0.95);
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(239, 83, 80, 0.5);
+    }
+
+    .btn-exit-fullscreen i {
+        margin-right: 0.5rem;
+    }
+
+    /* Animaciones */
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Ocultar elementos en modo pantalla completa */
+    .fullscreen-mode .map-sidebar-container {
+        display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        #map {
+            min-height: 500px;
+        }
+
+        .stats-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .stat-item {
+            width: 100%;
+        }
+
+        .map-actions {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .action-btn {
+            flex: 1;
+        }
+
+        .map-legend-control {
+            bottom: 50px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .map-header {
+            padding: 0.75rem 1rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .map-header h3 {
+            font-size: 1.1rem;
+        }
+
+        #map {
+            min-height: 450px;
+        }
+
+        .stats-bar {
+            padding: 1rem;
+        }
+
+        .stat-item {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .stat-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+        }
+
+        .style-control-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+        }
+
+        .map-legend-control {
+            padding: 10px;
+            min-width: 120px;
+        }
+
+        .legend-header {
+            font-size: 0.75rem;
+        }
+
+        .legend-item {
+            font-size: 0.7rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .map-header h3 {
+            font-size: 1rem;
+        }
+
+        #map {
+            min-height: 400px;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+        }
+
+        .action-btn span {
+            display: none;
+        }
+
+        .action-btn {
+            justify-content: center;
+            min-width: 44px;
+        }
+
+        .style-control-btn {
+            width: 34px;
+            height: 34px;
+            font-size: 0.9rem;
+        }
+
+        .map-legend-control {
+            padding: 8px;
+            min-width: 110px;
+            bottom: 40px;
+        }
+
+        .legend-header {
+            font-size: 0.7rem;
+            margin-bottom: 6px;
+        }
+
+        .legend-item {
+            font-size: 0.65rem;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+        }
+    }
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Compacto -->
+    <div class="map-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h3 class="mb-0">
+                    <i class="fas fa-map-marked-alt me-2"></i>
+                    Mapa Geográfico de Veredas
+                </h3>
+            </div>
+            <div class="col-md-6 text-end">
+                {% if organization %}
+                    <small class="text-white-50">
+                        <i class="fas fa-building me-1"></i>
+                        {{ organization.organization_name }}
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Estadísticas Compacta (Horizontal) -->
+    <div class="stats-bar mb-4">
+        <div class="stat-item stat-primary">
+            <div class="stat-icon">
+                <i class="fas fa-map-pin"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ total_veredas }}</div>
+                <div class="stat-label">Veredas</div>
+            </div>
+        </div>
+        <div class="stat-item stat-success">
+            <div class="stat-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ veredas_con_ubicacion }}</div>
+                <div class="stat-label">Con GPS</div>
+            </div>
+        </div>
+        <div class="stat-item stat-warning">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ total_veredas|add:"-"|add:veredas_con_ubicacion|default:0 }}</div>
+                <div class="stat-label">Sin GPS</div>
+            </div>
+        </div>
+
+        <!-- Controles de Navegación Integrados -->
+        <div class="map-actions">
+            <a href="{% url 'map-clusters' %}" class="action-btn" title="Vista de Clusters">
+                <i class="fas fa-object-group"></i>
+                <span>Clusters</span>
+            </a>
+            <a href="{% url 'map-heatmap' %}" class="action-btn" title="Mapa de Calor">
+                <i class="fas fa-fire"></i>
+                <span>Calor</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mapa a Ancho Completo con Controles Flotantes -->
+    <div class="map-row-container" id="mapContainer">
+        <div class="map-main-container" style="position: relative; width: 100%;">
+            <!-- Botón Pantalla Completa -->
+            <button class="btn-fullscreen" id="btnFullscreen" title="Ver en pantalla completa">
+                <i class="fas fa-expand"></i>
+            </button>
+
+            <!-- Selector de Estilos Flotante (sobre el mapa) -->
+            <div class="map-style-control">
+                <button class="style-control-btn active" data-style="voyager" title="Voyager (Claro)">
+                    <i class="fas fa-map"></i>
+                </button>
+                <button class="style-control-btn" data-style="positron" title="Positron (Minimalista)">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="style-control-btn" data-style="dark" title="Dark Matter (Oscuro)">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <!-- Leyenda Flotante (sobre el mapa) -->
+            <div class="map-legend-control">
+                <div class="legend-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <span>Leyenda</span>
+                </div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F44336;"></div>
+                        <span>> 100</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF9800;"></div>
+                        <span>50-100</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4CAF50;"></div>
+                        <span>20-50</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2196F3;"></div>
+                        <span>< 20</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Flotante (solo visible en pantalla completa) -->
+            <div class="fullscreen-header">
+                <h4><i class="fas fa-map-marked-alt me-2"></i>CENSO WEB</h4>
+                <p>Mapa Geográfico de Veredas</p>
+            </div>
+
+            <!-- Selector de Estilos Flotante para Fullscreen -->
+            <div class="fullscreen-style-selector">
+                <button class="fullscreen-style-btn active" data-style="voyager">
+                    <i class="fas fa-map me-1"></i> Voyager
+                </button>
+                <button class="fullscreen-style-btn" data-style="positron">
+                    <i class="fas fa-sun me-1"></i> Positron
+                </button>
+                <button class="fullscreen-style-btn" data-style="dark">
+                    <i class="fas fa-moon me-1"></i> Dark
+                </button>
+            </div>
+
+            <!-- Leyenda Flotante para Fullscreen -->
+            <div class="fullscreen-legend">
+                <h6><i class="fas fa-info-circle me-2"></i>Leyenda</h6>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #F44336;"></div>
+                    <span>> 100 personas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF9800;"></div>
+                    <span>50-100 personas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>20-50 personas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>< 20 personas</span>
+                </div>
+            </div>
+
+            <!-- Botón Salir de Pantalla Completa -->
+            <button class="btn-exit-fullscreen" id="btnExitFullscreen" title="Salir de pantalla completa (ESC)">
+                <i class="fas fa-times"></i>
+                Salir (ESC)
+            </button>
+
+            <div id="map"></div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+{{ block.super }}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar mapa
+    const map = L.map('map').setView([4.5709, -74.2973], 6);
+
+    // Definir estilos de CartoDB
+    const mapStyles = {
+        voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }),
+        positron: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }),
+        dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri',
+            maxZoom: 19
+        })
+    };
+
+    // Agregar capa inicial (Voyager)
+    let currentLayer = mapStyles.voyager.addTo(map);
+
+    // Control de capas adicionales
+    const baseMaps = {
+        "Voyager": mapStyles.voyager,
+        "Positron": mapStyles.positron,
+        "Dark Matter": mapStyles.dark,
+        "Satélite": mapStyles.satellite
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+
+    // Selector de estilos flotante (sobre el mapa)
+    document.querySelectorAll('.style-control-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const style = this.getAttribute('data-style');
+
+            // Remover capa actual
+            map.removeLayer(currentLayer);
+
+            // Agregar nueva capa
+            currentLayer = mapStyles[style].addTo(map);
+
+            // Actualizar botones activos (controles flotantes y fullscreen)
+            document.querySelectorAll('.style-control-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Sincronizar el otro selector
+            const otherSelector = this.classList.contains('style-control-btn') ? '.fullscreen-style-btn' : '.style-control-btn';
+            document.querySelectorAll(otherSelector).forEach(b => {
+                if (b.getAttribute('data-style') === style) {
+                    b.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // Selector de estilos en modo fullscreen
+    document.querySelectorAll('.fullscreen-style-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const style = this.getAttribute('data-style');
+
+            // Remover capa actual
+            map.removeLayer(currentLayer);
+
+            // Agregar nueva capa
+            currentLayer = mapStyles[style].addTo(map);
+
+            // Actualizar botones activos
+            document.querySelectorAll('.style-control-btn, .fullscreen-style-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Sincronizar selector flotante
+            document.querySelectorAll('.style-control-btn').forEach(b => {
+                if (b.getAttribute('data-style') === style) {
+                    b.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // ===== MODO PANTALLA COMPLETA =====
+    const mapContainer = document.getElementById('mapContainer');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const btnExitFullscreen = document.getElementById('btnExitFullscreen');
+    let isFullscreen = false;
+
+    // Función para entrar en modo pantalla completa
+    function enterFullscreen() {
+        mapContainer.classList.add('fullscreen-mode');
+        isFullscreen = true;
+
+        // Actualizar ícono del botón
+        btnFullscreen.innerHTML = '<i class="fas fa-compress"></i> <span class="d-none d-md-inline">Salir</span>';
+
+        // Invalidar el tamaño del mapa para que se adapte
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        console.log('✅ Modo pantalla completa activado');
+    }
+
+    // Función para salir del modo pantalla completa
+    function exitFullscreen() {
+        mapContainer.classList.remove('fullscreen-mode');
+        isFullscreen = false;
+
+        // Restaurar ícono del botón
+        btnFullscreen.innerHTML = '<i class="fas fa-expand"></i> <span class="d-none d-md-inline">Pantalla Completa</span>';
+
+        // Invalidar el tamaño del mapa para que se adapte
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        console.log('✅ Modo normal restaurado');
+    }
+
+    // Toggle pantalla completa
+    function toggleFullscreen() {
+        if (isFullscreen) {
+            exitFullscreen();
+        } else {
+            enterFullscreen();
+        }
+    }
+
+    // Event listeners
+    btnFullscreen.addEventListener('click', toggleFullscreen);
+    btnExitFullscreen.addEventListener('click', exitFullscreen);
+
+    // Salir con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isFullscreen) {
+            exitFullscreen();
+        }
+    });
+
+    // Escala
+    L.control.scale({imperial: false}).addTo(map);
+
+    // Cargar datos de veredas
+    fetch('{% url "map-sidewalks-data" %}')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Datos recibidos:', data);
+
+            if (!data.features || data.features.length === 0) {
+                console.warn('⚠️ No hay veredas con ubicación GPS');
+                alert('No hay veredas con ubicación GPS registrada');
+                return;
+            }
+
+            console.log(`✅ Cargando ${data.features.length} veredas`);
+
+            // Crear capa GeoJSON con marcadores mejorados
+            const geojsonLayer = L.geoJSON(data, {
+                pointToLayer: function(feature, latlng) {
+                    const props = feature.properties;
+                    const personas = props.personas || 0;
+
+                    console.log(`📍 Marcador: ${props.name} - ${personas} personas`);
+
+                    // Color según población
+                    let color = '#2196F3'; // Azul (< 20)
+                    if (personas > 100) {
+                        color = '#F44336'; // Rojo
+                    } else if (personas > 50) {
+                        color = '#FF9800'; // Naranja
+                    } else if (personas > 20) {
+                        color = '#4CAF50'; // Verde
+                    }
+
+                    // Radio proporcional a población (mínimo 8, máximo 30)
+                    const radius = Math.max(8, Math.min(personas / 5 + 8, 30));
+
+                    // Crear marcador circular
+                    const marker = L.circleMarker(latlng, {
+                        radius: radius,
+                        fillColor: color,
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    });
+
+                    // Agregar label con la cantidad de personas (siempre visible)
+                    const labelContent = `<div style="
+                        background: ${color};
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        font-weight: bold;
+                        font-size: 11px;
+                        white-space: nowrap;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                        text-align: center;
+                        min-width: 24px;
+                    ">${personas}</div>`;
+
+                    marker.bindTooltip(labelContent, {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'marker-label',
+                        offset: [0, 0]
+                    });
+
+                    return marker;
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    const personas = props.personas || 0;
+                    const fichas = props.fichas || 0;
+
+                    // Popup detallado (aparece al hacer click)
+                    const popupContent = `
+                        <div style="min-width: 220px; font-family: 'Open Sans', sans-serif;">
+                            <h6 style="color: #1e3c72; margin-bottom: 10px; font-weight: 700; font-size: 1.1rem;">
+                                <i class="fas fa-map-marker-alt me-2"></i>${props.name}
+                            </h6>
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <p style="margin: 5px 0; display: flex; justify-content: space-between;">
+                                    <span><i class="fas fa-users" style="color: #2196F3;"></i> <strong>Personas:</strong></span>
+                                    <span style="font-weight: 700; color: #2196F3;">${personas}</span>
+                                </p>
+                                <p style="margin: 5px 0; display: flex; justify-content: space-between;">
+                                    <span><i class="fas fa-home" style="color: #4CAF50;"></i> <strong>Fichas:</strong></span>
+                                    <span style="font-weight: 700; color: #4CAF50;">${fichas}</span>
+                                </p>
+                            </div>
+                            ${props.description ? `<p style="margin: 5px 0; font-size: 0.85em; color: #666; font-style: italic;">${props.description}</p>` : ''}
+                            <a href="/mapa/vereda/${props.id}/"
+                               class="btn btn-primary btn-sm w-100"
+                               style="text-decoration: none; margin-top: 10px;">
+                                <i class="fas fa-arrow-right me-2"></i>Ver Detalle Completo
+                            </a>
+                        </div>
+                    `;
+
+                    layer.bindPopup(popupContent, {
+                        maxWidth: 300,
+                        className: 'custom-popup'
+                    });
+
+                    // Tooltip con nombre al pasar el mouse
+                    layer.on('mouseover', function() {
+                        this.bindTooltip(`<strong>${props.name}</strong><br>${personas} personas`, {
+                            permanent: false,
+                            direction: 'top',
+                            offset: [0, -10]
+                        }).openTooltip();
+                    });
+                }
+            }).addTo(map);
+
+            // Ajustar zoom automáticamente a los marcadores
+            try {
+                const bounds = geojsonLayer.getBounds();
+                console.log('🎯 Ajustando zoom a marcadores:', bounds);
+
+                // Si solo hay un marcador, hacer zoom pero no demasiado cerca
+                if (data.features.length === 1) {
+                    map.setView(bounds.getCenter(), 13);
+                } else {
+                    // Múltiples marcadores: ajustar a todos con padding
+                    map.fitBounds(bounds, {
+                        padding: [50, 50],
+                        maxZoom: 15,
+                        animate: true,
+                        duration: 1
+                    });
+                }
+
+                console.log('✅ Zoom ajustado correctamente');
+            } catch (error) {
+                console.error('❌ Error ajustando zoom:', error);
+                // Fallback: centrar en Colombia
+                map.setView([4.5709, -74.2973], 6);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error cargando datos del mapa:', error);
+            alert('Error al cargar los datos del mapa. Por favor, recarga la página.');
+        });
+});
+</script>
+{% endblock javascripts %}

@@ -1,0 +1,82 @@
+<!-- Modal Genérico Reutilizable con Alpine.js -->
+<!-- Uso: incluir en base_modern.html o en cualquier template -->
+
+<div x-data="{
+    modalOpen: false,
+    modalTitle: '',
+    modalContent: '',
+    modalType: 'info'
+}">
+    <!-- Trigger example:
+    <button @click="modalOpen = true; modalTitle = 'Título'; modalContent = 'Contenido'">
+        Abrir Modal
+    </button>
+    -->
+
+    <!-- Modal Overlay -->
+    <div x-show="modalOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="modalOpen = false"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
+         style="display: none;">
+
+        <!-- Modal Container -->
+        <div @click.stop
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform scale-90"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-90"
+             class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200"
+                 :class="{
+                     'bg-blue-50': modalType === 'info',
+                     'bg-green-50': modalType === 'success',
+                     'bg-yellow-50': modalType === 'warning',
+                     'bg-red-50': modalType === 'danger'
+                 }">
+                <h3 class="text-xl font-semibold flex items-center gap-3"
+                    :class="{
+                        'text-blue-900': modalType === 'info',
+                        'text-green-900': modalType === 'success',
+                        'text-yellow-900': modalType === 'warning',
+                        'text-red-900': modalType === 'danger'
+                    }">
+                    <i :class="{
+                        'fas fa-info-circle': modalType === 'info',
+                        'fas fa-check-circle': modalType === 'success',
+                        'fas fa-exclamation-triangle': modalType === 'warning',
+                        'fas fa-times-circle': modalType === 'danger'
+                    }"></i>
+                    <span x-text="modalTitle"></span>
+                </h3>
+                <button @click="modalOpen = false"
+                        class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="px-6 py-6 overflow-y-auto max-h-[60vh]">
+                <div x-html="modalContent" class="text-gray-700"></div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button @click="modalOpen = false"
+                        class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

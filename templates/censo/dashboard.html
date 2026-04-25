@@ -1,0 +1,1156 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    /* ==========================================
+       DASHBOARD PROFESIONAL - CENSO WEB
+       Sistema de Diseño basado en Teoría del Color
+       Paleta Principal: #1e3c72 (Azul Noche)
+       Paleta Complementaria: #00909E (Turquesa), #82D616 (Verde Lima)
+       Paleta de Acentos: #F59E0B (Ámbar), #EF4444 (Coral)
+       ========================================== */
+
+    /* ===== VARIABLES CSS GLOBALES ===== */
+    :root {
+        /* Colores Principales */
+        --censo-primary: #1e3c72;
+        --censo-primary-light: #2a5298;
+        --censo-primary-dark: #152d5a;
+
+        /* Colores Complementarios */
+        --censo-secondary: #00909E;
+        --censo-success: #82D616;
+        --censo-warning: #F59E0B;
+        --censo-danger: #EF4444;
+        --censo-info: #3B82F6;
+
+        /* Tonos Neutros */
+        --censo-gray-light: #7e8ba3;
+        --censo-gray: #6B7280;
+        --censo-gray-dark: #374151;
+
+        /* Gradientes */
+        --censo-gradient-primary: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+        --censo-gradient-card: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    }
+
+    /* Animaciones Suaves */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    /* ===== HEADER DEL DASHBOARD - COMPACTO Y MODERNO ===== */
+    .dashboard-header {
+        background: var(--censo-gradient-primary);
+        color: white;
+        padding: 1.5rem 1.75rem;
+        margin: -1.5rem -1.5rem 1.75rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(30, 60, 114, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .dashboard-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: white !important;
+    }
+
+    .dashboard-header p {
+        font-size: 0.9rem;
+        opacity: 0.95;
+        margin: 0;
+        line-height: 1.4;
+        color: white !important;
+    }
+
+    .dashboard-header i,
+    .dashboard-header span,
+    .dashboard-header a {
+        color: white !important;
+    }
+
+    .dashboard-header .btn {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 2px solid rgba(255, 255, 255, 1) !important;
+        color: var(--censo-primary) !important;
+        font-weight: 700;
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-header .btn:hover {
+        background: white !important;
+        border: 2px solid white !important;
+        color: var(--censo-primary-dark) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .dashboard-header .btn i {
+        color: var(--censo-primary) !important;
+        margin-right: 0.5rem;
+    }
+
+    .dashboard-header .btn:hover i {
+        color: var(--censo-primary-dark) !important;
+    }
+
+    /* ===== CARDS DE ESTADÍSTICAS - DISEÑO PREMIUM ===== */
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-left: 4px solid var(--card-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: var(--card-color);
+        opacity: 0.05;
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-left-width: 6px;
+    }
+
+    .stat-card:hover::before {
+        transform: translate(25%, -25%) scale(1.2);
+        opacity: 0.08;
+    }
+
+    /* Colores de Cards - Paleta Complementaria */
+    .stat-card.blue { --card-color: var(--censo-primary); }
+    .stat-card.teal { --card-color: var(--censo-secondary); }
+    .stat-card.lime { --card-color: var(--censo-success); }
+    .stat-card.amber { --card-color: var(--censo-warning); }
+    .stat-card.coral { --card-color: var(--censo-danger); }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        color: white;
+        background: var(--card-color);
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--censo-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--censo-primary-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-description {
+        font-size: 0.8rem;
+        color: var(--censo-gray);
+        line-height: 1.5;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-description i {
+        font-size: 0.85rem;
+    }
+
+    /* ===== CARDS DE GRÁFICOS - DISEÑO PREMIUM ===== */
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .chart-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .chart-header {
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chart-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--censo-primary-dark);
+        margin: 0 0 0.5rem 0;
+        line-height: 1.3;
+        display: flex;
+        align-items: center;
+    }
+
+    .chart-title i {
+        font-size: 1.25rem;
+        margin-right: 0.5rem;
+    }
+
+    .chart-subtitle {
+        font-size: 0.85rem;
+        color: var(--censo-gray);
+        margin: 0;
+        line-height: 1.4;
+        font-weight: 500;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+    }
+
+    /* ===== LISTA DE RESUMEN ===== */
+    .list-group-item {
+        border: none;
+        padding: 0.875rem 0;
+        border-bottom: 1px solid #f0f2f5;
+        transition: all 0.2s ease;
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .list-group-item:hover {
+        background-color: #f9fafb;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        border-radius: 8px;
+        border-bottom-color: transparent;
+    }
+
+    .list-group-item span {
+        font-size: 0.9rem;
+        color: var(--censo-gray-dark);
+        font-weight: 500;
+    }
+
+    .list-group-item strong {
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1rem;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .dashboard-header p {
+            font-size: 0.8rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .chart-card {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- ==================== HEADER ==================== -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>
+                    <i class="fas fa-chart-line me-3"></i>
+                    Dashboard - Censo Web
+                </h2>
+                <p>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Actualizado: {{ "now"|date:"d/m/Y H:i" }}
+                    {% if user_organization %}
+                        <span class="ms-3">
+                            <i class="fas fa-building me-2"></i>
+                            {{ user_organization.organization_name }}
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{% url 'familyCardIndex' %}" class="btn btn-light me-2">
+                    <i class="fas fa-house-user me-2"></i>Fichas
+                </a>
+                <a href="{% url 'personas' %}" class="btn btn-light">
+                    <i class="fas fa-users me-2"></i>Personas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ESTADÍSTICAS ==================== -->
+    <div class="row g-3 mb-4">
+        <!-- Total Personas -->
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s">
+            <div class="stat-card blue">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-label">Total Personas</div>
+                <div class="stat-value">{{ total_personas|default:0 }}</div>
+                <div class="stat-description">
+                    <i class="fas fa-venus text-danger me-2"></i>{{ total_mujeres|default:0 }} Mujeres
+                    <i class="fas fa-mars text-primary ms-2 me-2"></i>{{ total_hombres|default:0 }} Hombres
+                </div>
+            </div>
+        </div>
+
+        <!-- Fichas Familiares -->
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s">
+            <div class="stat-card teal">
+                <div class="stat-icon">
+                    <i class="fas fa-house-user"></i>
+                </div>
+                <div class="stat-label">Fichas Familiares</div>
+                <div class="stat-value">{{ total_fichas|default:0 }}</div>
+                <div class="stat-description">
+                    <i class="fas fa-user-tie me-2"></i>{{ total_cabezas|default:0 }} Cabezas de familia
+                </div>
+            </div>
+        </div>
+
+        <!-- Promedio Personas/Familia -->
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s">
+            <div class="stat-card lime">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-label">Promedio por Familia</div>
+                <div class="stat-value">
+                    {% if total_fichas and total_fichas > 0 %}
+                        {% widthratio total_personas total_fichas 1 %}.{% widthratio total_personas total_fichas 10 %}
+                    {% else %}
+                        0.0
+                    {% endif %}
+                </div>
+                <div class="stat-description">
+                    <i class="fas fa-home me-2"></i>Personas por hogar
+                </div>
+            </div>
+        </div>
+
+        <!-- Veredas -->
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s">
+            <div class="stat-card amber">
+                <div class="stat-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="stat-label">Veredas Registradas</div>
+                <div class="stat-value">{{ total_veredas|default:0 }}</div>
+                <div class="stat-description">
+                    <i class="fas fa-location-dot me-2"></i>Ubicaciones geográficas
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GRÁFICOS PRINCIPALES ==================== -->
+    <div class="row g-3 mb-3">
+        <!-- Pirámide Poblacional -->
+        <div class="col-lg-8 fade-in-up" style="animation-delay: 0.5s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>
+                        Pirámide Poblacional
+                    </h3>
+                    <p class="chart-subtitle">Distribución por grupos de edad y género</p>
+                </div>
+                <div class="chart-container" style="height: 420px;">
+                    <canvas id="piramidePoblacional"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución por Edad -->
+        <div class="col-lg-4 fade-in-up" style="animation-delay: 0.6s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-pie text-success me-2"></i>
+                        Distribución por Edad
+                    </h3>
+                    <p class="chart-subtitle">Análisis de rangos etarios</p>
+                </div>
+                <div class="chart-container" style="height: 340px;">
+                    <canvas id="distribucionEdad"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SEGUNDA FILA - GRÁFICOS ADICIONALES ==================== -->
+    <div class="row g-3 mb-4">
+        <!-- Top Veredas -->
+        <div class="col-lg-6 fade-in-up" style="animation-delay: 0.7s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">
+                            <i class="fas fa-map-marker-alt text-warning me-2"></i>
+                            Top 10 Veredas
+                        </h3>
+                        <p class="chart-subtitle">Por número de personas registradas</p>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 340px;">
+                    <canvas id="topVeredas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Composición Demográfica -->
+        <div class="col-lg-6 fade-in-up" style="animation-delay: 0.8s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-pie text-info me-2"></i>
+                            Composición Demográfica
+                        </h3>
+                        <p class="chart-subtitle">Distribución de género en la comunidad</p>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 340px;">
+                    <canvas id="composicionGenero"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TERCERA FILA - INDICADORES CLAVE ==================== -->
+    <div class="row g-3">
+        <!-- Indicadores Clave -->
+        <div class="col-lg-4 fade-in-up" style="animation-delay: 0.9s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        Indicadores Clave
+                    </h3>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-home me-2" style="color: var(--censo-primary);"></i>Promedio Personas/Hogar</span>
+                        <strong style="color: var(--censo-primary); font-size: 1.15rem;">
+                            {% if total_fichas and total_fichas > 0 %}
+                                {% widthratio total_personas total_fichas 1 %}.{% widthratio total_personas total_fichas 10 %}
+                            {% else %}
+                                0.0
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-percent me-2" style="color: var(--censo-secondary);"></i>% Mujeres</span>
+                        <strong style="color: var(--censo-secondary); font-size: 1.15rem;">
+                            {% if total_personas and total_personas > 0 %}
+                                {% widthratio total_mujeres total_personas 100 %}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-percent me-2" style="color: var(--censo-success);"></i>% Hombres</span>
+                        <strong style="color: var(--censo-success); font-size: 1.15rem;">
+                            {% if total_personas and total_personas > 0 %}
+                                {% widthratio total_hombres total_personas 100 %}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-map-marked-alt me-2" style="color: var(--censo-warning);"></i>Veredas</span>
+                        <strong style="color: var(--censo-warning); font-size: 1.15rem;">{{ total_veredas|default:0 }}</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span><i class="fas fa-file-alt me-2" style="color: var(--censo-gray);"></i>Documentos</span>
+                        <strong style="color: var(--censo-gray); font-size: 1.15rem;">{{ total_documentos|default:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen General -->
+        <div class="col-lg-8 fade-in-up" style="animation-delay: 1s">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">
+                            <i class="fas fa-info-circle text-info me-2"></i>
+                            Resumen Ejecutivo
+                        </h3>
+                        <p class="chart-subtitle">Información consolidada para toma de decisiones</p>
+                    </div>
+                </div>
+                <div class="row g-3 p-3">
+                    <!-- Card Poblacional -->
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, rgba(30,60,114,0.1) 0%, rgba(42,82,152,0.05) 100%); border-left: 4px solid var(--censo-primary);">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-shape icon-sm rounded-circle me-3" style="background: var(--censo-primary);">
+                                    <i class="fas fa-users text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0" style="color: var(--censo-primary-dark); font-weight: 700;">Población Total</h6>
+                                    <small style="color: var(--censo-gray);">Censo actualizado</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <div>
+                                    <h3 class="mb-0" style="color: var(--censo-primary); font-weight: 800;">{{ total_personas|default:0 }}</h3>
+                                    <small style="color: var(--censo-gray);">personas registradas</small>
+                                </div>
+                                <div class="text-end">
+                                    <div style="color: var(--censo-danger); font-weight: 600;">{{ total_mujeres|default:0 }}</div>
+                                    <small style="color: var(--censo-gray);">Mujeres</small>
+                                </div>
+                                <div class="text-end">
+                                    <div style="color: var(--censo-info); font-weight: 600;">{{ total_hombres|default:0 }}</div>
+                                    <small style="color: var(--censo-gray);">Hombres</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Hogares -->
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, rgba(0,144,158,0.1) 0%, rgba(0,144,158,0.05) 100%); border-left: 4px solid var(--censo-secondary);">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-shape icon-sm rounded-circle me-3" style="background: var(--censo-secondary);">
+                                    <i class="fas fa-home text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0" style="color: var(--censo-primary-dark); font-weight: 700;">Hogares</h6>
+                                    <small style="color: var(--censo-gray);">Fichas familiares</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <div>
+                                    <h3 class="mb-0" style="color: var(--censo-secondary); font-weight: 800;">{{ total_fichas|default:0 }}</h3>
+                                    <small style="color: var(--censo-gray);">familias registradas</small>
+                                </div>
+                                <div class="text-end">
+                                    <div style="color: var(--censo-success); font-weight: 600;">
+                                        {% if total_fichas and total_fichas > 0 %}
+                                            {% widthratio total_personas total_fichas 1 %}.{% widthratio total_personas total_fichas 10 %}
+                                        {% else %}
+                                            0.0
+                                        {% endif %}
+                                    </div>
+                                    <small style="color: var(--censo-gray);">Prom/Hogar</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Territorio -->
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, rgba(130,214,22,0.1) 0%, rgba(130,214,22,0.05) 100%); border-left: 4px solid var(--censo-success);">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-shape icon-sm rounded-circle me-3" style="background: var(--censo-success);">
+                                    <i class="fas fa-map-marked-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0" style="color: var(--censo-primary-dark); font-weight: 700;">Territorio</h6>
+                                    <small style="color: var(--censo-gray);">Cobertura geográfica</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <div>
+                                    <h3 class="mb-0" style="color: var(--censo-success); font-weight: 800;">{{ total_veredas|default:0 }}</h3>
+                                    <small style="color: var(--censo-gray);">veredas registradas</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Documentos -->
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.05) 100%); border-left: 4px solid var(--censo-warning);">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-shape icon-sm rounded-circle me-3" style="background: var(--censo-warning);">
+                                    <i class="fas fa-file-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0" style="color: var(--censo-primary-dark); font-weight: 700;">Documentación</h6>
+                                    <small style="color: var(--censo-gray);">Certificados emitidos</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <div>
+                                    <h3 class="mb-0" style="color: var(--censo-warning); font-weight: 800;">{{ total_documentos|default:0 }}</h3>
+                                    <small style="color: var(--censo-gray);">documentos generados</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+{{ block.super }}
+<script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ==========================================
+    // CONFIGURACIÓN GLOBAL DE CHART.JS
+    // ==========================================
+    Chart.defaults.font.family = "'Inter', 'Segoe UI', 'Roboto', sans-serif";
+    Chart.defaults.font.size = 13;
+    Chart.defaults.color = '#6B7280';
+
+    // ==========================================
+    // PALETA DE COLORES PROFESIONAL
+    // Basada en Teoría del Color - Esquema Complementario
+    // ==========================================
+    const COLORS = {
+        // Colores Principales (Azules)
+        primary: '#1e3c72',          // Azul Noche (Principal)
+        primaryLight: '#2a5298',     // Azul Medio
+        primaryDark: '#152d5a',      // Azul Oscuro
+
+        // Colores Complementarios
+        secondary: '#00909E',        // Turquesa (Complementario principal)
+        success: '#82D616',          // Verde Lima (Análogo al turquesa)
+        warning: '#F59E0B',          // Ámbar (Complementario cálido)
+        danger: '#EF4444',           // Coral (Acento cálido)
+        info: '#3B82F6',            // Azul Info
+
+        // Tonos Neutros
+        gray: '#7e8ba3',            // Gris Azulado
+        grayDark: '#374151',        // Gris Oscuro
+        grayLight: '#9CA3AF',       // Gris Claro
+
+        // Paleta Extendida para Gráficos
+        palette: [
+            '#1e3c72',  // Azul Noche
+            '#00909E',  // Turquesa
+            '#82D616',  // Verde Lima
+            '#F59E0B',  // Ámbar
+            '#EF4444',  // Coral
+            '#3B82F6',  // Azul Info
+            '#7e8ba3',  // Gris Azulado
+            '#10B981',  // Esmeralda
+        ],
+
+        // Gradientes
+        gradientPrimary: {
+            start: '#1e3c72',
+            end: '#2a5298'
+        },
+        gradientSecondary: {
+            start: '#00909E',
+            end: '#0dcaf0'
+        }
+    };
+
+    // Función para crear gradientes
+    function createGradient(ctx, color1, color2) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        return gradient;
+    }
+
+    // ==========================================
+    // 1. PIRÁMIDE POBLACIONAL
+    // ==========================================
+    const piramide = document.getElementById('piramidePoblacional');
+    if (piramide) {
+        const labels = {{ piramide_labels|safe }};
+        const hombres = {{ piramide_hombres|safe }};
+        const mujeres = {{ piramide_mujeres|safe }};
+
+        new Chart(piramide, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Hombres',
+                        data: hombres,
+                        backgroundColor: COLORS.primary,
+                        borderColor: COLORS.primaryDark,
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        barPercentage: 0.8
+                    },
+                    {
+                        label: 'Mujeres',
+                        data: mujeres,
+                        backgroundColor: COLORS.secondary,
+                        borderColor: '#007A85',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        barPercentage: 0.8
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 14, weight: '700' },
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            color: COLORS.grayDark
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: COLORS.primary,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 14,
+                        cornerRadius: 10,
+                        titleFont: { size: 14, weight: '700' },
+                        bodyFont: { size: 13 },
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return ' ' + context.dataset.label + ': ' + Math.abs(context.parsed.x) + ' personas';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return Math.abs(value);
+                            },
+                            font: { size: 12, weight: '600' },
+                            color: COLORS.gray
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { size: 12, weight: '700' },
+                            color: COLORS.grayDark
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // 2. DISTRIBUCIÓN POR EDAD
+    // ==========================================
+    const edades = document.getElementById('distribucionEdad');
+    if (edades) {
+        const labels = {{ edades_labels|safe }};
+        const data = {{ edades_data|safe }};
+
+        new Chart(edades, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: COLORS.palette,
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverBorderWidth: 4,
+                    hoverBorderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 12, weight: '600' },
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            color: COLORS.grayDark,
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percent = ((value / total) * 100).toFixed(1);
+                                    return {
+                                        text: `${label}: ${percent}%`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: COLORS.primary,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 14,
+                        cornerRadius: 10,
+                        titleFont: { size: 14, weight: '700' },
+                        bodyFont: { size: 13 },
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(1);
+                                return ` ${context.label}: ${value} personas (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // 3. TOP VEREDAS
+    // ==========================================
+    const veredas = document.getElementById('topVeredas');
+    if (veredas) {
+        const labels = {{ veredas_nombres|safe }};
+        const data = {{ veredas_valores|safe }};
+
+        // Gradiente horizontal dinámico
+        const ctx = veredas.getContext('2d');
+
+        // Crear colores alternados para mejor visualización
+        const backgroundColors = data.map((_, index) => {
+            const colors = [COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning];
+            return colors[index % colors.length];
+        });
+
+        new Chart(veredas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Personas',
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderRadius: 8,
+                    borderWidth: 0,
+                    barPercentage: 0.75
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: COLORS.primary,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 14,
+                        cornerRadius: 10,
+                        titleFont: { size: 14, weight: '700' },
+                        bodyFont: { size: 13 },
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `  ${context.parsed.x} personas registradas`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { size: 12, weight: '600' },
+                            color: COLORS.gray
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { size: 12, weight: '700' },
+                            color: COLORS.grayDark
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // 4. COMPOSICIÓN DE GÉNERO
+    // ==========================================
+    const genero = document.getElementById('composicionGenero');
+    if (genero) {
+        const totalMujeres = {{ total_mujeres|default:0 }};
+        const totalHombres = {{ total_hombres|default:0 }};
+
+        new Chart(genero, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mujeres', 'Hombres'],
+                datasets: [{
+                    data: [totalMujeres, totalHombres],
+                    backgroundColor: [COLORS.danger, COLORS.info],
+                    borderWidth: 4,
+                    borderColor: '#ffffff',
+                    hoverBorderWidth: 6,
+                    hoverBorderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 14, weight: '700' },
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            color: COLORS.grayDark,
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percent = ((value / total) * 100).toFixed(1);
+                                    return {
+                                        text: `${label}: ${value} (${percent}%)`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: COLORS.primary,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 16,
+                        cornerRadius: 10,
+                        titleFont: { size: 15, weight: '700' },
+                        bodyFont: { size: 14 },
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(1);
+                                return ` ${context.label}: ${value} personas (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Agregar texto central con el total
+        const total = totalMujeres + totalHombres;
+        const centerText = {
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+                const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+
+                ctx.save();
+                ctx.font = 'bold 32px Inter';
+                ctx.fillStyle = COLORS.primary;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(total, centerX, centerY - 10);
+
+                ctx.font = '500 14px Inter';
+                ctx.fillStyle = COLORS.gray;
+                ctx.fillText('Total', centerX, centerY + 20);
+                ctx.restore();
+            }
+        };
+
+        genero.chart = Chart.getChart(genero);
+        if (genero.chart) {
+            genero.chart.options.plugins = {
+                ...genero.chart.options.plugins,
+                centerText: centerText
+            };
+        }
+    }
+
+    // Animación de conteo en las cards
+    document.querySelectorAll('.stat-value').forEach(el => {
+        const value = parseInt(el.textContent.replace(/,/g, ''));
+        if (!isNaN(value) && value > 0) {
+            let current = 0;
+            const increment = value / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= value) {
+                    el.textContent = value.toLocaleString('es-CO');
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.floor(current).toLocaleString('es-CO');
+                }
+            }, 30);
+        }
+    });
+});
+</script>
+{% endblock javascripts %}
+

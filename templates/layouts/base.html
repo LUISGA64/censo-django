@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/apple-icon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
+
+    <style>
+        .swal2-popup {
+            font-size: 0.9rem !important;
+        }
+
+        .swal2-zindex {
+            z-index: 10000 !important;
+        }
+
+        .swal2-container {
+            z-index: 20000 !important;
+        }
+
+        /* Mejora de contraste para notificaciones info (azul) */
+        .swal2-icon.swal2-info {
+            border-color: #0056b3 !important;
+            color: #0056b3 !important;
+        }
+
+        .swal2-popup.swal2-toast .swal2-icon.swal2-info {
+            background-color: #0056b3 !important;
+        }
+
+        /* Mejora del título para mejor legibilidad */
+        .swal2-title {
+            color: #2c3e50 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Personalización del ícono info con mejor contraste */
+        .swal2-icon.swal2-info [class^='swal2-icon-content'] {
+            color: #0056b3 !important;
+        }
+
+        /* ===== MEJORA DE CONTRASTE GLOBAL PARA ALERTAS DE BOOTSTRAP ===== */
+
+        /* Alert Success - Verde con excelente contraste */
+        .alert-success {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724 !important; /* Verde oscuro - Ratio 7.4:1 AAA */
+        }
+
+        .alert-success .alert-heading {
+            color: #0f4320 !important;
+            font-weight: 600 !important;
+        }
+
+        .alert-success p,
+        .alert-success li,
+        .alert-success .text-sm,
+        .alert-success span {
+            color: #155724 !important;
+            font-weight: 500 !important;
+        }
+
+        .alert-success strong {
+            color: #0f4320 !important;
+            font-weight: 700 !important;
+        }
+
+        .alert-success .alert-link {
+            color: #0c3618 !important;
+            font-weight: 600 !important;
+            text-decoration: underline;
+        }
+
+        .alert-success .alert-link:hover {
+            color: #051f0d !important;
+        }
+
+        /* Alert Info - Azul con excelente contraste */
+        .alert-info {
+            background-color: #d1ecf1 !important;
+            border-color: #17a2b8 !important;
+            color: #0c5460 !important; /* Azul oscuro - Ratio 7.5:1 AAA */
+        }
+
+        .alert-info .alert-heading {
+            color: #064350 !important;
+            font-weight: 600 !important;
+        }
+
+        .alert-info p,
+        .alert-info li,
+        .alert-info .text-sm,
+        .alert-info span {
+            color: #0c5460 !important;
+            font-weight: 500 !important;
+        }
+
+        .alert-info strong {
+            color: #064350 !important;
+            font-weight: 700 !important;
+        }
+
+        .alert-info .alert-link {
+            color: #0a4a56 !important;
+            font-weight: 600 !important;
+            text-decoration: underline;
+        }
+
+        /* Alert Warning - Amarillo/Dorado con excelente contraste */
+        .alert-warning {
+            background-color: #fff3cd !important;
+            border-color: #ffc107 !important;
+            color: #856404 !important; /* Dorado oscuro - Ratio 7.5:1 AAA */
+        }
+
+        .alert-warning .alert-heading {
+            color: #5a4003 !important;
+            font-weight: 600 !important;
+        }
+
+        .alert-warning p,
+        .alert-warning li,
+        .alert-warning .text-sm,
+        .alert-warning span {
+            color: #856404 !important;
+            font-weight: 500 !important;
+        }
+
+        .alert-warning strong {
+            color: #5a4003 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Alert Danger - Rojo con excelente contraste */
+        .alert-danger {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24 !important; /* Rojo oscuro - Ratio 9.1:1 AAA */
+        }
+
+        .alert-danger .alert-heading {
+            color: #5a1419 !important;
+            font-weight: 600 !important;
+        }
+
+        .alert-danger p,
+        .alert-danger li,
+        .alert-danger .text-sm,
+        .alert-danger span {
+            color: #721c24 !important;
+            font-weight: 500 !important;
+        }
+
+        .alert-danger strong {
+            color: #5a1419 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Mejora de iconos en alertas */
+        .alert i.fas,
+        .alert i.fa {
+            opacity: 1 !important;
+        }
+
+        /* Asegurar legibilidad de texto pequeño */
+        .alert .text-sm {
+            font-size: 0.9rem !important;
+            line-height: 1.5 !important;
+        }
+    </style>
+
+<style>
+    .lengthMenuWrapper .dataTables_length label {
+    display: flex;
+    align-items: center;
+}
+
+.lengthMenuWrapper .dataTables_length label select {
+    margin-left: 10px; /* Adjust the value as needed */
+}
+    
+</style>
+
+    <title>
+        Censo Web - {% block title %}{% endblock %}
+    </title>
+
+    <!--     Fonts and icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet"/>
+    <!-- Nucleo Icons -->
+    <link href="{% static 'assets/css/nucleo-icons.css' %}" rel="stylesheet"/>
+    <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet"/>
+
+{#    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>#}
+    <script src="https://kit.fontawesome.com/5c9d5dba7a.js" crossorigin="anonymous"></script>
+
+    <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet"/>
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{% static 'assets/css/soft-ui-dashboard.css' %}" rel="stylesheet"/>
+
+    <!-- Colores Corporativos Globales - Aplicación Censo -->
+    <link href="{% static 'assets/css/censo-corporate.css' %}" rel="stylesheet"/>
+
+    <!-- Estilos EMTEL Override - Aplicación Global -->
+    <link href="{% static 'css/emtel-override.css' %}" rel="stylesheet"/>
+
+    <!-- Búsqueda Global CSS -->
+    <link href="{% static 'css/global-search.css' %}" rel="stylesheet"/>
+
+    <!-- Optimización Móvil CSS -->
+    <link href="{% static 'css/mobile-optimizations.css' %}" rel="stylesheet"/>
+
+    <link id="pagestyle_dark" href="{% static 'assets/css/dark-theme-core.css' %}" rel="stylesheet"/>
+
+    <!-- Specific CSS goes HERE -->
+    {% block stylesheets %}{% endblock stylesheets %}
+
+</head>
+<body class="g-sidenav-show bg-gray-100 {% if not user.is_authenticated and segment == 'verificacion' %}no-sidebar{% endif %}">
+
+{% if user.is_authenticated or segment != 'verificacion' %}
+    {% include "includes/sidebar.html" %}
+{% endif %}
+
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg {% if not user.is_authenticated and segment == 'verificacion' %}full-width{% endif %}">
+
+    {% if user.is_authenticated or segment != 'verificacion' %}
+        {% include "includes/navigation.html" %}
+    {% endif %}
+
+    {% block content %}{% endblock content %}
+    {% include "includes/footer.html" %}
+    <script src="{% static 'assets/js/sweetalert/sweetalert2@11.js' %}"></script>
+    <div class="alert">
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                Swal.fire({
+                    icon: '{% if "error" in message.tags %}error{% elif "warning" in message.tags %}warning{% elif "success" in message.tags %}success{% elif "info" in message.tags %}info{% else %}info{% endif %}',
+                    title: '{{ message }}',
+                    showConfirmButton: false,
+                    timer: 1700
+                })
+            </script>
+        {% endfor %}
+    {% endif %}
+
+</div>
+</main>
+
+
+<!-- Core JS Files -->
+{% include "includes/scripts.html" %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}
+</body>
+</html>

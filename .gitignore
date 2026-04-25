@@ -1,0 +1,287 @@
+# ============================================
+# PYTHON
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ============================================
+# DJANGO
+# ============================================
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+db.censoweb
+db.censoWeb
+db.censo_Web*
+identifier.sqlite
+/media
+/staticfiles
+/static/CACHE
+
+# Static files recolectados (generados con collectstatic)
+staticfiles/
+!staticfiles/.gitkeep
+
+# CSS generados por Tailwind (no incluir en repo)
+static/css/output.css
+static/css/output.css.map
+
+# ============================================
+# NODE MODULES & NPM
+# ============================================
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================
+# VIRTUAL ENVIRONMENTS
+# ============================================
+venv/
+env/
+ENV/
+.venv
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.local
+.env.production
+.env.pythonanywhere
+*.env.backup
+
+# ============================================
+# DATABASE FILES
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+db.*
+
+# ============================================
+# BACKUP FILES
+# ============================================
+*.bak
+*.backup
+backup*.json
+*_backup.json
+backups/*.json
+backups/*.sqlite.gz
+
+# ============================================
+# IDE & EDITORS
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# TESTING & COVERAGE
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+test-results/
+coverage.xml
+
+# ⚠️ NOTE: NO excluir archivos test_*.py de Git
+# Comentado para permitir tests en repositorio
+# test_*.py
+# *_test.py
+test*.pdf
+*_test.pdf
+
+# ============================================
+# UTILITY SCRIPTS (TEMPORARY - Solo desarrollo)
+# ============================================
+crear_*.py
+activar_*.py
+corregir_*.py
+generar_*.py
+verificar_*.py
+ver_*.py
+diagnostico_*.py
+nueva_*.py
+reemplazar_*.py
+eliminar_*.py
+check_*.py
+add_*.py
+limpiar_*.py
+mostrar_*.py
+optimizar_*.py
+agregar_*.py
+pricing_*.py
+
+# Archivos temporales y logs #
+debug.log
+error.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Requirements duplicados #
+requirements_fixed.txt
+requirements_new.txt
+requirements_old.txt
+
+# If you are using PyCharm #
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Python #
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery
+celerybeat-schedule.*
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+/db.censo_Web
+
+
+# Archivos de configuración sensibles
+.env
+.env.*
+!.env.example
+!.env.pythonanywhere.example
+
+# Settings de Django (solo ignorar el principal y producción)
+censoProject/settings.py
+censoProject/local_settings.py
+
+# Permitir settings de ejemplo y PythonAnywhere
+!censoProject/settings.example.py
+!censoProject/settings_pythonanywhere.py
+!censoProject/settings_production.py
+
+# Archivos de documentación importantes (PERMITIR)
+!README.md
+!README_QUICK_START.md
+!docs/technical/*.md
+!docs/deployment/*.md
+
+# Documentación de desarrollo archivada (IGNORAR)
+docs/archive/
+
+# Archivos de backup
+*.bak
+*_backup.*
+*.backup

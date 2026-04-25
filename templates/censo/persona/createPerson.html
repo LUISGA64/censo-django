@@ -1,0 +1,409 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+    Agregar Miembro a la Familia
+{% endblock title %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <style>
+        .asteriskField {
+            color: #dc3545 !important;
+            font-weight: bold;
+            margin-left: 0.2rem;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem;
+        }
+
+        .card-header-custom h4 {
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .card-header-custom .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+            margin-bottom: 0;
+        }
+
+        .family-info-box {
+            background: #E3F2FD;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .family-info-box i {
+            color: #2196F3;
+            margin-right: 0.5rem;
+        }
+
+        .family-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .family-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .family-info-label {
+            font-weight: 600;
+            color: #1976D2;
+            margin-right: 0.5rem;
+        }
+
+        .family-info-value {
+            color: #374151;
+        }
+
+        .section-divider {
+            border-top: 2px solid #E4E7EB;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .section-title {
+            background: transparent;
+            color: #2196F3;
+            padding: 0.5rem 0;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-save {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: #1976D2;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-save-another {
+            background: white;
+            color: #2196F3;
+            border: 2px solid #2196F3;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save-another:hover {
+            background: #E3F2FD;
+            color: #1976D2;
+            border-color: #1976D2;
+        }
+
+        .btn-save:disabled,
+        .btn-save-another:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-control:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.15);
+        }
+
+        .info-note {
+            background: #FFF9E6;
+            border-left: 4px solid #FF9800;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-note i {
+            color: #FF9800;
+            margin-right: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <!-- Header mejorado -->
+                    <div class="card-header-custom">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="mb-1">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Agregar Miembro a la Familia
+                                </h4>
+                                <p class="subtitle mb-0">
+                                    Ficha Familiar #{{ familia.family_card_number }}
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <div class="badge bg-white text-primary px-3 py-2">
+                                    <i class="fas fa-users me-1"></i>
+                                    {{ total_members }} miembro{{ total_members|pluralize }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Info de la familia -->
+                        <div class="family-info-box">
+                            <div class="family-info-item">
+                                <i class="fas fa-home"></i>
+                                <span class="family-info-label">Vereda:</span>
+                                <span class="family-info-value">{{ familia.sidewalk_home.sidewalk_name }}</span>
+                            </div>
+                            <div class="family-info-item">
+                                <i class="fas fa-user-tie"></i>
+                                <span class="family-info-label">Cabeza de Familia:</span>
+                                <span class="family-info-value">
+                                    {% if family_head %}
+                                        {{ family_head.full_name }}
+                                    {% else %}
+                                        <span class="text-warning">Sin asignar</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="family-info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="family-info-label">Zona:</span>
+                                <span class="family-info-value">{{ familia.get_zone_display }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Nota informativa -->
+                        <div class="info-note">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Instrucciones:</strong>
+                            <span style="color: #6B7280; font-size: 0.875rem;">
+                                Los campos marcados con <span class="text-danger fw-bold">*</span> son obligatorios.
+                                Si desea designar un nuevo cabeza de familia, debe ser mayor de 18 años.
+                            </span>
+                        </div>
+
+                        <!-- Formulario -->
+                        <form method="POST" id="personForm" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Sección: Datos Personales -->
+                            <div class="mb-4">
+                                <div class="section-title">
+                                    <i class="fas fa-id-card me-2"></i>
+                                    Datos Personales
+                                </div>
+                                <div class="section-divider"></div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        {{ person_form.first_name_1|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.first_name_2|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.last_name_1|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.last_name_2|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.document_type|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.identification_person|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.date_birth|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.gender|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección: Información Familiar y Social -->
+                            <div class="mb-4">
+                                <div class="section-title">
+                                    <i class="fas fa-users me-2"></i>
+                                    Información Familiar y Social
+                                </div>
+                                <div class="section-divider"></div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        {{ person_form.kinship|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.social_insurance|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.eps|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.handicap|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección: Información Educativa y Laboral -->
+                            <div class="mb-4">
+                                <div class="section-title">
+                                    <i class="fas fa-briefcase me-2"></i>
+                                    Información Educativa y Laboral
+                                </div>
+                                <div class="section-divider"></div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        {{ person_form.education_level|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.civil_state|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ person_form.occupation|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección: Información de Contacto -->
+                            <div class="mb-4">
+                                <div class="section-title">
+                                    <i class="fas fa-phone me-2"></i>
+                                    Información de Contacto
+                                </div>
+                                <div class="section-divider"></div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ person_form.cell_phone|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ person_form.personal_email|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                <a href="{% url 'detailFamilyCard' familia.pk %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Volver a la Ficha
+                                </a>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" name="add_another" class="btn btn-save-another" id="addAnotherBtn">
+                                        <i class="fas fa-user-plus me-2"></i>
+                                        Guardar y Agregar Otro
+                                    </button>
+                                    <button type="submit" class="btn btn-save" id="submitBtn">
+                                        <i class="fas fa-save me-2"></i>
+                                        Guardar y Finalizar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('personForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const addAnotherBtn = document.getElementById('addAnotherBtn');
+
+            // Validación de edad en tiempo real
+            const birthDateInput = document.querySelector('input[name="date_birth"]');
+            if (birthDateInput) {
+                birthDateInput.addEventListener('change', function() {
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+
+                    // Mostrar edad calculada
+                    let feedback = this.parentElement.querySelector('.age-feedback');
+                    if (!feedback) {
+                        feedback = document.createElement('small');
+                        feedback.className = 'age-feedback text-muted d-block mt-1';
+                        this.parentElement.appendChild(feedback);
+                    }
+                    feedback.textContent = `Edad: ${age} años`;
+                    feedback.style.color = age < 18 ? '#FF9800' : '#4CAF50';
+                });
+            }
+
+            // Prevenir doble envío
+            form.addEventListener('submit', function(e) {
+                const clickedButton = document.activeElement;
+
+                if (clickedButton.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Validar formulario antes de enviar
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    form.classList.add('was-validated');
+                    return false;
+                }
+
+                // Deshabilitar ambos botones y mostrar spinner
+                submitBtn.disabled = true;
+                addAnotherBtn.disabled = true;
+
+                if (clickedButton === submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+                } else if (clickedButton === addAnotherBtn) {
+                    addAnotherBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+                }
+            });
+
+            // Auto-focus en el primer campo
+            const firstInput = form.querySelector('input[type="text"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+    </script>
+{% endblock javascripts %}

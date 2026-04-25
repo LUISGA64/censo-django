@@ -1,0 +1,147 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Seleccionar Tipo de Documento - {{ person.full_name }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .document-card {
+        transition: all 0.3s ease;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+    .document-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(33, 150, 243, 0.2);
+        border-color: #2196F3;
+    }
+
+    .document-icon {
+        font-size: 3rem;
+        color: #2196F3;
+        margin-bottom: 1rem;
+    }
+
+    .document-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .document-description {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .person-info {
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent mb-3">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'personas' %}"><i class="fas fa-users"></i> Personas</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'detail-person' person.id %}">{{ person.full_name }}</a></li>
+            <li class="breadcrumb-item active">Seleccionar Documento</li>
+        </ol>
+    </nav>
+
+    <!-- Información de la persona -->
+    <div class="person-info shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-2">
+                    <i class="fas fa-user-circle me-2"></i>{{ person.full_name }}
+                </h4>
+                <p class="mb-0 opacity-90">
+                    <i class="fas fa-id-card me-2"></i>{{ person.document_type.document_type }} {{ person.identification_person }}
+                    <span class="ms-3"><i class="fas fa-map-marker-alt me-2"></i>{{ person.family_card.sidewalk_home.sidewalk_name }}</span>
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'detail-person' person.id %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2 text-primary"></i>
+                        Seleccione el Tipo de Documento
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- AVAL GENERAL -->
+                        <div class="col-md-4">
+                            <a href="{% url 'generate-aval-general' person.id %}" class="text-decoration-none">
+                                <div class="document-card p-4 text-center h-100">
+                                    <div class="document-icon">
+                                        <i class="fas fa-file-signature"></i>
+                                    </div>
+                                    <div class="document-title">Aval General</div>
+                                    <div class="document-description">
+                                        Para trabajar, practicar deportes u otras actividades.
+                                        <br><small class="text-muted">Requiere: Entidad, Motivo, Cargo</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- AVAL DE ESTUDIO -->
+                        <div class="col-md-4">
+                            <a href="{% url 'generate-aval-estudio' person.id %}" class="text-decoration-none">
+                                <div class="document-card p-4 text-center h-100">
+                                    <div class="document-icon">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <div class="document-title">Aval de Estudio</div>
+                                    <div class="document-description">
+                                        Para estudiantes que requieren aval académico.
+                                        <br><small class="text-muted">Requiere: Entidad, Programa, Semestre</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- CONSTANCIA DE PERTENENCIA -->
+                        <div class="col-md-4">
+                            <a href="{% url 'generate-constancia' person.id %}" class="text-decoration-none">
+                                <div class="document-card p-4 text-center h-100">
+                                    <div class="document-icon">
+                                        <i class="fas fa-certificate"></i>
+                                    </div>
+                                    <div class="document-title">Constancia de Pertenencia</div>
+                                    <div class="document-description">
+                                        Certifica que la persona pertenece al resguardo.
+                                        <br><small class="text-muted">Sin campos adicionales</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

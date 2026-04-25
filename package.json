@@ -1,0 +1,22 @@
+{
+  "name": "censo-django-frontend",
+  "version": "3.0.0",
+  "description": "Frontend moderno para CensoWeb con Tailwind CSS y Alpine.js",
+  "scripts": {
+    "dev": "npm run build:css -- --watch",
+    "build": "npm run build:css",
+    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  },
+  "dependencies": {
+    "alpinejs": "^3.13.3",
+    "chart.js": "^4.4.1"
+  }
+}
+

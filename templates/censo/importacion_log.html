@@ -1,0 +1,191 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Log de Importación {% endblock %}
+
+{% block stylesheets %}
+<style>
+    .error-card {
+        margin-bottom: 15px;
+        border-left: 4px solid #dc3545;
+    }
+
+    .error-header {
+        background: #f8d7da;
+        padding: 10px 15px;
+        border-bottom: 1px solid #f5c6cb;
+    }
+
+    .error-body {
+        padding: 15px;
+    }
+
+    .error-detail {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .error-detail strong {
+        color: #495057;
+        min-width: 120px;
+        display: inline-block;
+    }
+
+    .stats-card {
+        border-left: 4px solid #007bff;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header mb-4">
+                <h2 class="page-title">
+                    <i class="fa fa-file-text"></i> Reporte de Importación
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="card-title">Fichas Creadas</h5>
+                    <h2 class="text-primary">{{ fichas_creadas }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="card-title">Personas Creadas</h5>
+                    <h2 class="text-success">{{ personas_creadas }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="border-left: 4px solid {% if errores|length > 0 %}#dc3545{% else %}#28a745{% endif %};">
+                <div class="card-body">
+                    <h5 class="card-title">Errores</h5>
+                    <h2 class="{% if errores|length > 0 %}text-danger{% else %}text-success{% endif %}">{{ errores|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            {% if log_file %}
+            <a href="{% url 'descargar-log-importacion' %}" class="btn btn-primary">
+                <i class="fa fa-download"></i> Descargar Log Completo
+            </a>
+            {% endif %}
+            <a href="{% url 'familyCardIndex' %}" class="btn btn-success">
+                <i class="fa fa-home"></i> Ir a Fichas Familiares
+            </a>
+            <a href="{% url 'importacion-masiva' %}" class="btn btn-secondary">
+                <i class="fa fa-upload"></i> Nueva Importación
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de errores -->
+    {% if errores %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="mb-3">
+                <i class="fa fa-exclamation-triangle text-danger"></i>
+                Errores Detallados ({{ errores|length }})
+            </h4>
+
+            {% for error in errores %}
+            <div class="card error-card">
+                <div class="error-header">
+                    <strong>
+                        <i class="fa fa-times-circle"></i>
+                        Error #{{ forloop.counter }} - {{ error.tipo }}
+                    </strong>
+                </div>
+                <div class="error-body">
+                    <div class="error-detail">
+                        <strong>Ficha:</strong> {{ error.ficha }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Persona:</strong> {{ error.persona }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Identificación:</strong> {{ error.identificacion }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Fila Excel:</strong> {{ error.fila_excel }}
+                    </div>
+                    <div class="error-detail">
+                        <strong>Error:</strong>
+                        <span class="text-danger">{{ error.error }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-success">
+                <h5><i class="fa fa-check-circle"></i> ¡Importación Exitosa!</h5>
+                <p class="mb-0">
+                    Se importaron correctamente <strong>{{ fichas_creadas }} fichas familiares</strong> y
+                    <strong>{{ personas_creadas }} personas</strong> sin errores.
+                </p>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fa fa-info-circle"></i> ¿Qué puedes hacer ahora?</h5>
+                    <ul>
+                        <li><strong>Ver las fichas importadas:</strong> Haz clic en "Ir a Fichas Familiares"</li>
+                        <li><strong>Descargar el log:</strong> Para tener un registro de la importación</li>
+                        <li><strong>Importar más datos:</strong> Haz clic en "Nueva Importación"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Información del archivo de log -->
+    {% if log_file %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h6><i class="fa fa-info-circle"></i> Archivo de Log</h6>
+                <p class="mb-0">
+                    <strong>Ubicación:</strong> <code>{{ log_file }}</code>
+                </p>
+                <p class="mb-0">
+                    Este archivo contiene el historial completo de la importación con timestamps.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    // Auto-scroll a errores si hay muchos
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorCount = {{ errores|length }};
+        if (errorCount > 0) {
+            console.log('Se encontraron ' + errorCount + ' errores en la importación');
+        }
+    });
+</script>
+{% endblock javascripts %}
+

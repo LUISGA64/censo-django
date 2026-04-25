@@ -1,0 +1,193 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard EMTEL Style - Censo Web{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+/* ===== HEADER DEL DASHBOARD (Estilo EMTEL) ===== */
+.dashboard-header-emtel {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+    color: white;
+    padding: 0.75rem;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 3px 15px rgba(30, 60, 114, 0.35);
+}
+
+.dashboard-header-emtel h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.dashboard-header-emtel p {
+    font-size: 0.8rem;
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: none;
+    height: 100%;
+    padding: 1rem;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #344767;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #7b809a;
+    letter-spacing: 0.5px;
+}
+
+.btn-filter {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.btn-filter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header-emtel {
+        padding: 0.5rem;
+        margin: -1rem -1rem 1rem -1rem;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .dashboard-header-emtel h3 {
+        font-size: 1rem;
+    }
+
+    .dashboard-header-emtel p {
+        font-size: 0.75rem;
+    }
+
+    .kpi-card {
+        padding: 0.75rem;
+    }
+
+    .kpi-value {
+        font-size: 1.35rem;
+    }
+
+    .kpi-label {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-header-emtel {
+        padding: 0.4rem;
+    }
+
+    .dashboard-header-emtel h3 {
+        font-size: 0.95rem;
+    }
+
+    .dashboard-header-emtel p {
+        font-size: 0.7rem;
+    }
+
+    .kpi-value {
+        font-size: 1.2rem;
+    }
+
+    .kpi-label {
+        font-size: 0.6rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 dashboard-header-emtel">
+                <div class="card-body p-0">
+                    <div class="row align-items-center">
+                        <div class="col-lg-5 mb-3 mb-lg-0">
+                            <div class="d-flex align-items-center">
+                                <div class="icon icon-shape icon-lg bg-white shadow-sm text-center border-radius-md me-3">
+                                    <i class="fas fa-chart-line text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0">{% block dashboard_title %}Dashboard{% endblock %}</h3>
+                                    <p class="mb-0">{% block dashboard_subtitle %}Estadísticas{% endblock %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="card mb-0 shadow-sm">
+                                <div class="card-body p-3">
+                                    <form action="{% block filter_action %}{% endblock %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="row g-3 align-items-end">
+                                            <div class="col-md-4">
+                                                <label class="form-label text-xs mb-1 font-weight-bold text-dark">
+                                                    <i class="fas fa-calendar-alt me-1 text-primary"></i>Fecha Inicial
+                                                </label>
+                                                <input type="date" id="fecha_inicio" name="fecha_inicio"
+                                                       class="form-control" value="{{ fecha_inicio|date:'Y-m-d' }}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label text-xs mb-1 font-weight-bold text-dark">
+                                                    <i class="fas fa-calendar-alt me-1 text-primary"></i>Fecha Final
+                                                </label>
+                                                <input type="date" id="fecha_final" name="fecha_final"
+                                                       class="form-control" value="{{ fecha_final|date:'Y-m-d' }}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button type="submit" class="btn btn-filter w-100 mb-0">
+                                                    <i class="fas fa-filter me-2"></i>Aplicar Filtros
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% block dashboard_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="{% static 'js/dashboard-emtel.js' %}"></script>
+{% block dashboard_scripts %}{% endblock %}
+{% endblock %}
+

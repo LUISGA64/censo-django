@@ -1,0 +1,280 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Búsqueda Global {% endblock %}
+
+{% block stylesheets %}
+<style>
+    .search-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 18px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .search-box input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+        outline: none;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 20px;
+    }
+
+    .result-section {
+        margin-bottom: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .result-section-header {
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        padding: 15px 20px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .result-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+
+    .result-item:hover {
+        background: #f8f9fa;
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .result-subtitle {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .result-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .no-results i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        color: #ddd;
+    }
+
+    .badge-count {
+        background: #2196F3;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+        margin-left: 10px;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h2 class="page-title">
+                    <i class="fa fa-search"></i> Búsqueda Global
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <!-- Caja de búsqueda -->
+        <div class="search-box">
+            <form method="GET" action="{% url 'global-search' %}">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    placeholder="Buscar personas, fichas familiares, documentos..."
+                    autofocus
+                    autocomplete="off"
+                >
+                <i class="fa fa-search search-icon"></i>
+            </form>
+        </div>
+
+        {% if query %}
+            {% if total_resultados > 0 %}
+                <div class="alert alert-info">
+                    Se encontraron <strong>{{ total_resultados }}</strong> resultados para "<strong>{{ query }}</strong>"
+                </div>
+
+                <!-- Resultados de Personas -->
+                {% if personas %}
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <i class="fa fa-users"></i> Personas
+                        <span class="badge-count">{{ personas|length }}</span>
+                    </div>
+                    <div class="result-list">
+                        {% for persona in personas %}
+                        <a href="{% url 'detail-person' persona.id %}" class="result-item d-flex align-items-center text-decoration-none">
+                            <div class="result-icon">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="result-title">
+                                    {{ persona.first_name_1 }}{% if persona.first_name_2 %} {{ persona.first_name_2 }}{% endif %} {{ persona.last_name_1 }}{% if persona.last_name_2 %} {{ persona.last_name_2 }}{% endif %}
+                                </div>
+                                <div class="result-subtitle">
+                                    <i class="fa fa-id-card"></i> {{ persona.identification_person }}
+                                    {% if persona.family_card %}
+                                        | <i class="fa fa-home"></i> Ficha #{{ persona.family_card.family_card_number }}
+                                    {% endif %}
+                                    {% if persona.family_card.sidewalk_home %}
+                                        | <i class="fa fa-map-marker"></i> {{ persona.family_card.sidewalk_home.sidewalk_name }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Resultados de Fichas Familiares -->
+                {% if fichas %}
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <i class="fa fa-home"></i> Fichas Familiares
+                        <span class="badge-count">{{ fichas|length }}</span>
+                    </div>
+                    <div class="result-list">
+                        {% for ficha in fichas %}
+                        <a href="{% url 'detailFamilyCard' ficha.id %}" class="result-item d-flex align-items-center text-decoration-none">
+                            <div class="result-icon">
+                                <i class="fa fa-home"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="result-title">
+                                    Ficha Familiar #{{ ficha.family_card_number }}
+                                </div>
+                                <div class="result-subtitle">
+                                    {% if ficha.sidewalk_home %}
+                                        <i class="fa fa-map-marker"></i> {{ ficha.sidewalk_home.sidewalk_name }}
+                                    {% endif %}
+                                    | <i class="fa fa-users"></i> {{ ficha.person_set.count }} integrantes
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Resultados de Documentos -->
+                {% if documentos %}
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <i class="fa fa-file-text"></i> Documentos Generados
+                        <span class="badge-count">{{ documentos|length }}</span>
+                    </div>
+                    <div class="result-list">
+                        {% for doc in documentos %}
+                        <a href="{% url 'view-document' doc.id %}" class="result-item d-flex align-items-center text-decoration-none">
+                            <div class="result-icon">
+                                <i class="fa fa-file-text"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="result-title">
+                                    {{ doc.get_document_type_display }} - {{ doc.document_number }}
+                                </div>
+                                <div class="result-subtitle">
+                                    <i class="fa fa-user"></i> {{ doc.person.first_name_1 }}{% if doc.person.first_name_2 %} {{ doc.person.first_name_2 }}{% endif %} {{ doc.person.last_name_1 }}{% if doc.person.last_name_2 %} {{ doc.person.last_name_2 }}{% endif %}
+                                    | <i class="fa fa-calendar"></i> {{ doc.issue_date|date:"d/m/Y" }}
+                                    |
+                                    {% if doc.status == 'ISSUED' %}
+                                        <span class="badge badge-success">Vigente</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Vencido</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            {% else %}
+                <div class="no-results">
+                    <i class="fa fa-search"></i>
+                    <h4>No se encontraron resultados</h4>
+                    <p>Intenta con otros términos de búsqueda</p>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-results">
+                <i class="fa fa-search"></i>
+                <h4>Realiza una búsqueda</h4>
+                <p>Escribe en el campo de búsqueda para encontrar personas, fichas familiares o documentos</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    // Auto-focus en el campo de búsqueda
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput && !searchInput.value) {
+            searchInput.focus();
+        }
+    });
+</script>
+{% endblock javascripts %}
+

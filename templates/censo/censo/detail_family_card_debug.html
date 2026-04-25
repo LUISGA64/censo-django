@@ -1,0 +1,101 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Detalle Ficha Familiar - Debug{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>DEBUG - Detalle de Ficha Familiar</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Información del Contexto:</h4>
+                    <ul>
+                        <li><strong>Family Card ID:</strong> {{ family_card.id|default:"N/A" }}</li>
+                        <li><strong>Número de Ficha:</strong> {{ family_card.family_card_number|default:"N/A" }}</li>
+                        <li><strong>Total Miembros:</strong> {{ total_miembros|default:"0" }}</li>
+                        <li><strong>Promedio Edad:</strong> {{ promedio_edad|default:"0" }}</li>
+                    </ul>
+
+                    <hr>
+
+                    <h4>Datos de Familia (QuerySet):</h4>
+                    {% if familia %}
+                        <p>Total registros en familia: {{ familia|length }}</p>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Identificación</th>
+                                    <th>Cabeza</th>
+                                    <th>Edad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in familia %}
+                                <tr>
+                                    <td>{{ member.id }}</td>
+                                    <td>{{ member.first_name_1 }} {{ member.last_name_1 }}</td>
+                                    <td>{{ member.identification_person }}</td>
+                                    <td>{% if member.family_head %}✓ SÍ{% else %}No{% endif %}</td>
+                                    <td>{{ member.age|default:"N/A" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <strong>¡Atención!</strong> No hay miembros en la familia o el queryset está vacío.
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <h4>Datos del Family Card:</h4>
+                    {% if family_card %}
+                        <ul>
+                            <li><strong>Dirección:</strong> {{ family_card.address_home|default:"N/A" }}</li>
+                            <li><strong>Vereda:</strong> {{ family_card.sidewalk_home.sidewalk_name|default:"N/A" }}</li>
+                            <li><strong>Zona:</strong> {{ family_card.zone|default:"N/A" }}</li>
+                            <li><strong>Latitud:</strong> {{ family_card.latitude|default:"N/A" }}</li>
+                            <li><strong>Longitud:</strong> {{ family_card.longitude|default:"N/A" }}</li>
+                        </ul>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <strong>¡Error!</strong> No se encontró el objeto family_card.
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <h4>Cabeza de Familia:</h4>
+                    {% if cabeza_familia %}
+                        <ul>
+                            <li><strong>ID:</strong> {{ cabeza_familia.id }}</li>
+                            <li><strong>Nombre:</strong> {{ cabeza_familia.first_name_1 }} {{ cabeza_familia.last_name_1 }}</li>
+                            <li><strong>Identificación:</strong> {{ cabeza_familia.identification_person }}</li>
+                        </ul>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            No se encontró cabeza de familia.
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="mt-4">
+                        <a href="{% url 'familyCardIndex' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Volver al Listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

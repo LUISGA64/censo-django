@@ -1,5 +1,2501 @@
-from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.db import transaction, IntegrityError
+from django.db.models import Value, Q, F, ExpressionWrapper, fields, Count, Sum, Max
+from django.db.models.functions.text import Concat
+from django.http import HttpResponse, JsonResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse, reverse_lazy
+from django.utils.timezone import now
+from django.views.decorators.http import require_POST
+from django.views.generic import DetailView
+from django.views.generic.edit import CreateView, UpdateView
+from censoapp.models import Association, Person, FamilyCard, Sidewalks, SystemParameters, MaterialConstructionFamilyCard, Organizations
+from .forms import FormFamilyCard, FormPerson, MaterialConstructionFamilyForm
+from django.views.decorators.csrf import csrf_protect
+from .mixins import OrganizationFilterMixin, OrganizationPermissionMixin, OrganizationFormMixin, ReadOnlyPermissionMixin
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 # Create your views here.
-def index(request):
-    return render(request, 'censo/base_site.html')
+@login_required
+def home(request):
+    """
+    Dashboard mejorado con estadísticas completas y filtrado por organización.
+    Incluye: personas, familias, documentos, distribución por edad, género, etc.
+    """
+    from datetime import date
+    from django.db.models import Q
+
+    # Importar modelo de documentos
+    try:
+        from censoapp.models import GeneratedDocument
+        documentos_disponibles = True
+    except ImportError:
+        documentos_disponibles = False
+
+    # Filtrar por organización del usuario
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_profile = request.user.userprofile
+            user_organization = user_profile.organization
+        except AttributeError:
+            pass
+
+    # Queries base con filtrado por organización
+    if user_organization:
+        personas_qs = Person.objects.filter(
+            family_card__organization=user_organization,
+            state=True
+        )
+        fichas_qs = FamilyCard.objects.filter(
+            organization=user_organization,
+            state=True
+        )
+    else:
+        # Superusuario ve todo
+        personas_qs = Person.objects.filter(state=True)
+        fichas_qs = FamilyCard.objects.filter(state=True)
+
+    # === ESTADÍSTICAS GENERALES ===
+    total_personas = personas_qs.count()
+    total_fichas = fichas_qs.count()
+    total_veredas = Sidewalks.objects.count()
+
+    # Personas por género
+    total_mujeres = personas_qs.filter(gender__gender='Femenino').count()
+    total_hombres = personas_qs.filter(gender__gender='Masculino').count()
+
+    # Cabezas de familia
+    total_cabezas = personas_qs.filter(family_head=True).count()
+
+    # Inicializar variables de estadísticas (para evitar NameError)
+    total_documentos = 0
+    documentos_vigentes = 0
+    documentos_vencidos = 0
+    documentos_mes = 0
+    documentos_proximos_vencer = 0
+    promedio_personas_ficha = 0
+    nuevas_fichas_mes = 0
+    porcentaje_mujeres = 0
+    porcentaje_hombres = 0
+
+    # Documentos generados
+    if documentos_disponibles:
+        if user_organization:
+            docs_qs = GeneratedDocument.objects.filter(organization=user_organization)
+        else:
+            docs_qs = GeneratedDocument.objects.all()
+
+        total_documentos = docs_qs.count()
+        documentos_vigentes = docs_qs.filter(
+            status='ISSUED',
+            expiration_date__gte=date.today()
+        ).count()
+        documentos_vencidos = docs_qs.filter(status='EXPIRED').count()
+
+        # Documentos generados este mes
+        from datetime import timedelta
+        documentos_mes = docs_qs.filter(
+            issue_date__month=date.today().month,
+            issue_date__year=date.today().year
+        ).count()
+
+        # Próximos a vencer (30 días)
+        fecha_limite = date.today() + timedelta(days=30)
+        documentos_proximos_vencer = docs_qs.filter(
+            status='ISSUED',
+            expiration_date__lte=fecha_limite,
+            expiration_date__gte=date.today()
+        ).count()
+
+    # === ESTADÍSTICAS ADICIONALES ===
+    # Promedio de personas por ficha
+    promedio_personas_ficha = round(total_personas / total_fichas, 1) if total_fichas > 0 else 0
+
+    # Nuevas fichas este mes
+    fecha_inicio_mes = date.today().replace(day=1)
+    if hasattr(FamilyCard, 'created_at'):
+        nuevas_fichas_mes = fichas_qs.filter(created_at__gte=fecha_inicio_mes).count()
+    else:
+        nuevas_fichas_mes = 0
+
+    # Porcentaje de cobertura (ejemplo: mujeres/hombres)
+    porcentaje_mujeres = round((total_mujeres / total_personas * 100), 1) if total_personas > 0 else 0
+    porcentaje_hombres = round((total_hombres / total_personas * 100), 1) if total_personas > 0 else 0
+
+    # === DISTRIBUCIÓN POR EDAD ===
+    today = date.today()
+
+    # Rangos de edad
+    edad_0_5 = 0
+    edad_6_12 = 0
+    edad_13_17 = 0
+    edad_18_29 = 0
+    edad_30_59 = 0
+    edad_60_mas = 0
+
+    for persona in personas_qs.only('date_birth'):
+        edad = today.year - persona.date_birth.year
+        if today.month < persona.date_birth.month or (
+            today.month == persona.date_birth.month and today.day < persona.date_birth.day
+        ):
+            edad -= 1
+
+        if edad <= 5:
+            edad_0_5 += 1
+        elif edad <= 12:
+            edad_6_12 += 1
+        elif edad <= 17:
+            edad_13_17 += 1
+        elif edad <= 29:
+            edad_18_29 += 1
+        elif edad <= 59:
+            edad_30_59 += 1
+        else:
+            edad_60_mas += 1
+
+    edades_labels = ['0-5', '6-12', '13-17', '18-29', '30-59', '60+']
+    edades_data = [edad_0_5, edad_6_12, edad_13_17, edad_18_29, edad_30_59, edad_60_mas]
+
+    # === PERSONAS POR VEREDA ===
+    personas_veredas = personas_qs.values(
+        'family_card__sidewalk_home__sidewalk_name'
+    ).annotate(
+        total_personas=Count('id')
+    ).order_by('-total_personas')[:10]  # Top 10 veredas
+
+    veredas_nombres = [v['family_card__sidewalk_home__sidewalk_name'] or 'Sin vereda'
+                       for v in personas_veredas]
+    veredas_valores = [v['total_personas'] for v in personas_veredas]
+
+    # === PIRÁMIDE POBLACIONAL (Grupos Quinquenales) ===
+    # Definir rangos quinquenales estándar en demografía
+    rangos_quinquenales = [
+        (0, 4, '0-4'), (5, 9, '5-9'), (10, 14, '10-14'), (15, 19, '15-19'),
+        (20, 24, '20-24'), (25, 29, '25-29'), (30, 34, '30-34'), (35, 39, '35-39'),
+        (40, 44, '40-44'), (45, 49, '45-49'), (50, 54, '50-54'), (55, 59, '55-59'),
+        (60, 64, '60-64'), (65, 69, '65-69'), (70, 74, '70-74'), (75, 150, '75+')
+    ]
+
+    # Inicializar diccionarios para cada rango
+    piramide_hombres = {label: 0 for _, _, label in rangos_quinquenales}
+    piramide_mujeres = {label: 0 for _, _, label in rangos_quinquenales}
+
+    # Calcular edades y clasificar por rango y género
+    for persona in personas_qs.select_related('gender').only('date_birth', 'gender__gender'):
+        edad = today.year - persona.date_birth.year
+        if today.month < persona.date_birth.month or (
+            today.month == persona.date_birth.month and today.day < persona.date_birth.day
+        ):
+            edad -= 1
+
+        # Encontrar el rango correspondiente
+        for min_edad, max_edad, label in rangos_quinquenales:
+            if min_edad <= edad <= max_edad:
+                if persona.gender.gender == 'Masculino':
+                    piramide_hombres[label] += 1
+                elif persona.gender.gender == 'Femenino':
+                    piramide_mujeres[label] += 1
+                break
+
+    # Preparar datos para Chart.js (invertir orden para que empiece de mayor a menor)
+    piramide_labels = [label for _, _, label in rangos_quinquenales]
+    piramide_labels.reverse()  # Invertir para que 75+ esté arriba
+
+    # Los valores de hombres serán negativos para el efecto visual de pirámide
+    piramide_hombres_values = [-piramide_hombres[label] for label in piramide_labels]
+    piramide_mujeres_values = [piramide_mujeres[label] for label in piramide_labels]
+
+    # === DISTRIBUCIÓN POR GÉNERO ===
+    genero_dist = personas_qs.values('gender__gender').annotate(total=Count('id')).order_by('-total')
+    genero_labels = [g['gender__gender'] for g in genero_dist]
+    genero_data = [g['total'] for g in genero_dist]
+
+    # === DISTRIBUCIÓN POR ESTADO CIVIL ===
+    estado_civil_dist = personas_qs.values('civil_state__state_civil').annotate(total=Count('id')).order_by('-total')
+    estado_civil_labels = [e['civil_state__state_civil'] for e in estado_civil_dist]
+    estado_civil_data = [e['total'] for e in estado_civil_dist]
+
+    # === DISTRIBUCIÓN POR NIVEL EDUCATIVO ===
+    educacion_dist = personas_qs.values('education_level__education_level').annotate(total=Count('id')).order_by('-total')
+    educacion_labels = [ed['education_level__education_level'] for ed in educacion_dist]
+    educacion_data = [ed['total'] for ed in educacion_dist]
+
+    # === EVOLUCIÓN POBLACIONAL (últimos 5 años) ===
+    from datetime import datetime
+    current_year = datetime.now().year
+    evolucion_labels = []
+    evolucion_data = []
+
+    for i in range(5, -1, -1):
+        year = current_year - i
+        # Contar personas nacidas hasta ese año
+        count = personas_qs.filter(date_birth__year__lte=year).count()
+        evolucion_labels.append(str(year))
+        evolucion_data.append(count)
+
+    # === ESTADÍSTICAS POR ORGANIZACIÓN (para superusuarios) ===
+    organizaciones_stats = []
+    if request.user.is_superuser:
+        from censoapp.models import Organizations
+        orgs = Organizations.objects.all()
+        for org in orgs[:5]:  # Top 5 organizaciones
+            org_personas = Person.objects.filter(
+                family_card__organization=org,
+                state=True
+            ).count()
+            org_fichas = FamilyCard.objects.filter(
+                organization=org,
+                state=True
+            ).count()
+            organizaciones_stats.append({
+                'nombre': org.organization_name,
+                'personas': org_personas,
+                'fichas': org_fichas
+            })
+
+    context = {
+        'segment': 'dashboard',
+        # Totales generales
+        'total_personas': total_personas,
+        'total_fichas': total_fichas,
+        'total_veredas': total_veredas,
+        'total_mujeres': total_mujeres,
+        'total_hombres': total_hombres,
+        'total_cabezas': total_cabezas,
+        # Documentos
+        'total_documentos': total_documentos,
+        'documentos_vigentes': documentos_vigentes,
+        'documentos_vencidos': documentos_vencidos,
+        'documentos_mes': documentos_mes,
+        'documentos_proximos_vencer': documentos_proximos_vencer,
+        # Distribución por edad
+        'edades_labels': edades_labels,
+        'edades_data': edades_data,
+        # Veredas
+        'veredas_nombres': veredas_nombres,
+        'veredas_valores': veredas_valores,
+        # Pirámide poblacional (reemplaza género por año)
+        'piramide_labels': piramide_labels,
+        'piramide_hombres': piramide_hombres_values,
+        'piramide_mujeres': piramide_mujeres_values,
+        # Distribución por género
+        'genero_labels': genero_labels,
+        'genero_data': genero_data,
+        # Distribución por estado civil
+        'estado_civil_labels': estado_civil_labels,
+        'estado_civil_data': estado_civil_data,
+        # Distribución por educación
+        'educacion_labels': educacion_labels,
+        'educacion_data': educacion_data,
+        # Evolución poblacional
+        'evolucion_labels': evolucion_labels,
+        'evolucion_data': evolucion_data,
+        # Estadísticas adicionales
+        'promedio_personas_ficha': promedio_personas_ficha,
+        'nuevas_fichas_mes': nuevas_fichas_mes,
+        'porcentaje_mujeres': porcentaje_mujeres,
+        'porcentaje_hombres': porcentaje_hombres,
+        # Organización del usuario
+        'user_organization': user_organization,
+        'organizaciones_stats': organizaciones_stats,
+    }
+
+    return render(request, 'censo/dashboard.html', context)
+
+
+@login_required
+def profile(request):
+    return render(request, 'account/profile.html')
+
+
+@login_required
+def association(request):
+    """
+    Vista optimizada para mostrar asociaciones.
+    Incluye paginación, búsqueda y carga optimizada de datos.
+    """
+    try:
+        # Query optimizado
+        associations_list = Association.objects.all().order_by('-id')
+
+        # Búsqueda (si se proporciona)
+        search_query = request.GET.get('search', '').strip()
+        if search_query:
+            associations_list = associations_list.filter(
+                Q(association_name__icontains=search_query) |
+                Q(association_identification__icontains=search_query) |
+                Q(association_email__icontains=search_query)
+            )
+
+        # Paginación
+        paginator = Paginator(associations_list, 10)  # 10 por página
+        page_number = request.GET.get('page', 1)
+
+        try:
+            associations = paginator.get_page(page_number)
+        except Exception:
+            associations = paginator.get_page(1)
+
+        context = {
+            'associations': associations,
+            'search_query': search_query,
+            'total_associations': associations_list.count(),
+            'segment': 'association'
+        }
+
+        return render(request, 'censo/configuracion/association.html', context)
+
+    except Exception as e:
+        messages.error(request, f"Error al cargar las asociaciones: {str(e)}")
+        return render(request, 'censo/configuracion/association.html', {
+            'associations': [],
+            'segment': 'association'
+        })
+
+
+class CreateAssociation(CreateView):
+    model = Association
+    fields = '__all__'
+    template_name = 'censo/createAssociation.html'
+    success_url = reverse_lazy('association')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super(CreateAssociation, self).form_valid(form)
+
+
+@login_required
+def organization_detail(request, pk):
+    """
+    Vista detallada de una organización que muestra:
+    - Información de la organización
+    - Junta directiva vigente
+    - Estadísticas
+    """
+    from censoapp.models import BoardPosition
+    from datetime import date
+
+    organization = get_object_or_404(Organizations, pk=pk)
+
+    # Verificar permisos
+    if not request.user.is_superuser:
+        user_profile = getattr(request, 'user_profile', None)
+        if user_profile and user_profile.organization != organization:
+            messages.error(request, "No tiene permisos para ver esta organización.")
+            return redirect('home')
+
+    # Obtener junta directiva vigente
+    today = date.today()
+    current_board = BoardPosition.get_valid_positions_on_date(organization, today)
+    signers = BoardPosition.get_signers_on_date(organization, today)
+
+    # Obtener historial de juntas directivas
+    all_boards = BoardPosition.objects.filter(
+        organization=organization
+    ).select_related('holder_person', 'alternate_person').order_by('-start_date', 'position_name')
+
+    # Estadísticas de la organización
+    total_fichas = FamilyCard.objects.filter(organization=organization, state=True).count()
+    total_personas = Person.objects.filter(
+        family_card__organization=organization,
+        state=True
+    ).count()
+    total_veredas = Sidewalks.objects.filter(organization_id=organization).count()
+
+    context = {
+        'organization': organization,
+        'current_board': current_board,
+        'signers': signers,
+        'all_boards': all_boards,
+        'has_active_board': current_board.exists(),
+        'total_fichas': total_fichas,
+        'total_personas': total_personas,
+        'total_veredas': total_veredas,
+        'segment': 'organization'
+    }
+
+    return render(request, 'censo/organizacion/organization_detail.html', context)
+
+
+def family_card_index(request):
+    return render(request, 'censo/censo/familyCardIndex.html',
+                  {'segment': 'family_card'})
+
+
+# Función optimizada para obtener las fichas familiares en formato JSON para DataTables
+@login_required
+def get_family_cards(request):
+    """
+    Vista optimizada para listar fichas familiares con paginación server-side.
+    Incluye búsqueda multi-campo, ordenamiento y conteo de miembros.
+    """
+    try:
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        search_value = request.GET.get('search[value]', '').strip()
+        order_column = request.GET.get('order[0][column]', '0')
+        order_dir = request.GET.get('order[0][dir]', 'asc')
+
+        # Columnas ordenables
+        order_columns = [
+            'family_card__family_card_number',
+            'full_name',
+            'family_card__sidewalk_home__sidewalk_name',
+            'person_count',
+        ]
+
+        # Validar índice de columna
+        try:
+            order_by = order_columns[int(order_column)]
+            if order_dir == 'desc':
+                order_by = f'-{order_by}'
+        except (IndexError, ValueError):
+            order_by = 'family_card__family_card_number'
+
+        # Query optimizado con select_related para evitar N+1 queries
+        queryset = (Person.objects
+                    .select_related('family_card', 'family_card__sidewalk_home',
+                                  'family_card__organization', 'document_type')
+                    .filter(family_head=True, state=True, family_card__state=True))
+
+        # Log para debugging
+        logger.info(f"FamilyCards - Usuario: {request.user.username}, is_superuser: {request.user.is_superuser}")
+        logger.info(f"FamilyCards - can_view_all: {getattr(request, 'can_view_all', False)}")
+
+        # Filtrar por organización del usuario (multi-tenancy)
+        # IMPORTANTE: Superusers y usuarios con can_view_all ven TODOS los datos
+        if request.user.is_superuser:
+            # Superuser ve TODO sin filtros
+            logger.info("FamilyCards - Superuser detectado - mostrando todos los datos")
+            pass  # No aplicar filtros
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            logger.info("FamilyCards - Usuario con can_view_all - mostrando todos los datos")
+            pass  # No aplicar filtros
+        else:
+            # Usuario normal: filtrar por organización
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                logger.info(f"FamilyCards - Filtrando por organización: {user_organization.organization_name}")
+                queryset = queryset.filter(family_card__organization=user_organization)
+            else:
+                # Usuario sin organización, retornar vacío
+                logger.warning(f"FamilyCards - Usuario {request.user.username} sin organización asignada")
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': 0,
+                    'recordsFiltered': 0,
+                    'data': []
+                })
+
+        queryset = queryset.values('family_card__family_card_number', 'family_card_id',
+                           'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                           'identification_person', 'document_type__code_document_type',
+                           'family_card__sidewalk_home__sidewalk_name', 'family_card__zone',
+                           'family_card__address_home', 'family_card__organization__organization_name').annotate(
+                        full_name=Concat('first_name_1', Value(' '), 'first_name_2',
+                                       Value(' '), 'last_name_1', Value(' '), 'last_name_2'),
+                        person_count=Count('family_card__person',
+                                         filter=Q(family_card__person__state=True))
+                    )
+
+        # Búsqueda optimizada con OR en múltiples campos
+        if search_value:
+            queryset = queryset.filter(
+                Q(first_name_1__icontains=search_value) |
+                Q(first_name_2__icontains=search_value) |
+                Q(last_name_1__icontains=search_value) |
+                Q(last_name_2__icontains=search_value) |
+                Q(identification_person__icontains=search_value) |
+                Q(family_card__family_card_number__icontains=search_value) |
+                Q(family_card__sidewalk_home__sidewalk_name__icontains=search_value) |
+                Q(family_card__zone__icontains=search_value) |
+                Q(family_card__address_home__icontains=search_value)
+            )
+
+        # Total de registros antes de aplicar filtros (respetando organización)
+        total_queryset = Person.objects.filter(
+            family_head=True,
+            state=True,
+            family_card__state=True
+        )
+
+        # Aplicar filtro de organización al total también
+        if request.user.is_superuser:
+            # Superuser ve TODO
+            pass
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            pass
+        else:
+            # Usuario normal: filtrar por organización
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                total_queryset = total_queryset.filter(family_card__organization=user_organization)
+
+        total_records = total_queryset.count()
+
+        # Total de registros después de aplicar filtros
+        filtered_records = queryset.count()
+
+        # Aplicar ordenamiento
+        queryset = queryset.order_by(order_by)
+
+        # Paginación
+        paginator = Paginator(queryset, length)
+        page_number = (start // length) + 1
+
+        try:
+            page = paginator.get_page(page_number)
+        except Exception:
+            page = paginator.get_page(1)
+
+        # Serializar los datos
+        data = list(page.object_list)
+
+        # Respuesta JSON para DataTables
+        response_data = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        # logger.error(f"Error en get_family_cards: {e}")
+        return JsonResponse({
+            'draw': 1,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'error': 'Error al cargar los datos'
+        }, status=500)
+
+
+# Función optimizada para crear ficha familiar con cabeza de familia
+@login_required
+def create_family_card(request):
+    """
+    Vista para crear una nueva ficha familiar junto con el cabeza de familia.
+    Incluye validaciones robustas y mensajes claros para el usuario.
+    Valida permisos de escritura (usuarios VIEWER no pueden crear).
+    """
+    # Validar permisos de escritura
+    if not request.user.is_superuser:
+        user_role = getattr(request, 'user_role', None)
+        if user_role == 'VIEWER':
+            messages.error(
+                request,
+                "No tiene permisos para crear fichas familiares. Su rol es de solo lectura."
+            )
+            return redirect('familyCardIndex')
+
+    if request.method == 'POST':
+        family_card_form = FormFamilyCard(request.POST)
+        person_form = FormPerson(request.POST)
+
+        # Validación 1: Verificar duplicidad de identificación ANTES de validar formularios
+        identification_person = request.POST.get('identification_person', '').strip()
+        if identification_person:
+            existing_person = Person.objects.filter(
+                identification_person=identification_person,
+                state=True
+            ).first()
+
+            if existing_person:
+                messages.error(
+                    request,
+                    f"El documento {identification_person} ya está registrado para "
+                    f"{existing_person.full_name} en la ficha {existing_person.family_card.family_card_number}."
+                )
+                return render(request, 'censo/censo/createFamilyCard.html', {
+                    'family_card_form': family_card_form,
+                    'person_form': person_form,
+                    'segment': 'family_card'
+                })
+
+        # Validación 2: Validar edad mínima del cabeza de familia (18 años)
+        date_birth = request.POST.get('date_birth')
+        if date_birth:
+            from datetime import date, datetime
+            try:
+                birth_date = datetime.strptime(date_birth, '%Y-%m-%d').date()
+                today = date.today()
+                age = today.year - birth_date.year - (
+                    (today.month, today.day) < (birth_date.month, birth_date.day)
+                )
+
+                if age < 18:
+                    messages.error(
+                        request,
+                        f"El cabeza de familia debe ser mayor de 18 años. "
+                        f"La edad registrada es de {age} años."
+                    )
+                    return render(request, 'censo/censo/createFamilyCard.html', {
+                        'family_card_form': family_card_form,
+                        'person_form': person_form,
+                        'segment': 'family_card'
+                    })
+            except ValueError:
+                messages.error(request, "Formato de fecha de nacimiento inválido.")
+                return render(request, 'censo/censo/createFamilyCard.html', {
+                    'family_card_form': family_card_form,
+                    'person_form': person_form,
+                    'segment': 'family_card'
+                })
+
+        # Validación 3: Validar formularios
+        if family_card_form.is_valid() and person_form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Crear FamilyCard
+                    family_card = family_card_form.save(commit=False)
+                    family_card.family_card_number = FamilyCard.get_next_family_card_number()
+                    family_card.state = True
+                    family_card.save()
+
+                    # Crear Person (cabeza de familia)
+                    person = person_form.save(commit=False)
+                    person.family_card = family_card
+                    person.family_head = True
+                    person.state = True
+                    person.save()
+
+                    messages.success(
+                        request,
+                        f"Ficha familiar #{family_card.family_card_number} creada exitosamente. "
+                        f"Cabeza de familia: {person.full_name}"
+                    )
+                    return redirect('createPerson', pk=family_card.pk)
+
+            except IntegrityError as e:
+                messages.error(
+                    request,
+                    "Error al guardar: Ya existe un registro con estos datos. "
+                    "Por favor, verifique la información."
+                )
+            except Exception as e:
+                messages.error(
+                    request,
+                    "Ocurrió un error inesperado al crear la ficha familiar. "
+                    "Por favor, contacte al administrador."
+                )
+        else:
+            # Mostrar errores específicos de los formularios
+            if family_card_form.errors:
+                for field, errors in family_card_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Datos de vivienda - {field}: {error}")
+
+            if person_form.errors:
+                for field, errors in person_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Datos de persona - {field}: {error}")
+
+            if not (family_card_form.errors or person_form.errors):
+                messages.warning(
+                    request,
+                    "Por favor, complete todos los campos obligatorios del formulario."
+                )
+    else:
+        family_card_form = FormFamilyCard()
+        person_form = FormPerson()
+
+    return render(request, 'censo/censo/createFamilyCard.html', {
+        'family_card_form': family_card_form,
+        'person_form': person_form,
+        'segment': 'family_card'
+    })
+
+
+@login_required
+def crear_persona(request, pk):
+    """
+    Vista para agregar un nuevo miembro a una ficha familiar existente.
+    Incluye validaciones robustas y mensajes claros para el usuario.
+    Valida permisos de escritura (usuarios VIEWER no pueden crear).
+    """
+    # Validar permisos de escritura
+    if not request.user.is_superuser:
+        user_role = getattr(request, 'user_role', None)
+        if user_role == 'VIEWER':
+            messages.error(
+                request,
+                "No tiene permisos para crear personas. Su rol es de solo lectura."
+            )
+            return redirect('familyCardIndex')
+
+    # Validar que la ficha familiar existe y está activa
+    try:
+        familia = get_object_or_404(FamilyCard, pk=pk, state=True)
+    except Exception:
+        messages.error(request, "La ficha familiar no existe o no está activa.")
+        return redirect('familyCardIndex')
+
+    if request.method == 'POST':
+        person_form = FormPerson(request.POST)
+
+        # Validación 1: Verificar duplicidad de identificación ANTES de validar formulario
+        identification_person = request.POST.get('identification_person', '').strip()
+        if identification_person:
+            existing_person = Person.objects.filter(
+                identification_person=identification_person,
+                state=True
+            ).first()
+
+            if existing_person:
+                messages.error(
+                    request,
+                    f"El documento {identification_person} ya está registrado para "
+                    f"{existing_person.full_name} en la ficha #{existing_person.family_card.family_card_number}."
+                )
+                return render(request, 'censo/persona/createPerson.html', {
+                    'person_form': person_form,
+                    'familia': familia,
+                    'segment': 'family_card'
+                })
+
+        # Validación 2: Si se marca como cabeza de familia, validar que sea mayor de 18 años
+        is_family_head = request.POST.get('family_head') == 'on'
+        date_birth = request.POST.get('date_birth')
+
+        if is_family_head and date_birth:
+            from datetime import date, datetime
+            try:
+                birth_date = datetime.strptime(date_birth, '%Y-%m-%d').date()
+                today = date.today()
+                age = today.year - birth_date.year - (
+                    (today.month, today.day) < (birth_date.month, birth_date.day)
+                )
+
+                if age < 18:
+                    messages.error(
+                        request,
+                        f"El cabeza de familia debe ser mayor de 18 años. "
+                        f"La edad registrada es de {age} años."
+                    )
+                    return render(request, 'censo/persona/createPerson.html', {
+                        'person_form': person_form,
+                        'familia': familia,
+                        'segment': 'family_card'
+                    })
+            except ValueError:
+                messages.error(request, "Formato de fecha de nacimiento inválido.")
+                return render(request, 'censo/persona/createPerson.html', {
+                    'person_form': person_form,
+                    'familia': familia,
+                    'segment': 'family_card'
+                })
+
+        # Validación 3: Verificar que no haya otro cabeza de familia si se marca como tal
+        if is_family_head:
+            existing_head = Person.objects.filter(
+                family_card=familia,
+                family_head=True,
+                state=True
+            ).first()
+
+            if existing_head:
+                messages.error(
+                    request,
+                    f"Ya existe un cabeza de familia en esta ficha: {existing_head.full_name}. "
+                    f"Primero debe cambiar el rol del cabeza actual."
+                )
+                return render(request, 'censo/persona/createPerson.html', {
+                    'person_form': person_form,
+                    'familia': familia,
+                    'segment': 'family_card'
+                })
+
+        # Validación 4: Validar formulario
+        if person_form.is_valid():
+            try:
+                with transaction.atomic():
+                    person = person_form.save(commit=False)
+                    person.family_card = familia
+                    person.state = True
+                    person.save()
+
+                    # Mensaje de éxito personalizado
+                    messages.success(
+                        request,
+                        f"Miembro agregado exitosamente: {person.full_name}. "
+                        f"Total de miembros en la ficha: {familia.person_set.filter(state=True).count()}"
+                    )
+
+                    # Redireccionar según la acción del usuario
+                    if 'add_another' in request.POST:
+                        return redirect('createPerson', pk=familia.pk)
+                    else:
+                        return redirect('detailFamilyCard', pk=familia.pk)
+
+            except IntegrityError:
+                messages.error(
+                    request,
+                    "Error al guardar: Ya existe un registro con estos datos. "
+                    "Por favor, verifique la información."
+                )
+            except Exception:
+                messages.error(
+                    request,
+                    "Ocurrió un error inesperado al agregar el miembro. "
+                    "Por favor, contacte al administrador."
+                )
+        else:
+            # Mostrar errores específicos del formulario
+            if person_form.errors:
+                for field, errors in person_form.errors.items():
+                    for error in errors:
+                        field_label = person_form.fields.get(field).label if field in person_form.fields else field
+                        messages.error(request, f"{field_label}: {error}")
+
+            if not person_form.errors:
+                messages.warning(
+                    request,
+                    "Por favor, complete todos los campos obligatorios del formulario."
+                )
+    else:
+        person_form = FormPerson()
+
+    # Obtener información adicional de la familia para el contexto
+    total_members = familia.person_set.filter(state=True).count()
+    family_head = familia.person_set.filter(family_head=True, state=True).first()
+
+    return render(request, 'censo/persona/createPerson.html', {
+        'person_form': person_form,
+        'familia': familia,
+        'total_members': total_members,
+        'family_head': family_head,
+        'segment': 'family_card'
+    })
+
+
+# Muestra el detalle de la ficha familiar - Vista optimizada
+@login_required
+def detalle_ficha(request, pk):
+    """
+    Vista optimizada para mostrar el detalle de una ficha familiar.
+    Incluye información de la vivienda y todos los miembros de la familia.
+    Valida permisos de organización (multi-tenancy).
+    """
+    try:
+        # Verificar que la ficha familiar existe
+        family_card = get_object_or_404(FamilyCard, pk=pk, state=True)
+
+        # Validar permisos de organización
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if not user_organization or family_card.organization != user_organization:
+                messages.error(request, "No tiene permiso para acceder a esta ficha familiar.")
+                return redirect('familyCardIndex')
+
+        # Query optimizado con select_related para evitar N+1 queries
+        familia = (Person.objects
+                   .select_related('family_card', 'family_card__sidewalk_home',
+                                 'family_card__organization', 'kinship', 'document_type', 'gender')
+                   .filter(family_card_id=pk, state=True)
+                   .values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                          'date_birth', 'identification_person', 'document_type__code_document_type',
+                          'kinship__description_kinship', 'family_card__family_card_number',
+                          'family_card__sidewalk_home__sidewalk_name', 'family_head',
+                          'family_card__zone', 'family_card__address_home', 'family_card__id',
+                          'family_card__latitude', 'family_card__longitude',
+                          'family_card__organization__organization_name', 'gender__gender',
+                          'cell_phone', 'personal_email')
+                   .annotate(
+                       age=ExpressionWrapper(now().year - F('date_birth__year'),
+                                           output_field=fields.IntegerField())
+                   )
+                   .order_by('-family_head', 'date_birth'))
+
+        # Verificar que hay miembros en la familia
+        if not familia.exists():
+            messages.warning(request, "No se encontraron miembros en esta ficha familiar.")
+
+        # Calcular estadísticas de la familia
+        total_miembros = familia.count()
+        cabeza_familia = familia.filter(family_head=True).first()
+        promedio_edad = familia.aggregate(promedio=ExpressionWrapper(
+            Sum(now().year - F('date_birth__year')) / Count('id'),
+            output_field=fields.FloatField()
+        ))['promedio']
+
+        context = {
+            'familia': familia,
+            'family_card': family_card,
+            'family_card_obj': family_card,  # Para acceder al historial
+            'total_miembros': total_miembros,
+            'cabeza_familia': cabeza_familia,
+            'promedio_edad': round(promedio_edad, 1) if promedio_edad else 0,
+            'segment': 'family_card',
+        }
+
+        return render(request, 'censo/censo/detail_family_card.html', context)
+
+    except Exception as e:
+        messages.error(request, "Hubo un error al cargar el detalle de la ficha familiar.")
+        return redirect('familyCardIndex')
+
+
+class UpdateFamily(LoginRequiredMixin, ReadOnlyPermissionMixin, OrganizationPermissionMixin,
+                   OrganizationFilterMixin, OrganizationFormMixin, UpdateView):
+    """
+    Vista optimizada para actualizar fichas familiares.
+    Maneja dos formularios: datos de ubicación y datos de vivienda.
+    Incluye validaciones robustas y mensajes claros para el usuario.
+
+    Mixins:
+    - ReadOnlyPermissionMixin: Bloquea acceso a usuarios VIEWER
+    - OrganizationPermissionMixin: Valida que el usuario tenga permiso para editar la ficha
+    - OrganizationFilterMixin: Filtra fichas por organización del usuario
+    - OrganizationFormMixin: Limita opciones de organización/vereda en formularios
+    """
+    model = FamilyCard
+    form_class = FormFamilyCard
+    template_name = 'censo/censo/edit-family-card.html'
+    success_url = reverse_lazy('familyCardIndex')
+
+    def get_queryset(self):
+        """Optimizar query con select_related para evitar N+1"""
+        # El mixin ya filtra por organización, aquí solo optimizamos
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            'sidewalk_home',
+            'organization'
+        ).filter(state=True)
+
+    def form_valid(self, form):
+        """Validar y guardar el formulario de ubicación"""
+        try:
+            # Validar coordenadas si se proporcionan
+            latitude = form.cleaned_data.get('latitude')
+            longitude = form.cleaned_data.get('longitude')
+
+            if latitude or longitude:
+                if not (latitude and longitude):
+                    messages.error(
+                        self.request,
+                        "Debe proporcionar tanto la latitud como la longitud, o dejar ambas en blanco."
+                    )
+                    return self.form_invalid(form)
+
+                # Validar rangos
+                try:
+                    lat_float = float(latitude) if isinstance(latitude, str) else latitude
+                    lon_float = float(longitude) if isinstance(longitude, str) else longitude
+
+                    if not (-90 <= lat_float <= 90):
+                        messages.error(
+                            self.request,
+                            f"La latitud debe estar entre -90 y 90 grados. Valor ingresado: {lat_float}"
+                        )
+                        return self.form_invalid(form)
+
+                    if not (-180 <= lon_float <= 180):
+                        messages.error(
+                            self.request,
+                            f"La longitud debe estar entre -180 y 180 grados. Valor ingresado: {lon_float}"
+                        )
+                        return self.form_invalid(form)
+                except (ValueError, TypeError):
+                    messages.error(
+                        self.request,
+                        "Las coordenadas deben ser valores numéricos válidos."
+                    )
+                    return self.form_invalid(form)
+
+            # Guardar
+            with transaction.atomic():
+                form.instance.user = self.request.user
+                response = super(UpdateFamily, self).form_valid(form)
+
+                messages.success(
+                    self.request,
+                    f"Ficha familiar #{self.object.family_card_number} actualizada correctamente."
+                )
+                return response
+
+        except Exception as e:
+            messages.error(
+                self.request,
+                "Ocurrió un error al actualizar la ficha familiar. Por favor, intente nuevamente."
+            )
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        """Mostrar errores específicos del formulario"""
+        if form.errors:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    field_name = form.fields[field].label if field in form.fields else field
+                    messages.error(self.request, f"{field_name}: {error}")
+        else:
+            messages.warning(
+                self.request,
+                "Hubo un problema con la actualización. Por favor, revise los campos."
+            )
+        return super(UpdateFamily, self).form_invalid(form)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Procesa envíos del formulario de vivienda o del formulario principal.
+        Detecta automáticamente cuál formulario se está enviando.
+        """
+        self.object = self.get_object()
+
+        # Detectar si es el formulario de materiales de vivienda
+        if 'material_form_submit' in request.POST:
+            return self._handle_material_form(request)
+
+        # Formulario principal de ubicación
+        return super().post(request, *args, **kwargs)
+
+    def _handle_material_form(self, request):
+        """Procesar el formulario de materiales de vivienda de manera optimizada"""
+        try:
+            # Obtener instancia existente o None
+            material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(
+                self.object.pk
+            )
+
+            # Determinar acción según si existe o no
+            action = "actualizados" if material_instance else "guardados"
+
+            # Crear formulario con instancia (existente o None)
+            material_form = MaterialConstructionFamilyForm(
+                request.POST,
+                instance=material_instance
+            )
+
+            if material_form.is_valid():
+                try:
+                    with transaction.atomic():
+                        instance = material_form.save(commit=False)
+                        instance.family_card = self.object
+                        instance.save()
+
+                        # Guardar relaciones many-to-many si existen
+                        if hasattr(material_form, 'save_m2m'):
+                            material_form.save_m2m()
+
+                        messages.success(
+                            request,
+                            f"✓ Datos de vivienda {action} correctamente para la ficha #{self.object.family_card_number}."
+                        )
+
+                        # Redirigir y mantener la pestaña vivienda activa
+                        url = reverse('update-family', kwargs={'pk': self.object.pk}) + '?tab=vivienda'
+                        return redirect(url)
+
+                except IntegrityError as e:
+                    messages.error(
+                        request,
+                        "Error de integridad: Ya existe un registro de vivienda para esta ficha."
+                    )
+                except Exception as e:
+                    messages.error(
+                        request,
+                        f"Error al guardar los datos de vivienda. Por favor, intente nuevamente."
+                    )
+            else:
+                # Mostrar errores específicos del formulario
+                for field, errors in material_form.errors.items():
+                    for error in errors:
+                        if field == '__all__':
+                            messages.error(request, f"Error: {error}")
+                        else:
+                            field_name = material_form.fields.get(field).label if field in material_form.fields else field
+                            messages.error(request, f"Vivienda - {field_name}: {error}")
+
+            # Renderizar con errores
+            return self.render_to_response(
+                self.get_context_data(
+                    form=self.get_form(),
+                    material_form=material_form
+                )
+            )
+
+        except Exception as e:
+            messages.error(
+                request,
+                "Error inesperado al procesar el formulario de vivienda."
+            )
+            return redirect('update-family', pk=self.object.pk)
+
+    def get_context_data(self, **kwargs):
+        """Agregar contexto optimizado con información de la ficha"""
+        context = super().get_context_data(**kwargs)
+
+        # Parámetros del sistema (cacheados si es posible)
+        params = SystemParameters.objects.all().only('key', 'value')
+        system_params = {p.key: p.value for p in params}
+
+        context['segment'] = 'family_card'
+        context['system_params'] = system_params
+        context['datos_vivienda'] = system_params.get('Datos de Vivienda', 'N')
+
+        # Información de la familia para el contexto
+        family = self.object
+
+        # Contar miembros activos de forma eficiente
+        context['total_members'] = Person.objects.filter(
+            family_card=family,
+            state=True
+        ).count()
+
+        # Obtener cabeza de familia
+        context['family_head'] = Person.objects.filter(
+            family_card=family,
+            family_head=True,
+            state=True
+        ).only('first_name_1', 'last_name_1').first()
+
+        # Formulario de materiales de vivienda
+        material_instance = None
+        try:
+            material_instance = MaterialConstructionFamilyCard.get_materials_by_family_card(family.pk)
+        except Exception:
+            pass
+
+        if 'material_form' not in kwargs:
+            if material_instance:
+                context['material_form'] = MaterialConstructionFamilyForm(instance=material_instance)
+                context['material_exists'] = True
+            else:
+                context['material_form'] = MaterialConstructionFamilyForm()
+                context['material_exists'] = False
+        else:
+            context['material_form'] = kwargs['material_form']
+            context['material_exists'] = bool(material_instance)
+
+        return context
+
+
+class DetailPersona(LoginRequiredMixin, OrganizationPermissionMixin,
+                    OrganizationFilterMixin, DetailView):
+    """
+    Vista optimizada para mostrar el detalle de una persona.
+    Incluye validaciones, carga optimizada de datos relacionados y contexto enriquecido.
+
+    Mixins:
+    - OrganizationPermissionMixin: Valida que el usuario tenga permiso para ver la persona
+    - OrganizationFilterMixin: Filtra personas por organización del usuario
+    """
+    model = Person
+    template_name = 'censo/persona/detail_person.html'
+    context_object_name = 'persona'
+
+    def get_queryset(self):
+        """
+        Query optimizado con select_related para evitar N+1 queries.
+        Solo carga registros activos para seguridad.
+        El mixin ya filtra por organización.
+        """
+        queryset = super().get_queryset()
+        return queryset.select_related(
+            'document_type',
+            'gender',
+            'education_level',
+            'civil_state',
+            'occupation',
+            'social_insurance',
+            'eps',
+            'kinship',
+            'family_card',
+            'family_card__sidewalk_home',
+            'family_card__organization',
+            'handicap'
+        ).filter(state=True)
+
+    def get_object(self, queryset=None):
+        """Validar que la persona existe y está activa"""
+        try:
+            obj = super().get_object(queryset)
+            if not obj.state:
+                raise Http404("Esta persona no está disponible.")
+            return obj
+        except Person.DoesNotExist:
+            raise Http404("Persona no encontrada.")
+
+    def get_context_data(self, **kwargs):
+        """Agregar contexto enriquecido con información relacionada"""
+        context = super().get_context_data(**kwargs)
+        persona = self.object
+
+        # Calcular edad
+        if persona.date_birth:
+            from datetime import date
+            today = date.today()
+            age = today.year - persona.date_birth.year - (
+                (today.month, today.day) < (persona.date_birth.month, persona.date_birth.day)
+            )
+            context['age'] = age
+        else:
+            context['age'] = None
+
+        # Información de la familia (optimizado)
+        if persona.family_card:
+            family = persona.family_card
+
+            # Total de miembros de la familia
+            context['total_family_members'] = Person.objects.filter(
+                family_card=family,
+                state=True
+            ).count()
+
+            # Cabeza de familia
+            context['family_head_obj'] = Person.objects.filter(
+                family_card=family,
+                family_head=True,
+                state=True
+            ).only('first_name_1', 'last_name_1', 'id').first()
+
+            # Miembros de la familia (limitado a 10 para rendimiento)
+            context['family_members'] = Person.objects.filter(
+                family_card=family,
+                state=True
+            ).exclude(
+                id=persona.id
+            ).select_related(
+                'kinship', 'gender'
+            ).only(
+                'id', 'first_name_1', 'last_name_1', 'kinship__description_kinship',
+                'gender__gender', 'date_birth', 'family_head'
+            )[:10]
+
+            context['family_card'] = family
+        else:
+            context['total_family_members'] = 0
+            context['family_head_obj'] = None
+            context['family_members'] = []
+            context['family_card'] = None
+
+        # Información de seguridad
+        context['segment'] = 'persons'
+        context['can_edit'] = self.request.user.is_authenticated
+
+        return context
+
+
+
+# Lista las personas en formato JSON para DataTables
+@login_required
+def listar_personas(request):
+    """
+    Vista optimizada para listar personas con paginación server-side.
+    Incluye búsqueda, ordenamiento y cálculo de edad eficiente.
+    """
+    try:
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        search_value = request.GET.get('search[value]', '').strip()
+        order_column = request.GET.get('order[0][column]', '0')
+        order_dir = request.GET.get('order[0][dir]', 'asc')
+
+        # Columnas ordenables
+        order_columns = [
+            'first_name_1',
+            'date_birth',
+            'age',
+            'gender__gender',
+            'family_card__family_card_number',
+        ]
+
+        # Validar índice de columna
+        try:
+            order_by = order_columns[int(order_column)]
+            if order_dir == 'desc':
+                order_by = f'-{order_by}'
+        except (IndexError, ValueError):
+            order_by = 'first_name_1'
+
+        # Query optimizado con select_related para evitar N+1 queries
+        personas = (Person.objects
+                    .select_related('document_type', 'gender', 'family_card', 'family_card__sidewalk_home',
+                                  'family_card__organization')
+                    .filter(state=True))
+
+        # Log para debugging
+        logger.info(f"Usuario: {request.user.username}, is_superuser: {request.user.is_superuser}")
+        logger.info(f"can_view_all: {getattr(request, 'can_view_all', False)}")
+        logger.info(f"user_organization: {getattr(request, 'user_organization', None)}")
+
+        # Filtrar por organización del usuario (multi-tenancy)
+        # IMPORTANTE: Superusers y usuarios con can_view_all ven TODOS los datos
+        if request.user.is_superuser:
+            # Superuser ve TODO sin filtros
+            logger.info("Superuser detectado - mostrando todos los datos")
+            pass  # No aplicar filtros
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            logger.info("Usuario con can_view_all - mostrando todos los datos")
+            pass  # No aplicar filtros
+        else:
+            # Usuario normal: filtrar por organización
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                logger.info(f"Filtrando por organización: {user_organization.organization_name}")
+                personas = personas.filter(family_card__organization=user_organization)
+            else:
+                # Usuario sin organización, retornar vacío
+                logger.warning(f"Usuario {request.user.username} sin organización asignada")
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': 0,
+                    'recordsFiltered': 0,
+                    'data': []
+                })
+
+        personas = personas.values('id', 'first_name_1', 'first_name_2', 'last_name_1', 'last_name_2',
+                            'identification_person', 'document_type__code_document_type', 'date_birth',
+                            'family_card', 'family_head', 'family_card__family_card_number',
+                            'family_card__sidewalk_home__sidewalk_name').annotate(
+                        gender=F('gender__gender'),
+                        age=ExpressionWrapper(
+                            now().year - F('date_birth__year'),
+                            output_field=fields.IntegerField()
+                        )
+                    )
+
+        # Búsqueda optimizada con OR en múltiples campos
+        if search_value:
+            personas = personas.filter(
+                Q(first_name_1__icontains=search_value) |
+                Q(first_name_2__icontains=search_value) |
+                Q(last_name_1__icontains=search_value) |
+                Q(last_name_2__icontains=search_value) |
+                Q(identification_person__icontains=search_value) |
+                Q(family_card__family_card_number__icontains=search_value) |
+                Q(family_card__sidewalk_home__sidewalk_name__icontains=search_value)
+            )
+
+        # Total de registros antes de aplicar filtros (para DataTables)
+        # Respetar filtro de organización también en el total
+        total_queryset = Person.objects.filter(state=True)
+
+        # Aplicar el mismo filtro de organización
+        if request.user.is_superuser:
+            # Superuser ve TODO
+            pass
+        elif getattr(request, 'can_view_all', False):
+            # Usuario con permiso global ve TODO
+            pass
+        else:
+            # Usuario normal: filtrar por organización
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                total_queryset = total_queryset.filter(family_card__organization=user_organization)
+
+        total_records = total_queryset.count()
+
+        # Total de registros después de aplicar filtros
+        filtered_records = personas.count()
+
+        # Aplicar ordenamiento
+        personas = personas.order_by(order_by)
+
+        # Paginación
+        paginator = Paginator(personas, length)
+        page_number = (start // length) + 1
+
+        try:
+            page = paginator.get_page(page_number)
+        except Exception:
+            page = paginator.get_page(1)
+
+        # Serializar los datos
+        data = list(page.object_list)
+
+        # Respuesta JSON para DataTables
+        response_data = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        # logger.error(f"Error en listar_personas: {e}")
+        return JsonResponse({
+            'draw': 1,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'error': 'Error al cargar los datos'
+        }, status=500)
+
+
+# Vista para mostrar la lista de personas en la plantilla HTML.
+def view_persons(request):
+    return render(request, 'censo/persona/listado_personas.html', {'segment': 'personas'})
+
+
+# Vista para editar una persona
+class UpdatePerson(LoginRequiredMixin, ReadOnlyPermissionMixin, OrganizationPermissionMixin,
+                   OrganizationFilterMixin, UpdateView):
+    """
+    Vista para editar una persona.
+
+    Mixins:
+    - ReadOnlyPermissionMixin: Bloquea acceso a usuarios VIEWER
+    - OrganizationPermissionMixin: Valida que el usuario tenga permiso para editar
+    - OrganizationFilterMixin: Filtra personas por organización del usuario
+    """
+    model = Person
+    fields = ['first_name_1', 'first_name_2', 'last_name_1', 'last_name_2', 'document_type', 'identification_person',
+              'date_birth', 'cell_phone', 'personal_email', 'gender', 'kinship', 'education_level', 'civil_state',
+              'occupation', 'social_insurance', 'eps', 'handicap', 'state', 'family_head']
+    template_name = 'censo/persona/edit_person.html'
+    success_url = reverse_lazy('personas')
+
+    def form_valid(self, person_form):
+        person = person_form.save(commit=False)
+
+        # VALIDACIÓN 1: Solo puede haber un cabeza de familia por ficha
+        if person.family_head:
+            otros_jefes = Person.objects.filter(
+                family_card=person.family_card,
+                family_head=True,
+                state=True
+            ).exclude(pk=person.pk)
+
+            if otros_jefes.exists():
+                jefe_actual = otros_jefes.first()
+                messages.error(
+                    self.request,
+                    f"Ya existe un cabeza de familia en esta ficha: {jefe_actual.full_name}. "
+                    f"Primero debe cambiar el rol del cabeza actual."
+                )
+                return self.form_invalid(person_form)
+
+        # VALIDACIÓN 2: El cabeza de familia debe ser mayor de 18 años
+        if person.family_head and person.date_birth:
+            from datetime import date
+            today = date.today()
+            age = today.year - person.date_birth.year - (
+                (today.month, today.day) < (person.date_birth.month, person.date_birth.day)
+            )
+
+            if age < 18:
+                messages.error(
+                    self.request,
+                    f"El cabeza de familia debe ser mayor de 18 años. "
+                    f"La persona tiene {age} años."
+                )
+                return self.form_invalid(person_form)
+
+        # VALIDACIÓN 3: El documento de identidad debe ser único
+        if person.identification_person:
+            duplicado = Person.objects.filter(
+                identification_person=person.identification_person,
+                state=True
+            ).exclude(pk=person.pk).first()
+
+            if duplicado:
+                messages.error(
+                    self.request,
+                    f"El documento {person.identification_person} ya está registrado "
+                    f"para {duplicado.full_name} en la ficha {duplicado.family_card.family_card_number}."
+                )
+                return self.form_invalid(person_form)
+
+        # Guardar persona
+        person_form.instance.user = self.request.user
+        person.save()
+
+        # LÓGICA: Desactivar ficha si no quedan miembros activos
+        if not person.state:
+            miembros_activos = Person.objects.filter(
+                family_card_id=person.family_card_id,
+                state=True
+            ).count()
+
+            if miembros_activos == 0:
+                ficha = person.family_card
+                ficha.state = False
+                ficha.family_card_number = 0
+                ficha.save()
+                messages.warning(
+                    self.request,
+                    "La ficha familiar ha sido desactivada porque no quedan miembros activos."
+                )
+
+        messages.success(self.request, "Persona actualizada correctamente")
+        return super(UpdatePerson, self).form_valid(person_form)
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            "Por favor, corrija los errores en el formulario antes de continuar."
+        )
+        return super(UpdatePerson, self).form_invalid(form)
+
+
+def person_by_gender(request):
+    # Contar las personas por género
+    cantidad = Person.objects.values('gender__gender')
+
+    return JsonResponse({'cantidad': cantidad})
+
+
+@require_POST
+@csrf_protect
+def update_family_head(request, family, person):
+    # Aquí deberías validar permisos del usuario
+    with transaction.atomic():
+        family_obj = get_object_or_404(FamilyCard, id=family)
+        person_obj = get_object_or_404(Person, id=person, family_card=family_obj)
+
+        if person_obj.family_head:
+            return JsonResponse(
+                {'status': 'info', 'title': 'Información', 'message': 'La persona ya es el cabeza de familia.'})
+
+        Person.objects.filter(family_card=family_obj, family_head=True).update(family_head=False)
+        person_obj.family_head = True
+        person_obj.save()
+        return JsonResponse(
+            {'status': 'success', 'title': 'Éxito', 'message': 'Cabeza de familia actualizado correctamente.'})
+
+
+def delete_person_familyCard(request, person):
+    # Aquí deberías validar permisos del usuario
+
+    with transaction.atomic():
+        old_person_obj = get_object_or_404(Person, id=person)
+        old_family_card = old_person_obj.family_card
+
+        nueva_ficha = FamilyCard.objects.create(
+            address_home=old_family_card.address_home,
+            sidewalk_home=old_family_card.sidewalk_home,
+            latitude=old_family_card.latitude,
+            longitude=old_family_card.longitude,
+            zone=old_family_card.zone,
+            organization=old_family_card.organization,
+            family_card_number=FamilyCard.get_next_family_card_number(),
+        )
+
+        old_person_obj.family_card = nueva_ficha
+        old_person_obj.family_head = True
+        old_person_obj.save()
+
+        return JsonResponse(
+            {'status': 'success', 'title': 'Éxito', 'message': 'Persona desvinculada correctamente.'})
+
+
+
+# Consultar los parámetros y retornar un json
+@login_required
+def get_system_parameters(request):
+    """
+    Vista API que retorna los parametros del sistema en formato JSON.
+    Usa cache para mejorar el rendimiento.
+    """
+    from .utils import get_system_parameters_cached
+
+    try:
+        # Usar cache con timeout de 1 hora
+        data = get_system_parameters_cached(timeout=3600)
+        return JsonResponse(data)
+    except Exception as e:
+        logger.error(f"Error al obtener los parametros del sistema: {e}")
+        return JsonResponse({'error': 'Error al obtener los parametros del sistema'}, status=500)
+
+
+# Registro de Materiales de construcción
+class MaterialConstructionView(LoginRequiredMixin, CreateView):
+    model = MaterialConstructionFamilyCard
+    form_class = MaterialConstructionFamilyForm
+    template_name = 'censo/censo/material_construction_form.html'
+    success_url = reverse_lazy('familyCardIndex')
+    context_object_name = 'material_construction'
+    extra_context = {'segment': 'material_construction'}
+
+    def form_valid(self, form):
+        # Guardado manual para asegurar que family_card se asigne correctamente
+        pk = self.kwargs.get('pk')
+        try:
+            with transaction.atomic():
+                instance = form.save(commit=False)
+                # Asignar usuario si el modelo tiene ese campo (seguro no lo tiene en este modelo)
+                try:
+                    instance.user = self.request.user
+                except Exception:
+                    pass
+                if pk:
+                    family = get_object_or_404(FamilyCard, pk=pk)
+                    instance.family_card = family
+                instance.save()
+                # guardar m2m si existieran
+                form.save_m2m()
+                # asignar la instancia creada a self.object para compatibilidad con get_success_url()
+                self.object = instance
+            messages.success(self.request, "Material de construcción creado correctamente")
+            return redirect('familyCardIndex')
+        except IntegrityError as e:
+            # logger.error(f"Error al guardar MaterialConstructionFamilyCard: {e}")
+            print(f"Error al guardar MaterialConstructionFamilyCard: {e}")
+            form.add_error(None, "No se pudo guardar el registro por un conflicto en la base de datos.")
+            messages.error(self.request, "Error al crear el material de construcción. Por favor, revise los campos.")
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Error al crear el material de construcción. Por favor, revise los campos.")
+        print(form.errors)
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        params = SystemParameters.objects.all().values('key', 'value')
+        context['system_params'] = {p['key']: p['value'] for p in params}
+        return context
+
+
+# ============================================================================
+# EXPORTACIÓN A EXCEL
+# ============================================================================
+
+@login_required
+def export_persons_excel(request):
+    """
+    Exporta el listado de personas a Excel con el formato solicitado.
+    Respeta el filtro de organización del usuario.
+
+    Columnas:
+    Nro de ficha, dirección, zona, tipo documento identidad, identificación,
+    nombre 1, nombre 2, apellido 1, apellido 2, fecha nacimiento, eps,
+    parentesco, género, estado civil, ocupación, nivel educativo, teléfono,
+    cabeza de hogar
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from datetime import datetime
+
+    try:
+        # Query base de personas
+        personas = Person.objects.select_related(
+            'family_card',
+            'family_card__sidewalk_home',
+            'family_card__organization',
+            'document_type',
+            'gender',
+            'eps',
+            'kinship',
+            'civil_state',
+            'occupation',
+            'education_level'
+        ).filter(state=True)
+
+        # Filtrar por organización del usuario
+        if not (request.user.is_superuser or getattr(request, 'can_view_all', False)):
+            user_organization = getattr(request, 'user_organization', None)
+            if user_organization:
+                personas = personas.filter(family_card__organization=user_organization)
+            else:
+                # Sin organización, retornar vacío
+                messages.error(request, "No tiene una organización asignada.")
+                return redirect('personas')
+
+        # Ordenar por ficha y cabeza de familia
+        personas = personas.order_by('family_card__family_card_number', '-family_head')
+
+        # Crear workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Personas Registradas"
+
+        # Estilos
+        header_font = Font(name='Arial', size=11, bold=True, color='FFFFFF')
+        header_fill = PatternFill(start_color='2196F3', end_color='2196F3', fill_type='solid')
+        header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+        cell_border = Border(
+            left=Side(style='thin', color='CCCCCC'),
+            right=Side(style='thin', color='CCCCCC'),
+            top=Side(style='thin', color='CCCCCC'),
+            bottom=Side(style='thin', color='CCCCCC')
+        )
+
+        # Headers según el orden solicitado
+        headers = [
+            'Nro de Ficha',
+            'Dirección',
+            'Zona',
+            'Tipo Documento',
+            'Identificación',
+            'Nombre 1',
+            'Nombre 2',
+            'Apellido 1',
+            'Apellido 2',
+            'Fecha Nacimiento',
+            'EPS',
+            'Parentesco',
+            'Género',
+            'Estado Civil',
+            'Ocupación',
+            'Nivel Educativo',
+            'Teléfono',
+            'Cabeza de Hogar'
+        ]
+
+        # Escribir headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = cell_border
+
+        # Ajustar anchos de columna
+        column_widths = {
+            'A': 15,  # Nro Ficha
+            'B': 30,  # Dirección
+            'C': 10,  # Zona
+            'D': 15,  # Tipo Doc
+            'E': 15,  # Identificación
+            'F': 15,  # Nombre 1
+            'G': 15,  # Nombre 2
+            'H': 15,  # Apellido 1
+            'I': 15,  # Apellido 2
+            'J': 15,  # Fecha Nac
+            'K': 25,  # EPS
+            'L': 20,  # Parentesco
+            'M': 12,  # Género
+            'N': 15,  # Estado Civil
+            'O': 20,  # Ocupación
+            'P': 20,  # Nivel Educativo
+            'Q': 15,  # Teléfono
+            'R': 15   # Cabeza Hogar
+        }
+
+        for col, width in column_widths.items():
+            ws.column_dimensions[col].width = width
+
+        # Escribir datos
+        row_num = 2
+        for persona in personas:
+            # Determinar zona
+            zona_text = ''
+            if persona.family_card and persona.family_card.zone:
+                zona_text = 'Urbana' if persona.family_card.zone == 'U' else 'Rural'
+
+            # Cabeza de hogar
+            cabeza_text = 'SÍ' if persona.family_head else 'NO'
+
+            # Fecha de nacimiento formateada
+            fecha_nac = persona.date_birth.strftime('%Y-%m-%d') if persona.date_birth else ''
+
+            # Datos según el orden solicitado
+            row_data = [
+                persona.family_card.family_card_number if persona.family_card else '',
+                persona.family_card.address_home if persona.family_card and persona.family_card.address_home else '',
+                zona_text,
+                persona.document_type.code_document_type if persona.document_type else '',
+                persona.identification_person or '',
+                persona.first_name_1 or '',
+                persona.first_name_2 or '',
+                persona.last_name_1 or '',
+                persona.last_name_2 or '',
+                fecha_nac,
+                persona.eps.name_eps if persona.eps else '',  # Corregido: name_eps
+                persona.kinship.description_kinship if persona.kinship else '',
+                persona.gender.gender if persona.gender else '',
+                persona.civil_state.state_civil if persona.civil_state else '',  # Corregido: state_civil
+                persona.occupation.description_occupancy if persona.occupation else '',
+                persona.education_level.education_level if persona.education_level else '',  # Corregido: education_level
+                persona.cell_phone or '',
+                cabeza_text
+            ]
+
+            for col_num, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col_num)
+                cell.value = value
+                cell.border = cell_border
+                cell.alignment = Alignment(vertical='center')
+
+            row_num += 1
+
+        # Agregar filtros
+        ws.auto_filter.ref = ws.dimensions
+
+        # Congelar primera fila
+        ws.freeze_panes = 'A2'
+
+        # Crear response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+
+        # Nombre del archivo con fecha y organización
+        org_name = ''
+        if hasattr(request, 'user_organization') and request.user_organization:
+            org_name = f"_{request.user_organization.organization_name.replace(' ', '_')}"
+
+        filename = f'personas_registradas{org_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+
+        wb.save(response)
+
+        # Log de exportación
+        print(f"Exportación Excel de personas: {personas.count()} registros - Usuario: {request.user.username}")
+
+        return response
+
+    except Exception as e:
+        messages.error(request, f"Error al exportar a Excel: {str(e)}")
+        return redirect('personas')
+
+
+@login_required
+def global_search(request):
+    """
+    Búsqueda global en todo el sistema.
+    Busca en: Personas, Fichas Familiares, Documentos Generados.
+    """
+    query = request.GET.get('q', '').strip()
+
+    context = {
+        'segment': 'search',
+        'query': query,
+        'personas': [],
+        'fichas': [],
+        'documentos': [],
+        'total_resultados': 0,
+    }
+
+    if not query or len(query) < 2:
+        return render(request, 'censo/global_search.html', context)
+
+    # Filtrar por organización del usuario
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_profile = request.user.userprofile
+            user_organization = user_profile.organization
+        except AttributeError:
+            pass
+
+    # Búsqueda en Personas
+    personas_qs = Person.objects.select_related(
+        'gender', 'family_card', 'family_card__sidewalk_home'
+    ).filter(state=True)
+
+    if user_organization:
+        personas_qs = personas_qs.filter(family_card__organization=user_organization)
+
+    personas = personas_qs.filter(
+        Q(first_name_1__icontains=query) |
+        Q(first_name_2__icontains=query) |
+        Q(last_name_1__icontains=query) |
+        Q(last_name_2__icontains=query) |
+        Q(identification_person__icontains=query)
+    )[:10]  # Limitar a 10 resultados
+
+    # Búsqueda en Fichas Familiares
+    fichas_qs = FamilyCard.objects.select_related(
+        'sidewalk_home'
+    ).filter(state=True)
+
+    if user_organization:
+        fichas_qs = fichas_qs.filter(organization=user_organization)
+
+    fichas = fichas_qs.filter(
+        Q(family_card_number__icontains=query)
+    )[:10]
+
+    # Búsqueda en Documentos Generados
+    try:
+        from censoapp.models import GeneratedDocument
+        docs_qs = GeneratedDocument.objects.select_related('person', 'organization')
+
+        if user_organization:
+            docs_qs = docs_qs.filter(organization=user_organization)
+
+        documentos = docs_qs.filter(
+            Q(document_number__icontains=query) |
+            Q(person__first_name_1__icontains=query) |
+            Q(person__first_name_2__icontains=query) |
+            Q(person__last_name_1__icontains=query) |
+            Q(person__last_name_2__icontains=query) |
+            Q(person__identification_person__icontains=query)
+        )[:10]
+
+        context['documentos'] = documentos
+    except ImportError:
+        pass
+
+    context.update({
+        'personas': personas,
+        'fichas': fichas,
+        'total_resultados': personas.count() + fichas.count() + len(context['documentos']),
+    })
+
+    return render(request, 'censo/global_search.html', context)
+
+
+@login_required
+def global_search_api(request):
+    """
+    API para autocompletado de búsqueda global.
+    Retorna JSON con resultados rápidos para autocomplete.
+    """
+    query = request.GET.get('q', '').strip()
+
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+
+    # Filtrar por organización
+    user_organization = None
+    if not request.user.is_superuser:
+        try:
+            user_profile = request.user.userprofile
+            user_organization = user_profile.organization
+        except AttributeError:
+            pass
+
+    results = []
+
+    # Buscar personas
+    personas_qs = Person.objects.select_related('family_card').filter(state=True)
+    if user_organization:
+        personas_qs = personas_qs.filter(family_card__organization=user_organization)
+
+    personas = personas_qs.filter(
+        Q(first_name_1__icontains=query) |
+        Q(first_name_2__icontains=query) |
+        Q(last_name_1__icontains=query) |
+        Q(last_name_2__icontains=query) |
+        Q(identification_person__icontains=query)
+    )[:5]
+
+    for persona in personas:
+        # Construir nombre completo
+        nombre_completo = f"{persona.first_name_1}"
+        if persona.first_name_2:
+            nombre_completo += f" {persona.first_name_2}"
+        nombre_completo += f" {persona.last_name_1}"
+        if persona.last_name_2:
+            nombre_completo += f" {persona.last_name_2}"
+
+        results.append({
+            'type': 'persona',
+            'title': nombre_completo,
+            'subtitle': f"ID: {persona.identification_person}",
+            'url': reverse('persona_detail', args=[persona.id]),
+            'icon': 'fa-user'
+        })
+
+    # Buscar fichas
+    fichas_qs = FamilyCard.objects.select_related('sidewalk_home').filter(state=True)
+    if user_organization:
+        fichas_qs = fichas_qs.filter(organization=user_organization)
+
+    fichas = fichas_qs.filter(
+        Q(family_card_number__icontains=query)
+    )[:5]
+
+    for ficha in fichas:
+        results.append({
+            'type': 'ficha',
+            'title': f"Ficha Familiar #{ficha.family_card_number}",
+            'subtitle': f"{ficha.sidewalk_home.sidewalk_name if ficha.sidewalk_home else 'Sin vereda'}",
+            'url': reverse('fichadetail', args=[ficha.id]),
+            'icon': 'fa-home'
+        })
+
+    return JsonResponse({'results': results})
+
+
+# ==================== IMPORTACIÓN MASIVA ====================
+
+@login_required
+def importacion_masiva_inicio(request):
+    """Vista principal de importación masiva."""
+    # Verificar estado del parámetro de datos de vivienda
+    housing_data_enabled = False
+    try:
+        param = SystemParameters.objects.filter(key='Datos de Vivienda').first()
+        housing_data_enabled = param and param.value == 'S'
+    except Exception:
+        pass
+
+    context = {
+        'segment': 'importacion',
+        'housing_data_status': 'enabled' if housing_data_enabled else 'disabled',
+    }
+
+    # Si es superusuario, pasar lista de organizaciones
+    if request.user.is_superuser:
+        context['organizations'] = Organizations.objects.all()
+
+    return render(request, 'censo/importacion_masiva.html', context)
+
+
+@login_required
+def descargar_template_importacion(request):
+    """Genera y descarga el template Excel para importación."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from django.http import HttpResponse
+
+    # Verificar si los datos de vivienda están habilitados
+    housing_data_enabled = False
+    try:
+        param = SystemParameters.objects.filter(key='Datos de Vivienda').first()
+        housing_data_enabled = param and param.value == 'S'
+    except Exception:
+        pass
+
+    # Crear workbook
+    wb = Workbook()
+
+    # === HOJA DE FICHAS ===
+    ws_fichas = wb.active
+    ws_fichas.title = "Fichas"
+
+    # Headers de fichas - condicionales según parámetro
+    headers_fichas = [
+        'numero_ficha', 'vereda', 'zona', 'direccion'
+    ]
+
+    # Solo agregar columnas de materiales si está habilitado
+    if housing_data_enabled:
+        headers_fichas.extend(['material_paredes', 'material_piso', 'material_techo'])
+
+    # Estilo de headers
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+
+    for col_num, header in enumerate(headers_fichas, 1):
+        cell = ws_fichas.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Datos de ejemplo - condicionales
+    if housing_data_enabled:
+        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123', 'Ladrillo', 'Cemento', 'Zinc'])
+        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45', 'Madera', 'Tierra', 'Teja'])
+    else:
+        ws_fichas.append([1, 'Vereda El Rosal', 'R', 'Calle 123'])
+        ws_fichas.append([2, 'Vereda La Esperanza', 'R', 'Carrera 45'])
+
+    # === HOJA DE PERSONAS ===
+    ws_personas = wb.create_sheet("Personas")
+
+    headers_personas = [
+        'numero_ficha', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+        'identificacion', 'tipo_documento', 'fecha_nacimiento', 'genero', 'parentesco', 'cabeza_familia',
+        'celular', 'email', 'nivel_educativo', 'ocupacion'
+    ]
+
+    for col_num, header in enumerate(headers_personas, 1):
+        cell = ws_personas.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Datos de ejemplo con formato de fecha dd/mm/yyyy
+    ws_personas.append([
+        1, 'Juan', 'Carlos', 'García', 'López', '123456789', 'CC', '15/05/1980',
+        'Masculino', 'Jefe de Hogar', 'SI', '3001234567', 'juan@email.com', 'Bachiller', 'Agricultor'
+    ])
+    ws_personas.append([
+        1, 'María', 'Elena', 'García', 'Pérez', '987654321', 'CC', '20/08/1985',
+        'Femenino', 'Cónyuge', 'NO', '3009876543', 'maria@email.com', 'Técnico', 'Ama de Casa'
+    ])
+    ws_personas.append([
+        1, 'Pedro', '', 'García', 'García', '456789123', 'TI', '10/03/2010',
+        'Masculino', 'Hijo', 'NO', '', '', 'Primaria', 'Estudiante'
+    ])
+
+    # === HOJA DE INSTRUCCIONES ===
+    ws_instrucciones = wb.create_sheet("Instrucciones")
+    ws_instrucciones.column_dimensions['A'].width = 50
+
+    # Instrucciones base
+    instrucciones = [
+        "INSTRUCCIONES PARA IMPORTACION MASIVA",
+        "",
+        "1. HOJA 'Fichas':",
+        "   - numero_ficha: Numero unico de la ficha familiar (OBLIGATORIO)",
+        "   - vereda: Nombre de la vereda (OBLIGATORIO)",
+        "   - zona: U (Urbana) o R (Rural) (OBLIGATORIO)",
+        "   - direccion: Direccion de la vivienda (OBLIGATORIO)",
+    ]
+
+    # Agregar instrucciones de materiales solo si estan habilitados
+    if housing_data_enabled:
+        instrucciones.extend([
+            "   - material_paredes: Material de las paredes (OPCIONAL)",
+            "   - material_piso: Material del piso (OPCIONAL)",
+            "   - material_techo: Material del techo (OPCIONAL)",
+        ])
+    else:
+        instrucciones.append("   NOTA: Las columnas de materiales NO estan habilitadas en este sistema")
+
+    instrucciones.extend([
+        "",
+        "2. HOJA 'Personas':",
+        "   - numero_ficha: Debe coincidir con una ficha existente (OBLIGATORIO)",
+        "   - primer_nombre: Obligatorio",
+        "   - primer_apellido: Obligatorio",
+        "   - identificacion: Debe ser unica (sin repetir) (OBLIGATORIO)",
+        "   - tipo_documento: CC, TI, RC, CE, etc. (OBLIGATORIO)",
+        "   - fecha_nacimiento: Formatos aceptados:",
+        "       * dd/mm/yyyy (ej: 25/12/1990) - RECOMENDADO",
+        "       * dd-mm-yyyy (ej: 25-12-1990)",
+        "       * yyyy-mm-dd (ej: 1990-12-25)",
+        "   - genero: Masculino o Femenino (OBLIGATORIO)",
+        "   - cabeza_familia: SI o NO (OBLIGATORIO)",
+        "   - celular: Numero de celular (OPCIONAL)",
+        "   - email: Correo electronico (OPCIONAL)",
+        "   - nivel_educativo: Nivel educativo (OPCIONAL)",
+        "   - ocupacion: Ocupacion (OPCIONAL)",
+        "",
+        "3. NOTAS IMPORTANTES:",
+        "   - No eliminar las columnas del encabezado",
+        "   - Cada ficha debe tener al menos una persona",
+        "   - Solo puede haber un cabeza de familia por ficha",
+        "   - Las identificaciones no pueden estar duplicadas",
+        "   - Los campos marcados como OBLIGATORIOS no pueden estar vacios",
+        "   - Para fechas, puede usar el formato de Excel (dd/mm/yyyy)",
+        "",
+        "4. PROCESO:",
+        "   1. Llenar los datos en las hojas Fichas y Personas",
+        "   2. Guardar el archivo",
+        "   3. Subir el archivo en la plataforma",
+        "   4. Revisar el preview y corregir errores si los hay",
+        "   5. Confirmar la importacion",
+        "",
+        "5. VALORES PERMITIDOS:",
+        "   - zona: U, R, URBANA, RURAL",
+        "   - genero: Masculino, Femenino",
+        "   - cabeza_familia: SI, NO, SI, S, N",
+        "   - tipo_documento: CC, TI, RC, CE, PA",
+        "   - fecha_nacimiento: dd/mm/yyyy, dd-mm-yyyy, yyyy-mm-dd",
+    ])
+
+    for row_num, texto in enumerate(instrucciones, 1):
+        cell = ws_instrucciones.cell(row=row_num, column=1)
+        cell.value = texto
+        if "INSTRUCCIONES" in texto or texto.startswith(tuple('12345')):
+            cell.font = Font(bold=True, size=12)
+
+    # Crear response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=template_importacion_censo.xlsx'
+
+    wb.save(response)
+    return response
+
+
+@login_required
+def validar_archivo_importacion(request):
+    """Valida el archivo Excel y muestra preview."""
+    if request.method != 'POST':
+        return redirect('importacion-masiva')
+
+    if 'archivo' not in request.FILES:
+        messages.error(request, "No se ha seleccionado ningún archivo")
+        return redirect('importacion-masiva')
+
+    archivo = request.FILES['archivo']
+
+    # Validar extensión
+    if not archivo.name.endswith(('.xlsx', '.xls')):
+        messages.error(request, "El archivo debe ser formato Excel (.xlsx o .xls)")
+        return redirect('importacion-masiva')
+
+    # Obtener organización del usuario
+    user_organization = None
+    try:
+        if not request.user.is_superuser:
+            try:
+                user_organization = request.user.userprofile.organization
+            except AttributeError:
+                messages.error(request, "Tu usuario no tiene una organización asignada")
+                return redirect('importacion-masiva')
+        else:
+            # Superusuario debe seleccionar organización
+            org_id = request.POST.get('organization_id')
+            if not org_id:
+                messages.error(request, "Debes seleccionar una organización")
+                return redirect('importacion-masiva')
+            user_organization = Organizations.objects.get(id=org_id)
+
+        # Guardar archivo temporalmente
+        import os
+        from django.conf import settings
+        from censoapp.importador_masivo import ImportadorMasivo
+
+        temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', archivo.name)
+        os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+
+        with open(temp_path, 'wb+') as destination:
+            for chunk in archivo.chunks():
+                destination.write(chunk)
+
+        # Validar archivo
+        importador = ImportadorMasivo(temp_path, user_organization)
+
+        # Ejecutar validación dentro de try-except
+        try:
+            validacion_exitosa = importador.validar_todo()
+        except Exception as e:
+            # Eliminar archivo temporal
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+            messages.error(request, f"Error al validar el archivo: {str(e)}")
+            logger.error(f"Error en validación de importación: {str(e)}", exc_info=True)
+            return redirect('importacion-masiva')
+
+        if validacion_exitosa:
+            # Guardar ruta en sesión para importación posterior
+            request.session['archivo_importacion'] = temp_path
+            request.session['organization_id'] = user_organization.id
+
+            # Extraer preview
+            try:
+                fichas_preview = importador.extraer_datos_fichas()[:10]
+                personas_preview = importador.extraer_datos_personas()[:10]
+                total_fichas = len(importador.extraer_datos_fichas())
+                total_personas = len(importador.extraer_datos_personas())
+            except Exception as e:
+                # Si falla la extracción de preview, eliminar archivo y mostrar error
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                messages.error(request, f"Error al procesar el archivo: {str(e)}")
+                logger.error(f"Error al extraer preview: {str(e)}", exc_info=True)
+                return redirect('importacion-masiva')
+
+            context = {
+                'segment': 'importacion',
+                'archivo_valido': True,
+                'fichas_preview': fichas_preview,
+                'personas_preview': personas_preview,
+                'total_fichas': total_fichas,
+                'total_personas': total_personas,
+                'advertencias': importador.advertencias,
+            }
+
+            return render(request, 'censo/importacion_preview.html', context)
+        else:
+            # Eliminar archivo temporal
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+            context = {
+                'segment': 'importacion',
+                'archivo_valido': False,
+                'errores': importador.errores,
+                'advertencias': importador.advertencias,
+            }
+
+            return render(request, 'censo/importacion_preview.html', context)
+
+    except Exception as e:
+        # Capturar cualquier error no manejado
+        messages.error(request, f"Error inesperado al procesar el archivo: {str(e)}")
+        logger.error(f"Error inesperado en validar_archivo_importacion: {str(e)}", exc_info=True)
+
+        # Limpiar archivo temporal si existe
+        try:
+            if 'temp_path' in locals() and os.path.exists(temp_path):
+                os.remove(temp_path)
+        except:
+            pass
+
+        return redirect('importacion-masiva')
+
+
+@login_required
+def confirmar_importacion(request):
+    """Ejecuta la importación definitiva."""
+    if request.method != 'POST':
+        return redirect('importacion-masiva')
+
+    archivo_path = request.session.get('archivo_importacion')
+    org_id = request.session.get('organization_id')
+
+    if not archivo_path or not org_id:
+        messages.error(request, "No hay archivo para importar")
+        return redirect('importacion-masiva')
+
+    try:
+        organization = Organizations.objects.get(id=org_id)
+
+        from censoapp.importador_masivo import ImportadorMasivo
+        importador = ImportadorMasivo(archivo_path, organization)
+
+        resultado = importador.importar()
+
+        # Eliminar archivo temporal
+        import os
+        os.remove(archivo_path)
+
+        # Limpiar sesión
+        del request.session['archivo_importacion']
+        del request.session['organization_id']
+
+        if resultado['exito']:
+            mensaje_exito = (
+                f"✅ Importación completada exitosamente: "
+                f"{resultado['fichas_creadas']} fichas y "
+                f"{resultado['personas_creadas']} personas creadas."
+            )
+
+            # Agregar información del log
+            if resultado.get('log_file'):
+                log_name = os.path.basename(resultado['log_file'])
+                mensaje_exito += f" Ver detalles en: {log_name}"
+
+                # Guardar log en sesión para poder consultarlo
+                request.session['importacion_log'] = {
+                    'log_file': resultado['log_file'],
+                    'errores': [],
+                    'fichas_creadas': resultado.get('fichas_creadas', 0),
+                    'personas_creadas': resultado.get('personas_creadas', 0),
+                    'exitoso': True
+                }
+
+            messages.success(request, mensaje_exito)
+
+            if resultado.get('advertencias'):
+                messages.warning(
+                    request,
+                    f"⚠️ {len(resultado['advertencias'])} advertencias generadas. "
+                    f"Ver archivo de log para detalles."
+                )
+        else:
+            # Mensaje principal de error
+            messages.error(
+                request,
+                f"❌ Importación fallida. "
+                f"{len(resultado.get('errores_detallados', []))} errores encontrados."
+            )
+
+            # Mostrar errores detallados
+            errores_detallados = resultado.get('errores_detallados', [])
+            if errores_detallados:
+                # Agrupar errores por ficha
+                errores_por_ficha = {}
+                for error in errores_detallados:
+                    ficha = error['ficha']
+                    if ficha not in errores_por_ficha:
+                        errores_por_ficha[ficha] = []
+                    errores_por_ficha[ficha].append(error)
+
+                # Mostrar resumen de errores
+                for ficha, errores in list(errores_por_ficha.items())[:5]:  # Primeras 5 fichas
+                    for error in errores[:2]:  # Primeros 2 errores por ficha
+                        messages.error(
+                            request,
+                            f"Ficha {ficha} - {error['persona']}: {error['error']}"
+                        )
+
+                if len(errores_por_ficha) > 5:
+                    messages.warning(
+                        request,
+                        f"⚠️ Hay {len(errores_por_ficha) - 5} fichas más con errores. "
+                        f"Ver archivo de log para detalles completos."
+                    )
+
+            # Información del archivo de log
+            if resultado.get('log_file'):
+                log_name = os.path.basename(resultado['log_file'])
+                print(log_name)
+                messages.info(
+                    request,
+                    f"📄 Reporte completo de errores guardado en: {log_name}"
+                )
+
+            # Guardar información del log en sesión para mostrarlo en una página
+            if resultado.get('log_file') and resultado.get('errores_detallados'):
+                request.session['importacion_log'] = {
+                    'log_file': resultado['log_file'],
+                    'errores': errores_detallados,
+                    'fichas_creadas': resultado.get('fichas_creadas', 0),
+                    'personas_creadas': resultado.get('personas_creadas', 0)
+                }
+                # Redirigir a la página de log cuando hay errores
+                return redirect('ver-log-importacion')
+
+        # Si no hay errores o es exitoso, ir a fichas familiares
+        return redirect('familyCardIndex')
+
+    except Exception as e:
+        logger.error(f"Error inesperado en confirmar_importacion: {str(e)}", exc_info=True)
+        messages.error(request, f"Error inesperado: {str(e)}")
+        return redirect('importacion-masiva')
+
+
+@login_required
+def ver_log_importacion(request):
+    """Muestra el log de la última importación con errores."""
+    log_info = request.session.get('importacion_log')
+
+    if not log_info:
+        messages.warning(request, "No hay información de log disponible")
+        return redirect('importacion-masiva')
+
+    context = {
+        'segment': 'importacion',
+        'log_file': log_info.get('log_file'),
+        'errores': log_info.get('errores', []),
+        'fichas_creadas': log_info.get('fichas_creadas', 0),
+        'personas_creadas': log_info.get('personas_creadas', 0),
+    }
+
+    return render(request, 'censo/importacion_log.html', context)
+
+
+@login_required
+def descargar_log_importacion(request):
+    """Descarga el archivo de log de importación."""
+    log_info = request.session.get('importacion_log')
+
+    if not log_info or not log_info.get('log_file'):
+        messages.error(request, "No hay archivo de log disponible")
+        return redirect('importacion-masiva')
+
+    import os
+    from django.http import FileResponse, Http404
+
+    log_file_path = log_info['log_file']
+
+    if not os.path.exists(log_file_path):
+        messages.error(request, "El archivo de log no existe")
+        return redirect('importacion-masiva')
+
+    try:
+        response = FileResponse(
+            open(log_file_path, 'rb'),
+            content_type='text/plain; charset=utf-8'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(log_file_path)}"'
+        return response
+    except Exception as e:
+        messages.error(request, f"Error al descargar el log: {str(e)}")
+        return redirect('importacion-masiva')
+
+

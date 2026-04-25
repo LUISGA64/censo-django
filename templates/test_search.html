@@ -1,0 +1,133 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Prueba de Búsqueda{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>🔍 Prueba de Búsqueda Global</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Buscador de Prueba -->
+                    <div class="mb-4">
+                        <label>Buscar (mínimo 3 caracteres):</label>
+                        <input type="text"
+                               id="testSearchInput"
+                               class="form-control"
+                               placeholder="Escribe un nombre..."
+                               minlength="3">
+                    </div>
+
+                    <!-- Resultados -->
+                    <div id="testResults" class="mt-3"></div>
+
+                    <!-- Debug Info -->
+                    <div id="debugInfo" class="mt-3 p-3 bg-light rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Test search loaded');
+
+    const input = document.getElementById('testSearchInput');
+    const resultsDiv = document.getElementById('testResults');
+    const debugDiv = document.getElementById('debugInfo');
+
+    let timeout;
+
+    input.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+
+        debugDiv.innerHTML = `
+            <strong>Debug Info:</strong><br>
+            Query: "${query}"<br>
+            Length: ${query.length}<br>
+            Time: ${new Date().toLocaleTimeString()}
+        `;
+
+        clearTimeout(timeout);
+
+        if (query.length < 3) {
+            resultsDiv.innerHTML = '<div class="alert alert-warning">Escribe al menos 3 caracteres</div>';
+            return;
+        }
+
+        resultsDiv.innerHTML = '<div class="alert alert-info">Buscando...</div>';
+
+        timeout = setTimeout(() => {
+            const url = `/search/?q=${encodeURIComponent(query)}`;
+            debugDiv.innerHTML += `<br>URL: ${url}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                debugDiv.innerHTML += `<br>Status: ${response.status}`;
+                return response.json();
+            })
+            .then(data => {
+                debugDiv.innerHTML += `<br>Response: ${JSON.stringify(data, null, 2)}`;
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    return;
+                }
+
+                let html = `<div class="alert alert-success">Encontrados ${data.total} resultados</div>`;
+
+                // Personas
+                if (data.personas && data.personas.length > 0) {
+                    html += '<h6>Personas:</h6><ul class="list-group mb-3">';
+                    data.personas.forEach(p => {
+                        html += `
+                            <li class="list-group-item">
+                                <strong>${p.name}</strong><br>
+                                <small>ID: ${p.identification}</small>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                }
+
+                // Fichas
+                if (data.fichas && data.fichas.length > 0) {
+                    html += '<h6>Fichas Familiares:</h6><ul class="list-group mb-3">';
+                    data.fichas.forEach(f => {
+                        html += `
+                            <li class="list-group-item">
+                                <strong>Ficha #${f.number}</strong><br>
+                                <small>${f.address}</small>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                }
+
+                if (data.total === 0) {
+                    html = '<div class="alert alert-warning">No se encontraron resultados</div>';
+                }
+
+                resultsDiv.innerHTML = html;
+            })
+            .catch(error => {
+                debugDiv.innerHTML += `<br>Error: ${error.message}`;
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                console.error('Error:', error);
+            });
+        }, 500);
+    });
+});
+</script>
+{% endblock %}

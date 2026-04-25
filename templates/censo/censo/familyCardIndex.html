@@ -1,0 +1,491 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %} Fichas Familiares {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/datatable/dataTables.bootstrap5.css' %}">
+    {% include 'censo/partials/header_styles.html' %}
+    <style>
+        /* ===================================
+           ESTILO PROFESIONAL CORPORATIVO
+           =================================== */
+
+
+        /* Tabla */
+        .table-hover tbody tr:hover {
+            background-color: rgba(33, 150, 243, 0.04);
+            cursor: pointer;
+        }
+
+        /* Badge de número de ficha */
+        .badge-ficha {
+            background: #2196F3;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Badge de miembros - Alto contraste */
+        .badge-members {
+            background: linear-gradient(135deg, #00909E 0%, #0dcaf0 100%);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 6px rgba(0, 144, 158, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dropdown de acciones profesional y responsive */
+        .dropdown-actions {
+            position: relative;
+        }
+
+        .btn-actions {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(30, 60, 114, 0.3);
+        }
+
+        .btn-actions:hover {
+            background: linear-gradient(135deg, #152d5a 0%, #1e3c72 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-actions:focus {
+            background: linear-gradient(135deg, #152d5a 0%, #1e3c72 100%);
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(30, 60, 114, 0.25);
+        }
+
+        /* Dropdown menu mejorado */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #374151;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .dropdown-item:hover {
+            background: #E3F2FD;
+            color: #1976D2;
+            transform: translateX(4px);
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-top: 1px solid #E4E7EB;
+        }
+
+        /* Optimización para pantallas pequeñas */
+        @media (max-width: 576px) {
+            /* Botón más compacto en móvil */
+            .btn-actions {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+                gap: 0.3rem;
+            }
+
+            .btn-actions .btn-text {
+                display: none; /* Ocultar texto "Acciones" */
+            }
+
+            .btn-actions i {
+                margin: 0;
+            }
+
+            /* Dropdown menú adaptado para móvil */
+            .dropdown-menu {
+                min-width: 180px;
+                max-width: 90vw;
+                font-size: 0.85rem;
+                padding: 0.4rem;
+            }
+
+            .dropdown-item {
+                padding: 0.6rem 0.8rem;
+                gap: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .dropdown-item i {
+                width: 16px;
+                font-size: 0.9rem;
+            }
+
+            /* Asegurar que el dropdown no se salga de la pantalla */
+            .dropdown-menu-end {
+                right: 0 !important;
+                left: auto !important;
+            }
+        }
+
+        /* Tablets */
+        @media (min-width: 577px) and (max-width: 768px) {
+            .btn-actions {
+                padding: 0.45rem 0.85rem;
+                font-size: 0.85rem;
+            }
+
+            .dropdown-menu {
+                min-width: 190px;
+            }
+
+            .dropdown-item {
+                padding: 0.65rem 0.9rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Info de vereda simplificada */
+        .vereda-info {
+            color: #6B7280;
+            font-size: 0.875rem;
+        }
+
+        /* Botones del header */
+        .btn-header-action {
+            background: white;
+            color: #2196F3;
+            border: 2px solid white;
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-header-action:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1976D2;
+            transform: translateY(-1px);
+        }
+
+        .btn-header-primary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-header-primary:hover {
+            background: white;
+            color: #2196F3;
+        }
+
+        /* Loading spinner */
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner-overlay.active {
+            display: flex;
+        }
+
+        /* DataTables processing */
+        .dataTables_processing {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #2196F3;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            color: #2196F3;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-header-custom h3 {
+                font-size: 1.25rem;
+            }
+
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Móvil - Optimizaciones adicionales */
+        @media (max-width: 576px) {
+            /* Header más compacto */
+            .card-header-custom {
+                padding: 1rem;
+            }
+
+            .card-header-custom h3 {
+                font-size: 1.1rem;
+            }
+
+            .card-header-custom p {
+                font-size: 0.8rem;
+            }
+
+            /* Botones del header */
+            .btn-header-action,
+            .btn-header-primary {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            /* Tabla más compacta */
+            .table-responsive {
+                font-size: 0.8rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem 0.25rem !important;
+            }
+
+            /* Badges más pequeños */
+            .badge-ficha,
+            .badge-members {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            /* Ocultar iconos en headers de tabla para ahorrar espacio */
+            .table thead th i {
+                display: none;
+            }
+
+            /* Texto de vereda más compacto */
+            .vereda-info {
+                font-size: 0.7rem;
+            }
+
+            /* Footer de la card */
+            .card-footer {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            #btnRefresh {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.75rem;
+            }
+        }
+
+        /* Animación sutil para badges */
+        .badge-ficha {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="loadingSpinner">
+        <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="page-header-censo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-home me-2"></i>
+                        Gestión de Fichas Familiares
+                    </h2>
+                    <p class="mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Registro y gestión de familias de la comunidad indígena
+                    </p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'personas' %}" class="btn me-2">
+                        <i class="fas fa-users"></i>Ver Personas
+                    </a>
+                    {% if user.is_superuser or request.user_role != 'VIEWER' %}
+                    <a href="{% url 'createFamilyCard' %}" class="btn">
+                        <i class="fas fa-plus-circle"></i>Nueva Ficha
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table Card -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 text-dark d-flex align-items-center">
+                            <i class="fas fa-table me-2 text-primary"></i>
+                            Listado de Fichas Familiares
+                        </h5>
+                    </div>
+
+                    <div class="card-body px-4 pt-3 pb-2">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle align-items-center mb-0 display compact w-100"
+                                   id="familycard"
+                                   role="grid"
+                                   aria-label="Tabla de fichas familiares">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder" style="width: 12%">
+                                            <i class="fas fa-hashtag me-1"></i> Ficha N°
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder" style="width: 30%">
+                                            <i class="fas fa-user-tie me-1"></i> Cabeza de Familia
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-sm font-weight-bolder" style="width: 20%">
+                                            <i class="fas fa-map-marker-alt me-1"></i> Vereda
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder" style="width: 13%">
+                                            <i class="fas fa-users me-1"></i> Miembros
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-center text-sm font-weight-bolder" style="width: 15%">
+                                            <i class="fas fa-cog me-1"></i> Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- DataTables carga los datos aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light border-top">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="text-muted text-sm mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Los datos se actualizan en tiempo real
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button class="btn btn-sm btn-outline-secondary" id="btnRefresh">
+                                    <i class="fas fa-sync-alt me-1"></i> Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    <script src="{% static 'assets/js/datatable/jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.js' %}"></script>
+    <script src="{% static 'assets/js/datatable/dataTables.bootstrap5.js' %}"></script>
+    <script>
+        const FAMILYCARD_JSON_URL = "{% url 'familycards' %}";
+        const DATATABLE_LANG_URL = "{% static 'assets/js/datatable/es-CO.json' %}";
+        const EDIT_FAMILY_CARD_URL = "{% url 'update-family' 0 %}";
+        const VIEW_FAMILY_CARD_URL = "{% url 'detailFamilyCard' 0 %}";
+        const NEW_PERSON_FAMILY = "{% url 'createPerson' 0 %}";
+        const MATERIAL_CONSTRUCTION = "{% url 'material-construction' 0 %}";
+        const USER_ROLE = "{{ request.user_role|default:'' }}";
+        const IS_SUPERUSER = {{ user.is_superuser|yesno:"true,false" }};
+    </script>
+    <script src="{% static 'assets/js/censo/family-card/datatable-family-card.js' %}"></script>
+
+    <!-- Scripts adicionales para funcionalidad mejorada -->
+    <script>
+        $(document).ready(function() {
+            // Botón de actualizar
+            $('#btnRefresh').on('click', function() {
+                const $btn = $(this);
+                const originalHtml = $btn.html();
+
+                // Mostrar spinner en el botón
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Actualizando...');
+
+                $('#familycard').DataTable().ajax.reload(function() {
+                    // Restaurar botón
+                    $btn.prop('disabled', false).html(originalHtml);
+                    showNotification('Datos actualizados correctamente', 'success');
+                }, false);
+            });
+
+            // Función para mostrar notificaciones
+            function showNotification(message, type = 'info') {
+                const iconMap = {
+                    'success': 'check-circle',
+                    'error': 'exclamation-triangle',
+                    'warning': 'exclamation-circle',
+                    'info': 'info-circle'
+                };
+
+                const bgMap = {
+                    'success': 'alert-success',
+                    'error': 'alert-danger',
+                    'warning': 'alert-warning',
+                    'info': 'alert-info'
+                };
+
+                const alert = `
+                    <div class="alert ${bgMap[type] || 'alert-info'} alert-dismissible fade show position-fixed top-0 end-0 m-3"
+                         role="alert" style="z-index: 10000; min-width: 300px;">
+                        <i class="fas fa-${iconMap[type] || 'info-circle'} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+
+                $('body').append(alert);
+                setTimeout(() => {
+                    $('.alert').alert('close');
+                }, 3000);
+            }
+
+            // Hacer la función global
+            window.showNotification = showNotification;
+        });
+    </script>
+{% endblock javascripts %}

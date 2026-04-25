@@ -1,0 +1,275 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block stylesheets %}
+    {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <div class="row align-items-center justify-content-center">
+            <div class="d-flex bd-highlight">
+                <div class="p-2 flex-grow-1 bd-highlight">
+                    <h5>Censo Web<small></small></h5>
+                </div>
+            </div>
+
+            <!-- Familias Registradas - Censo Web -->
+            <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Familias</p>
+                                    <h5 class="font-weight-bolder text-2xl mb-0">
+                                        {{ total_fichas|safe }}
+                                        <span class="text-dark text-sm font-weight-bolder">registradas</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                    <i class="fa-solid fa-people-roof text-2xl opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Personas Registradas - Censo Web -->
+            <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Personas</p>
+                                    <h5 class="font-weight-bolder text-2xl mb-0">
+                                        {{ total_personas }}
+                                        <span class="text-info text-sm font-weight-bolder">registradas</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                    <i class="fa-solid fa-user-check text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Avales Generados - Censo Web -->
+            <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Avales</p>
+                                    <h5 class="font-weight-bolder text-2xl mb-0">
+                                        0
+                                        <span class="text-warning text-sm font-weight-bolder">Generados</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                                    <i class="fa-regular fa-file-pdf text-2xl opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Veredas Registradas - Censo Web -->
+            <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Veredas</p>
+                                    <h5 class="font-weight-bolder text-2xl mb-0">
+                                        {{ total_veredas|safe }}
+                                        <span class="text-success text-sm font-weight-bolder">registradas</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-faded-success shadow text-center border-radius-md">
+                                    <i class="fa-solid fa-street-view text-2xl opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segundo bloque de estadísticas -->
+        <div class="row mt-4">
+            <!-- Gráfico de Línea Generacional -->
+            <div class="col-lg-9 mb-4">
+                <div class="card z-index-2">
+                    <canvas id="lineChartGeneracional" class="chart-canvas" height="300"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card z-index-2">
+                    <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Vereda</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Personas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vereda, total in veredas_totales.items %}
+                                    <tr>
+
+                                        <td>
+                                            <p class="ms-2 text-xs font-weight-bold mb-0">{{ vereda }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="ms-4 text-xs font-weight-bold mb-0">{{ total }}</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block javascripts %}
+    <script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+    <script>
+    let ctx2 = document.getElementById("lineChartGeneracional").getContext("2d");
+
+    let gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+    let gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
+    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+    let gradientStroke3 = ctx2.createLinearGradient(0, 230, 0, 50);
+    gradientStroke3.addColorStop(1, 'rgba(13,202,240,0.2)'); // Color #0dcaf0 con 20% de opacidad
+    gradientStroke3.addColorStop(0.2, 'rgba(13,202,240,0.0)'); // Color #0dcaf0 con 0% de opacidad
+    gradientStroke3.addColorStop(0, 'rgba(13,202,240,0)'); // Color #0dcaf0 con 0% de opacidad
+
+    const anios = {{ anios|safe }};
+    console.log(anios);
+    const mujeres = {{ mujeres_list|safe }};
+    const hombres = {{ hombres_list|safe }};
+
+
+    new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: anios,
+            datasets: [
+                {
+                    label: 'Femenino',
+                    data: mujeres,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 7,
+                    borderColor: "#0dcaf0",
+                    borderWidth: 2,
+                    backgroundColor: gradientStroke3,
+                    fill: true,
+                    maxBarThickness: 6,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#0dcaf0',
+                    pointHoverBackgroundColor: '#0dcaf0',
+                    pointHoverBorderColor: '#f59622',
+                },
+                {
+                    label: 'Masculino',
+                    data: hombres,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 7,
+                    borderColor: "#575f9a",
+                    borderWidth: 2,
+                    backgroundColor: gradientStroke2,
+                    fill: true,
+                    maxBarThickness: 6,
+                    pointBackgroundColor: '#575f9a',
+                    pointBorderColor: '#575f9a',
+                    pointHoverBackgroundColor: '#7f85ae',
+                    pointHoverBorderColor: '#edff21',
+                }
+            ]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins:
+            {
+                legend: {
+                    display: true,
+                }
+            },
+        interaction: {
+            intersect: false,
+            mode: 'index',
+        },
+        scales: {
+            y: {
+                grid: {
+                    drawBorder: false,
+                    display: true,
+                    drawOnChartArea: true,
+                    drawTicks: false,
+                    borderDash: [5, 5]
+                },
+                ticks: {
+                    display: true,
+                    padding: 10,
+                    color: '#b2b9bf',
+                    font:
+                        {
+                            size: 11,
+                            family: "Open Sans",
+                            style: 'normal',
+                            lineHeight: 2
+                        },
+                }
+            },
+            x: {
+                grid: {
+                    drawBorder: false,
+                    display: false,
+                    drawOnChartArea: false,
+                    drawTicks: false,
+                    borderDash: [5, 5]
+                },
+                ticks: {
+                    display: true,
+                    color: '#b2b9bf',
+                    padding: 20,
+                    font:
+                        {
+                            size: 11,
+                            family: "Open Sans",
+                            style: 'normal',
+                            lineHeight: 2
+                        },
+                }
+            },
+        },
+    },
+    });
+</script>
+{% endblock javascripts %}
+

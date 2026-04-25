@@ -1,0 +1,18 @@
+[
+  {
+    "model": "censoapp.systemparameters",
+    "pk": 1,
+    "fields": {
+      "key": "family_card_number",
+      "value": "0"
+    }
+  },
+  {
+    "model": "censoapp.systemparameters",
+    "pk": 2,
+    "fields": {
+      "key": "Datos de Vivienda",
+      "value": "S"
+    }
+  }
+]

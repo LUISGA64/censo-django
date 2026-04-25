@@ -1,0 +1,12 @@
+{% load crispy_forms_tags %}
+
+{% if filter.label %}
+<div class="form-group">
+    {{ filter.label }}
+    {% crispy filter.form %}
+</div>
+{% else %}
+<div class="form-group">
+    {% crispy filter.form %}
+</div>
+{% endif %}

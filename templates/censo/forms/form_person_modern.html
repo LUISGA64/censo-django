@@ -1,0 +1,326 @@
+{% load static %}
+{% load widget_tweaks %}
+
+<!-- Formulario Moderno de Persona con Tailwind + Alpine.js -->
+<div class="bg-white rounded-xl shadow-lg p-8 max-w-6xl mx-auto"
+     x-data="{
+        isSubmitting: false,
+        currentStep: 1,
+        totalSteps: 3,
+        showHelp: false
+     }">
+
+    <!-- Header del formulario -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <i class="fas fa-user-plus text-primary-600"></i>
+            {% if form.instance.pk %}
+                Editar Persona
+            {% else %}
+                Agregar Nueva Persona
+            {% endif %}
+        </h2>
+        <p class="text-gray-600 mt-2">Complete toda la información de la persona</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-gray-700">Paso <span x-text="currentStep"></span> de <span x-text="totalSteps"></span></span>
+            <span class="text-sm font-medium text-primary-600" x-text="Math.round((currentStep / totalSteps) * 100) + '%'"></span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-primary-600 h-2.5 rounded-full transition-all duration-300"
+                 :style="'width: ' + (currentStep / totalSteps * 100) + '%'"></div>
+        </div>
+    </div>
+
+    <form method="post" id="personForm" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Paso 1: Información Personal -->
+        <div x-show="currentStep === 1" x-transition class="space-y-6">
+            <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-6 border border-primary-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-user text-primary-600"></i>
+                    Información Personal
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombres -->
+                    <div>
+                        <label for="{{ form.first_name_1.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.first_name_1.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.first_name_1|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                        {% if form.first_name_1.errors %}
+                            <p class="mt-2 text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.first_name_1.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.first_name_2.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.first_name_2.label }}
+                        </label>
+                        {{ form.first_name_2|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Apellidos -->
+                    <div>
+                        <label for="{{ form.last_name_1.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.last_name_1.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.last_name_1|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                        {% if form.last_name_1.errors %}
+                            <p class="mt-2 text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.last_name_1.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.last_name_2.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.last_name_2.label }}
+                        </label>
+                        {{ form.last_name_2|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Documento -->
+                    <div>
+                        <label for="{{ form.document_type.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.document_type.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.document_type|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.identification_person.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.identification_person.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.identification_person|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                        {% if form.identification_person.errors %}
+                            <p class="mt-2 text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.identification_person.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Género y Fecha de Nacimiento -->
+                    <div>
+                        <label for="{{ form.gender.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.gender.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.gender|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.date_birth.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.date_birth.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.date_birth|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                        {% if form.date_birth.errors %}
+                            <p class="mt-2 text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.date_birth.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 2: Información Familiar y Social -->
+        <div x-show="currentStep === 2" x-transition class="space-y-6">
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-users text-purple-600"></i>
+                    Información Familiar y Social
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Parentesco -->
+                    <div>
+                        <label for="{{ form.kinship.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.kinship.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.kinship|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Estado Civil -->
+                    <div>
+                        <label for="{{ form.civil_state.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.civil_state.label }}
+                        </label>
+                        {{ form.civil_state|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Nivel Educativo -->
+                    <div>
+                        <label for="{{ form.education_level.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.education_level.label }}
+                        </label>
+                        {{ form.education_level|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Ocupación -->
+                    <div>
+                        <label for="{{ form.occupation.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.occupation.label }}
+                        </label>
+                        {{ form.occupation|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 3: Información de Salud y Contacto -->
+        <div x-show="currentStep === 3" x-transition class="space-y-6">
+            <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-6 border border-green-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-heartbeat text-green-600"></i>
+                    Información de Salud
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- EPS -->
+                    <div>
+                        <label for="{{ form.eps.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.eps.label }}
+                        </label>
+                        {{ form.eps|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Seguro Social -->
+                    <div>
+                        <label for="{{ form.social_insurance.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.social_insurance.label }}
+                        </label>
+                        {{ form.social_insurance|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+
+                    <!-- Discapacidad -->
+                    <div class="md:col-span-2">
+                        <label for="{{ form.handicap.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.handicap.label }}
+                        </label>
+                        {{ form.handicap|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 border border-blue-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-phone text-blue-600"></i>
+                    Información de Contacto
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Teléfono -->
+                    <div>
+                        <label for="{{ form.cell_phone.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.cell_phone.label }}
+                        </label>
+                        {{ form.cell_phone|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                        {% if form.cell_phone.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.cell_phone.help_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.personal_email.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.personal_email.label }}
+                        </label>
+                        {{ form.personal_email|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors duration-200" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Errores generales del formulario -->
+        {% if form.non_field_errors %}
+            <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+                <div class="flex">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-red-800">Errores en el formulario</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Botones de navegación -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+            <div class="flex gap-3">
+                <a href="{% url 'censo:familyCardIndex' %}"
+                   class="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancelar
+                </a>
+
+                <button type="button"
+                        x-show="currentStep > 1"
+                        @click="currentStep--"
+                        class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Anterior
+                </button>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button"
+                        x-show="currentStep < totalSteps"
+                        @click="currentStep++"
+                        class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+                    Siguiente
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+
+                <button type="submit"
+                        x-show="currentStep === totalSteps"
+                        @click="isSubmitting = true"
+                        :disabled="isSubmitting"
+                        class="inline-flex items-center px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-save mr-2"></i>
+                    <span x-show="!isSubmitting">
+                        {% if form.instance.pk %}
+                            Actualizar Persona
+                        {% else %}
+                            Guardar Persona
+                        {% endif %}
+                    </span>
+                    <span x-show="isSubmitting" class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('personForm').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+});
+</script>
+

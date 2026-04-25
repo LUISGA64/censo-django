@@ -1,0 +1,749 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block title %}Editar Ficha Familiar{% endblock title %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    {% include 'censo/partials/header_styles.html' %}
+    <style>
+        /* ===================================
+           DISEÑO EMTEL CORPORATIVO
+           Azul Principal: #1e3c72
+           Verde Acento: #82D616
+           =================================== */
+
+
+        /* Breadcrumb profesional */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: #6B7280;
+            font-size: 1.2rem;
+        }
+
+        .breadcrumb-item a {
+            color: #1e3c72;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #152d5a;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #374151;
+            font-weight: 500;
+        }
+
+        /* Tabs profesionales con verde */
+        .nav-pills-custom .nav-link {
+            background: white;
+            color: #374151;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            margin-right: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills-custom .nav-link:hover {
+            background: #F3F4F6;
+            border-color: #82D616;
+            color: #82D616;
+        }
+
+        .nav-pills-custom .nav-link.active {
+            background: linear-gradient(135deg, #82D616 0%, #9AE034 100%);
+            color: white;
+            border-color: #82D616;
+            box-shadow: 0 4px 6px rgba(130, 214, 22, 0.35);
+        }
+
+        .nav-pills-custom .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        /* Secciones del formulario */
+        .section-title {
+            color: #1e3c72;
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: #82D616;
+        }
+
+        /* Info box */
+        .info-box {
+            background: linear-gradient(135deg, #E8F7D1 0%, #F0FADC 100%);
+            border-left: 4px solid #82D616;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 6px rgba(130, 214, 22, 0.15);
+        }
+
+        .info-box i {
+            color: #82D616;
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        /* Campos modificados */
+        .modified-field {
+            position: relative;
+        }
+
+        .modified-field::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #82D616;
+            border-radius: 2px;
+        }
+
+        /* Campos de solo lectura */
+        .readonly-field-container {
+            position: relative;
+        }
+
+        .readonly-field-container .form-control[readonly],
+        .readonly-field-container .form-control[disabled],
+        .readonly-field-container select[disabled] {
+            background-color: #F8F9FA;
+            border-color: #DEE2E6;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .readonly-field-container small.text-muted {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.8rem;
+            color: #6C757D;
+        }
+
+        .readonly-field-container small.text-muted i {
+            font-size: 0.75rem;
+        }
+
+        /* Botones - Verde Corporativo */
+        .btn-save {
+            background: linear-gradient(135deg, #82D616 0%, #9AE034 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(130, 214, 22, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #6BB012 0%, #82D616 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(130, 214, 22, 0.4);
+        }
+
+        .btn-save:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #6B7280;
+            border: 2px solid #E5E7EB;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #F9FAFB;
+            border-color: #1e3c72;
+            color: #1e3c72;
+            transform: translateY(-2px);
+        }
+
+        /* Labels */
+        .form-label {
+            font-weight: 600;
+            color: #344767;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Asterisco obligatorio */
+        .asteriskField {
+            color: #EF4444;
+            font-weight: bold;
+            margin-left: 0.2rem;
+        }
+
+        /* Inputs focus con verde */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #82D616;
+            box-shadow: 0 0 0 0.25rem rgba(130, 214, 22, 0.15);
+        }
+
+        /* Badge de info */
+        .badge-info-custom {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-pills-custom .nav-link {
+                margin-bottom: 0.5rem;
+                margin-right: 0;
+                width: 100%;
+            }
+
+            .card-header-custom {
+                padding: 1rem;
+            }
+
+            .card-header-custom h4 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'home' %}">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'familyCardIndex' %}">
+                        <i class="fas fa-house-user"></i> Fichas Familiares
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-edit"></i> Editar Ficha #{{ object.family_card_number }}
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Header Estandarizado -->
+        <div class="page-header-censo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Ficha Familiar
+                    </h2>
+                    <p class="mb-0">
+                        <i class="fas fa-home me-1"></i>
+                        Ficha #{{ object.family_card_number }} - {{ total_members }} miembro{{ total_members|pluralize }}
+                    </p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'detailFamilyCard' object.pk %}" class="btn">
+                        <i class="fas fa-eye"></i>Ver Detalle
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Principal -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <!-- Info box -->
+                        <div class="info-box">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <i class="fas fa-user-tie"></i>
+                                    <strong>Cabeza de Familia:</strong>
+                                    {% if family_head %}
+                                        {{ family_head.first_name_1 }} {{ family_head.last_name_1 }}
+                                    {% else %}
+                                        <span class="text-warning">Sin asignar</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <strong>Vereda:</strong>
+                                    {{ object.sidewalk_home.sidewalk_name }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <ul class="nav nav-pills nav-pills-custom mb-4" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active"
+                                        id="tab-ubicacion-btn"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-ubicacion"
+                                        type="button"
+                                        role="tab">
+                                    <i class="fas fa-location-dot"></i>
+                                    Datos de Ubicación
+                                </button>
+                            </li>
+                            {% if datos_vivienda == 'S' %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        id="tab-vivienda-btn"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-vivienda"
+                                        type="button"
+                                        role="tab">
+                                    <i class="fas fa-house"></i>
+                                    Datos de Vivienda
+                                    {% if material_exists %}
+                                        <span class="badge bg-success ms-2">Registrado</span>
+                                    {% else %}
+                                        <span class="badge bg-warning ms-2">Pendiente</span>
+                                    {% endif %}
+                                </button>
+                            </li>
+                            {% elif datos_vivienda == 'N' %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        id="tab-vivienda-disabled-btn"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-vivienda-disabled"
+                                        type="button"
+                                        role="tab">
+                                    <i class="fas fa-house"></i>
+                                    Datos de Vivienda
+                                    <span class="badge bg-secondary ms-2">Deshabilitado</span>
+                                </button>
+                            </li>
+                            {% endif %}
+                        </ul>
+
+                        <div class="tab-content">
+                            <!-- Tab 1: Datos de Ubicación -->
+                            <div class="tab-pane fade show active"
+                                 id="tab-ubicacion"
+                                 role="tabpanel">
+                                <form method="post" id="form-ubicacion" novalidate>
+                                    {% csrf_token %}
+
+                                    <div class="section-title">
+                                        <i class="fas fa-map-marked-alt me-2"></i>
+                                        Información de Ubicación
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <!-- Dirección complementaria (opcional) -->
+                                        <div class="col-md-12">
+                                            {{ form.address_home|as_crispy_field }}
+                                        </div>
+
+                                        <!-- Campos editables -->
+                                        <div class="col-md-4">
+                                            {{ form.sidewalk_home|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ form.zone|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ form.organization|as_crispy_field }}
+                                        </div>
+
+                                        <!-- Coordenadas GPS (editables y opcionales) -->
+                                        <div class="col-md-6">
+                                            {{ form.latitude|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.longitude|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                        <a href="{% url 'familyCardIndex' %}"
+                                           class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>
+                                            Volver al Listado
+                                        </a>
+                                        <button type="submit"
+                                                class="btn btn-save"
+                                                id="btn-save-ubicacion">
+                                            <i class="fas fa-save me-2"></i>
+                                            Guardar Cambios
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tab 2: Datos de Vivienda -->
+                            {% if datos_vivienda == 'S' %}
+                            <div class="tab-pane fade"
+                                 id="tab-vivienda"
+                                 role="tabpanel">
+                                <form method="post" id="form-vivienda" novalidate>
+                                    {% csrf_token %}
+
+                                    <div class="section-title">
+                                        <i class="fas fa-home me-2"></i>
+                                        Características de la Vivienda
+                                    </div>
+
+                                    {# Mostrar errores no de campo #}
+                                    {% if material_form.non_field_errors %}
+                                        <div class="alert alert-danger alert-dismissible fade show">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            {{ material_form.non_field_errors }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Materiales de Construcción -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-hammer me-2"></i>
+                                        Materiales de Construcción
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.material_roof|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.material_wall|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.material_floor|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado de Materiales -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-clipboard-check me-2"></i>
+                                        Estado de los Materiales
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.condition_roof|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.condition_wall|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.condition_floor|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Datos de Ocupación -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-users me-2"></i>
+                                        Datos de Ocupación
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.number_families|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.number_bedrooms|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.number_people_bedrooms|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Datos de Propiedad y Cocina -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-house-user me-2"></i>
+                                        Propiedad y Cocina
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.home_ownership|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.kitchen_location|as_crispy_field }}
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            {{ material_form.cooking_fuel|as_crispy_field }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Condiciones Adicionales -->
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Condiciones Adicionales
+                                    </h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="form-check">
+                                                {{ material_form.home_smoke }}
+                                                <label class="form-check-label ms-2" for="{{ material_form.home_smoke.id_for_label }}">
+                                                    {{ material_form.home_smoke.label }}
+                                                </label>
+                                                {% if material_form.home_smoke.help_text %}
+                                                    <small class="form-text text-muted d-block">
+                                                        {{ material_form.home_smoke.help_text }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="form-check">
+                                                {{ material_form.ventilation }}
+                                                <label class="form-check-label ms-2" for="{{ material_form.ventilation.id_for_label }}">
+                                                    {{ material_form.ventilation.label }}
+                                                </label>
+                                                {% if material_form.ventilation.help_text %}
+                                                    <small class="form-text text-muted d-block">
+                                                        {{ material_form.ventilation.help_text }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="form-check">
+                                                {{ material_form.lighting }}
+                                                <label class="form-check-label ms-2" for="{{ material_form.lighting.id_for_label }}">
+                                                    {{ material_form.lighting.label }}
+                                                </label>
+                                                {% if material_form.lighting.help_text %}
+                                                    <small class="form-text text-muted d-block">
+                                                        {{ material_form.lighting.help_text }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                        <a href="{% url 'familyCardIndex' %}"
+                                           class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>
+                                            Volver al Listado
+                                        </a>
+                                        <button type="submit"
+                                                name="material_form_submit"
+                                                class="btn btn-save"
+                                                id="btn-save-vivienda">
+                                            <i class="fas fa-save me-2"></i>
+                                            {% if material_exists %}Actualizar{% else %}Guardar{% endif %} Datos de Vivienda
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            {% endif %}
+
+                            <!-- Tab 3: Vivienda Deshabilitada (cuando parámetro es 'N') -->
+                            {% if datos_vivienda == 'N' %}
+                            <div class="tab-pane fade"
+                                 id="tab-vivienda-disabled"
+                                 role="tabpanel">
+                                <div class="alert alert-warning" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-2">Funcionalidad Deshabilitada</h5>
+                                            <p class="mb-0">
+                                                La funcionalidad de registro de datos de vivienda está actualmente deshabilitada.
+                                                Contacte al administrador del sistema para habilitar esta opción.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Activar pestaña según query param ?tab=vivienda
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+
+            if (tab === 'vivienda') {
+                const tabBtn = document.getElementById('tab-vivienda-btn');
+                if (tabBtn) {
+                    const bsTab = new bootstrap.Tab(tabBtn);
+                    bsTab.show();
+                }
+            }
+
+            // Asegurar que latitud y longitud NO sean obligatorios
+            const latInput = document.getElementById('id_latitude');
+            const lonInput = document.getElementById('id_longitude');
+
+            if (latInput) {
+                latInput.removeAttribute('required');
+                latInput.required = false;
+            }
+
+            if (lonInput) {
+                lonInput.removeAttribute('required');
+                lonInput.required = false;
+            }
+
+            // Prevenir doble envío en ambos formularios
+            const forms = document.querySelectorAll('form');
+            forms.forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+
+                    if (submitBtn && submitBtn.disabled) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // Validar formulario pero permitir latitud/longitud vacíos
+                    const invalidFields = [];
+                    const inputs = form.querySelectorAll('input[required], select[required]');
+
+                    inputs.forEach(function(input) {
+                        // Excluir latitud y longitud de la validación required
+                        if (input.id !== 'id_latitude' && input.id !== 'id_longitude') {
+                            if (!input.value || input.value.trim() === '') {
+                                invalidFields.push(input);
+                            }
+                        }
+                    });
+
+                    if (invalidFields.length > 0) {
+                        e.preventDefault();
+                        form.classList.add('was-validated');
+                        invalidFields[0].focus();
+                        return false;
+                    }
+
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+                        // Timeout de seguridad
+                        setTimeout(function() {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        }, 10000);
+                    }
+                });
+            });
+
+            // Marcar campos modificados
+            const allInputs = document.querySelectorAll('input:not([type="hidden"]), select, textarea');
+            allInputs.forEach(function(input) {
+                input.dataset.originalValue = input.value;
+
+                input.addEventListener('change', function() {
+                    const formGroup = this.closest('.mb-3') || this.closest('[class*="col-"]');
+
+                    if (formGroup) {
+                        if (this.value !== this.dataset.originalValue) {
+                            formGroup.classList.add('modified-field');
+                        } else {
+                            formGroup.classList.remove('modified-field');
+                        }
+                    }
+                });
+            });
+
+            // Validación de coordenadas (solo si se ingresan valores)
+            if (latInput) {
+                latInput.addEventListener('blur', function() {
+                    if (!this.value || this.value.trim() === '') {
+                        this.classList.remove('is-invalid');
+                        return; // Permitir vacío
+                    }
+
+                    const lat = parseFloat(this.value);
+                    if (isNaN(lat) || lat < -90 || lat > 90) {
+                        this.classList.add('is-invalid');
+                        let feedback = this.parentElement.querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            this.parentElement.appendChild(feedback);
+                        }
+                        feedback.textContent = 'La latitud debe estar entre -90 y 90 grados.';
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            }
+
+            if (lonInput) {
+                lonInput.addEventListener('blur', function() {
+                    if (!this.value || this.value.trim() === '') {
+                        this.classList.remove('is-invalid');
+                        return; // Permitir vacío
+                    }
+
+                    const lon = parseFloat(this.value);
+                    if (isNaN(lon) || lon < -180 || lon > 180) {
+                        this.classList.add('is-invalid');
+                        let feedback = this.parentElement.querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            this.parentElement.appendChild(feedback);
+                        }
+                        feedback.textContent = 'La longitud debe estar entre -180 y 180 grados.';
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            }
+
+            // Auto-focus
+            const firstInput = document.querySelector('form input:not([type="hidden"]), form select');
+            if (firstInput && !params.get('tab')) {
+                firstInput.focus();
+            }
+        });
+    </script>
+{% endblock javascripts %}
