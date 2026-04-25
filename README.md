@@ -111,47 +111,155 @@ python manage.py runserver
 ```
 
 ### Producción (PythonAnywhere)
+
+#### 📦 Configuración Inicial (Solo Primera Vez)
+
+**1. Instalar python-decouple:**
 ```bash
-# 1. Conectar por SSH y activar entorno
-workon censo-env
-cd ~/censo-django
-
-# 2. Actualizar código
-git pull origin development
-
-# 3. Instalar dependencias y migrar
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py collectstatic --noinput
-
-# 4. Recargar aplicación
-touch /var/www/*_pythonanywhere_com_wsgi.py
+cd /home/tuusuario/censo-django
+source /home/tuusuario/.virtualenvs/venv/bin/activate
+pip install python-decouple
 ```
 
-### Variables de Entorno Requeridas
+**2. Crear archivo .env:**
+```bash
+cd /home/tuusuario/censo-django
+nano .env
+```
 
-Crea un archivo `.env` en la raíz del proyecto:
-
+Contenido del archivo `.env`:
 ```env
-# Django
-SECRET_KEY=tu_secret_key_aqui
-DEBUG=False
-ALLOWED_HOSTS=tudominio.com,www.tudominio.com
-
-# Base de datos (Producción MySQL)
-DB_NAME=tu_base_datos
-DB_USER=tu_usuario
-DB_PASSWORD=tu_password
-DB_HOST=tu_host
+# DATABASE
+DB_NAME=tuusuario$censodb
+DB_USER=tuusuario
+DB_PASSWORD=tu_password_mysql
+DB_HOST=tuusuario.mysql.pythonanywhere-services.com
 DB_PORT=3306
 
-# Email (Gmail)
-EMAIL_HOST_USER=tu_email@gmail.com
-EMAIL_HOST_PASSWORD=tu_app_password
-ADMIN_EMAIL=admin@tudominio.com
+# DJANGO
+SECRET_KEY=generar_con_comando_abajo
+DEBUG=False
+ALLOWED_HOSTS=tuusuario.pythonanywhere.com
 
-# API
-JWT_SECRET_KEY=tu_jwt_secret_key
+# SITE
+SITE_URL=https://tuusuario.pythonanywhere.com
+CORS_ALLOWED_ORIGINS=https://tuusuario.pythonanywhere.com
+
+# SECURITY
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+SECURE_HSTS_SECONDS=31536000
+SESSION_COOKIE_AGE=86400
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+```
+
+**3. Generar SECRET_KEY:**
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+# Copiar y pegar el resultado en .env
+```
+
+**4. Proteger archivo .env:**
+```bash
+chmod 600 .env
+```
+
+**5. Configurar WSGI:**
+- Web tab → Code → WSGI file
+- Verificar que tenga: `os.environ['DJANGO_SETTINGS_MODULE'] = 'censoProject.settings_pythonanywhere'`
+
+#### 🔄 Actualizar Producción (Cada Deploy)
+
+**Comando completo (copy/paste):**
+```bash
+# Ir al proyecto
+cd /home/tuusuario/censo-django
+
+# Activar virtualenv
+source /home/tuusuario/.virtualenvs/venv/bin/activate
+
+# Configurar Django settings
+export DJANGO_SETTINGS_MODULE=censoProject.settings_pythonanywhere
+
+# Actualizar código
+git pull origin main
+
+# Instalar nuevas dependencias
+pip install -r requirements.txt
+
+# Ejecutar migraciones
+python manage.py migrate
+
+# Recolectar archivos estáticos
+python manage.py collectstatic --noinput
+
+# Verificar configuración
+python manage.py check --deploy
+
+# Importante: Ir a Web tab y hacer click en "Reload"
+```
+
+#### 🛠️ Script Helper (Recomendado)
+
+Crear script para facilitar comandos Django:
+```bash
+cd /home/tuusuario/censo-django
+cat > manage_prod.sh << 'EOF'
+#!/bin/bash
+source /home/tuusuario/.virtualenvs/venv/bin/activate
+export DJANGO_SETTINGS_MODULE=censoProject.settings_pythonanywhere
+python manage.py "$@"
+EOF
+chmod +x manage_prod.sh
+```
+
+Uso:
+```bash
+./manage_prod.sh migrate
+./manage_prod.sh createsuperuser
+./manage_prod.sh collectstatic
+```
+
+#### ✅ Verificación Post-Deploy
+
+1. **Recargar aplicación:** Web tab → botón "Reload" verde
+2. **Verificar sitio:** Visitar https://tuusuario.pythonanywhere.com
+3. **Revisar logs:** Web tab → Error log (buscar errores nuevos)
+4. **Probar funcionalidades críticas:**
+   - Login/Logout
+   - Mapas (verificar que no hay error 403)
+   - Dashboard
+   - CRUD básica
+
+#### 🚨 Troubleshooting
+
+**Error: "UndefinedValueError"**
+```bash
+# Verificar que .env existe
+ls -la /home/tuusuario/censo-django/.env
+
+# Verificar contenido
+cat /home/tuusuario/censo-django/.env
+
+# Si falta SECRET_KEY, generarla nuevamente
+```
+
+**Error: "Table doesn't exist"**
+```bash
+cd /home/tuusuario/censo-django
+source /home/tuusuario/.virtualenvs/venv/bin/activate
+export DJANGO_SETTINGS_MODULE=censoProject.settings_pythonanywhere
+python manage.py migrate
+```
+
+**Mapas con error 403**
+```bash
+# Verificar que el código está actualizado
+git log --oneline -3
+
+# Verificar archivo específico
+cat censoapp/geolocation_views.py | grep CartoDB
 ```
 
 ## 📱 Optimización Móvil
