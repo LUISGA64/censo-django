@@ -39,6 +39,48 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [2.1.1] - 2026-04-25
+
+### Added
+- Archivo `sidebar-enhanced.css` con mejoras completas de UX/UI del menú lateral
+- Script JavaScript para funcionalidad mejorada del sidebar
+- Scrollbar personalizada con diseño moderno
+- Indicador visual de scroll (gradiente en parte inferior)
+- Animaciones suaves de entrada para items del menú
+- Soporte completo para dispositivos táctiles
+- Sistema de cierre con tecla ESC y click en overlay
+
+### Changed
+- Optimizado espaciado del sidebar para pantallas pequeñas
+- Mejorado contraste de íconos en estado activo (AAA WCAG 2.1)
+- Sidebar ahora tiene scroll funcional en contenido largo
+- Padding inferior aumentado (2-3rem) para visibilidad completa
+- Items del menú más compactos en laptops pequeños (1024px-1366px)
+- Área de toque optimizada a 44px+ en móviles
+- Transiciones CSS optimizadas con cubic-bezier
+
+### Fixed
+- **Crítico:** Botón "Estadísticas" ahora visible en laptops pequeños
+- **Crítico:** Íconos con contraste adecuado en estado activo (blanco sobre azul)
+- Último elemento del menú ahora siempre visible
+- Scroll del body bloqueado cuando sidebar está abierto en móvil
+- Cierre automático del sidebar al navegar en móvil
+
+### Improved
+- Ratio de contraste mejorado a 7:1 (WCAG 2.1 AAA)
+- Performance optimizada con `will-change` y `backface-visibility`
+- Responsive design para 5 breakpoints diferentes
+- Accesibilidad con navegación por teclado mejorada
+- Micro-interacciones más fluidas y naturales
+
+### Documentation
+- Creado `MEJORAS_UX_SIDEBAR.md` con documentación completa
+- Métricas de mejora documentadas
+- Comparativa antes/después incluida
+- Guía de breakpoints responsive
+
+---
+
 ## [2.1.0] - 2026-04-25
 
 ### Added

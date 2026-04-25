@@ -1,0 +1,38 @@
+# COMANDOS PARA COPIAR Y PEGAR EN PYTHONANYWHERE
+# VERSIÓN FINAL - Preserva cambios de configuración en producción
+
+cd /home/luisga64/censo-django && \
+source /home/luisga64/.virtualenvs/venv/bin/activate && \
+echo "🔍 Guardando cambios de configuración de producción..." && \
+git add .env 2>/dev/null || true && \
+git stash --include-untracked && \
+echo "🔀 Cambiando a rama master..." && \
+git checkout master && \
+echo "⬇️  Descargando últimos cambios..." && \
+git pull origin master && \
+echo "📦 Versión desplegada:" && \
+cat VERSION && \
+echo "" && \
+echo "🔧 Restaurando configuración de producción (.env)..." && \
+git stash pop && \
+export DJANGO_SETTINGS_MODULE=censoProject.settings_pythonanywhere && \
+echo "📦 Instalando dependencias..." && \
+pip install -r requirements.txt && \
+echo "🗄️  Ejecutando migraciones..." && \
+python manage.py migrate && \
+echo "📦 Recolectando archivos estáticos..." && \
+python manage.py collectstatic --noinput && \
+echo "✅ Verificando configuración..." && \
+python manage.py check --deploy && \
+echo "" && \
+echo "═══════════════════════════════════════" && \
+echo "✅ ACTUALIZACIÓN COMPLETADA" && \
+echo "═══════════════════════════════════════" && \
+echo "⚠️  PASO FINAL OBLIGATORIO:" && \
+echo "   1. Ve a Web tab en PythonAnywhere" && \
+echo "   2. Haz click en botón verde 'Reload'" && \
+echo "   3. Espera 15-20 segundos" && \
+echo "   4. Visita: https://luisga64.pythonanywhere.com" && \
+echo "═══════════════════════════════════════" && \
+echo ""
+

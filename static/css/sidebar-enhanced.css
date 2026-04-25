@@ -1,0 +1,476 @@
+/* ============================================
+   CENSO WEB - MEJORAS UX/UI DEL SIDEBAR
+   Optimizado para todas las pantallas
+   ============================================ */
+
+/* ===== VARIABLES CSS ===== */
+:root {
+    --sidebar-width: 255px;
+    --sidebar-bg: #fff;
+    --sidebar-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    --sidebar-item-height: 48px;
+    --sidebar-padding: 1rem;
+    --active-bg: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --active-text: #ffffff;
+    --hover-bg: #f8f9fa;
+    --icon-size: 20px;
+    --transition-speed: 0.3s;
+}
+
+/* ===== CONTENEDOR PRINCIPAL DEL SIDEBAR ===== */
+.sidenav {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--sidebar-bg);
+    box-shadow: var(--sidebar-shadow);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-speed) ease-in-out;
+}
+
+/* ===== HEADER DEL SIDEBAR ===== */
+.sidenav-header {
+    flex-shrink: 0;
+    padding: var(--sidebar-padding);
+    border-bottom: 1px solid #e9ecef;
+    background: var(--sidebar-bg);
+    position: relative;
+    z-index: 2;
+}
+
+.sidenav-header .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #344767;
+    font-weight: 700;
+    font-size: 1.15rem;
+}
+
+.sidenav-header .navbar-brand-img {
+    height: 32px;
+    width: auto;
+}
+
+/* ===== ÁREA DE NAVEGACIÓN CON SCROLL ===== */
+.sidenav .navbar-collapse {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 2rem; /* ✅ Espacio suficiente para ver último elemento */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+/* Custom Scrollbar Webkit (Chrome, Safari, Edge) */
+.sidenav .navbar-collapse::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidenav .navbar-collapse::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidenav .navbar-collapse::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    transition: background-color 0.3s;
+}
+
+.sidenav .navbar-collapse::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0,0,0,0.3);
+}
+
+/* ===== ITEMS DE NAVEGACIÓN ===== */
+.sidenav .navbar-nav {
+    padding: 0.5rem 0;
+    list-style: none;
+    margin: 0;
+}
+
+.sidenav .nav-item {
+    margin: 0.25rem 0.5rem;
+    transition: all var(--transition-speed) ease;
+}
+
+/* ===== ENLACES DE NAVEGACIÓN ===== */
+.sidenav .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    color: #67748e;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    min-height: var(--sidebar-item-height);
+}
+
+/* ===== ESTADO HOVER ===== */
+.sidenav .nav-link:hover {
+    background: var(--hover-bg);
+    color: #344767;
+    transform: translateX(3px);
+}
+
+.sidenav .nav-link:hover .icon {
+    transform: scale(1.05);
+}
+
+/* ===== ESTADO ACTIVO ===== */
+.sidenav .nav-link.active {
+    background: var(--active-bg);
+    color: var(--active-text);
+    box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    font-weight: 600;
+}
+
+/* ✅ FIX: Iconos con buen contraste en estado activo */
+.sidenav .nav-link.active .icon {
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2) !important;
+}
+
+.sidenav .nav-link.active .icon i {
+    color: #ffffff !important; /* ✅ BLANCO para máximo contraste */
+    opacity: 1 !important;
+}
+
+.sidenav .nav-link.active .nav-link-text {
+    color: var(--active-text);
+    font-weight: 600;
+}
+
+/* ===== ICONOS ===== */
+.sidenav .icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    transition: all var(--transition-speed) ease;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.sidenav .icon i {
+    font-size: var(--icon-size);
+    transition: all var(--transition-speed) ease;
+}
+
+/* ===== TEXTO DEL ENLACE ===== */
+.sidenav .nav-link-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color var(--transition-speed) ease;
+}
+
+/* ===== SEPARADORES DE SECCIÓN ===== */
+.sidenav .navbar-nav h6 {
+    padding: 0.75rem 1.25rem;
+    margin: 1rem 0 0.5rem 0;
+    color: #67748e;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+}
+
+.sidenav .navbar-nav h6:first-child {
+    margin-top: 0;
+}
+
+/* ===== INDICADOR VISUAL PARA ITEM ACTIVO ===== */
+.sidenav .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: #ffffff;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.4);
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.sidenav .nav-item {
+    animation: slideInLeft 0.3s ease-out backwards;
+}
+
+.sidenav .nav-item:nth-child(1) { animation-delay: 0.05s; }
+.sidenav .nav-item:nth-child(2) { animation-delay: 0.1s; }
+.sidenav .nav-item:nth-child(3) { animation-delay: 0.15s; }
+.sidenav .nav-item:nth-child(4) { animation-delay: 0.2s; }
+.sidenav .nav-item:nth-child(5) { animation-delay: 0.25s; }
+.sidenav .nav-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* ===== RESPONSIVE - LAPTOP PEQUEÑO (1024px - 1366px) ===== */
+@media (max-width: 1366px) and (min-width: 1024px) {
+    :root {
+        --sidebar-width: 240px;
+        --sidebar-item-height: 44px;
+        --icon-size: 18px;
+    }
+
+    .sidenav .nav-link {
+        padding: 0.6rem 0.85rem;
+        font-size: 0.8125rem;
+    }
+
+    .sidenav .icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        margin-right: 0.65rem;
+    }
+
+    .sidenav .navbar-nav h6 {
+        font-size: 0.6rem;
+        padding: 0.65rem 1rem;
+    }
+
+    /* ✅ Reducir espaciado entre items en laptops pequeños */
+    .sidenav .nav-item {
+        margin: 0.2rem 0.4rem;
+    }
+}
+
+/* ===== RESPONSIVE - TABLET (768px - 1023px) ===== */
+@media (max-width: 1023px) and (min-width: 768px) {
+    :root {
+        --sidebar-width: 260px;
+    }
+
+    .sidenav {
+        transform: translateX(-100%);
+    }
+
+    .g-sidenav-show .sidenav {
+        transform: translateX(0);
+        box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+    }
+
+    /* Overlay oscuro cuando sidebar está abierto */
+    .g-sidenav-show::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
+
+/* ===== RESPONSIVE - MÓVIL (<768px) ===== */
+@media (max-width: 767px) {
+    :root {
+        --sidebar-width: 280px;
+        --sidebar-item-height: 52px;
+        --icon-size: 22px;
+    }
+
+    .sidenav {
+        transform: translateX(-100%);
+    }
+
+    .g-sidenav-show .sidenav {
+        transform: translateX(0);
+        box-shadow: 2px 0 20px rgba(0,0,0,0.2);
+    }
+
+    .sidenav .nav-link {
+        padding: 0.85rem 1rem;
+        font-size: 0.9375rem;
+        min-height: var(--sidebar-item-height);
+    }
+
+    .sidenav .icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        margin-right: 0.85rem;
+    }
+
+    /* Mejorar área de toque en móvil */
+    .sidenav .nav-item {
+        margin: 0.3rem 0.5rem;
+    }
+
+    /* Overlay con backdrop-filter en móvil */
+    .g-sidenav-show::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+        animation: fadeIn 0.3s ease;
+    }
+}
+
+/* ===== PANTALLAS EXTRA PEQUEÑAS (<576px) ===== */
+@media (max-width: 575px) {
+    :root {
+        --sidebar-width: 100%;
+    }
+
+    .sidenav {
+        width: 85vw;
+        max-width: 320px;
+    }
+
+    .sidenav-header {
+        padding: 0.85rem 1rem;
+    }
+
+    .sidenav-header .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .sidenav .navbar-nav {
+        padding: 0.5rem 0 1.5rem 0;
+    }
+
+    /* Más espacio en la parte inferior en móviles pequeños */
+    .sidenav .navbar-collapse {
+        padding-bottom: 3rem;
+    }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.sidenav .nav-link:focus-visible {
+    outline: 2px solid #2196F3;
+    outline-offset: 2px;
+}
+
+.sidenav .nav-link:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Reducir animaciones si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+    .sidenav .nav-link,
+    .sidenav .icon,
+    .sidenav .nav-item {
+        transition: none;
+        animation: none;
+    }
+}
+
+/* ===== MODO OSCURO (Preparado para futuro) ===== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --sidebar-bg: #1e293b;
+        --hover-bg: #334155;
+    }
+
+    .sidenav .nav-link {
+        color: #cbd5e1;
+    }
+
+    .sidenav .nav-link:hover {
+        color: #f1f5f9;
+    }
+
+    .sidenav .navbar-nav h6 {
+        color: #94a3b8;
+    }
+}
+
+/* ===== INDICADOR DE SCROLL ===== */
+.sidenav .navbar-collapse::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidenav .navbar-collapse.has-scroll::after {
+    opacity: 1;
+}
+
+/* ===== SOPORTE PARA TOUCH DEVICES ===== */
+@media (hover: none) and (pointer: coarse) {
+    .sidenav .nav-link:hover {
+        transform: none;
+    }
+
+    .sidenav .nav-link:active {
+        transform: scale(0.98);
+        background: var(--hover-bg);
+    }
+
+    .sidenav .nav-link.active:active {
+        transform: scale(0.98);
+    }
+
+    /* Mejorar feedback táctil */
+    .sidenav .nav-link {
+        -webkit-tap-highlight-color: rgba(33, 150, 243, 0.1);
+    }
+}
+
+/* ===== OPTIMIZACIÓN DE RENDIMIENTO ===== */
+.sidenav {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.sidenav .nav-link {
+    will-change: background-color, transform;
+}
+
+/* ===== COMPATIBILIDAD CON NAVEGADORES ANTIGUOS ===== */
+@supports not (backdrop-filter: blur(2px)) {
+    .g-sidenav-show::after {
+        background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* ===== FIN DE SIDEBAR-ENHANCED.CSS ===== */
+
