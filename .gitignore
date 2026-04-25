@@ -31,6 +31,19 @@ identifier.sqlite
 staticfiles/
 !staticfiles/.gitkeep
 
+# CSS generados por Tailwind (no incluir en repo)
+static/css/output.css
+static/css/output.css.map
+
+# ============================================
+# NODE MODULES & NPM
+# ============================================
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # ============================================
 # VIRTUAL ENVIRONMENTS
 # ============================================

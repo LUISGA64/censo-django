@@ -270,6 +270,45 @@ El sistema está optimizado para dispositivos móviles:
 - Búsqueda optimizada para táctil
 - Formularios adaptados a móviles
 
+## 📌 Versionamiento
+
+Este proyecto usa [Semantic Versioning](https://semver.org/lang/es/):
+
+- **MAJOR.MINOR.PATCH** (ejemplo: 2.1.0)
+- **MAJOR**: Cambios incompatibles (breaking changes)
+- **MINOR**: Nueva funcionalidad compatible
+- **PATCH**: Corrección de bugs
+
+Ver historial completo de cambios en [CHANGELOG.md](CHANGELOG.md)
+
+### Versión Actual
+
+```
+Versión: 2.1.0
+Última actualización: 2026-04-25
+Estado: ✅ En producción
+```
+
+### Crear Nueva Versión
+
+```bash
+# 1. Actualizar VERSION file
+echo "2.2.0" > VERSION
+
+# 2. Actualizar CHANGELOG.md
+# Agregar entrada con cambios
+
+# 3. Commit cambios
+git add VERSION CHANGELOG.md
+git commit -m "chore: Bump version to 2.2.0"
+
+# 4. Crear tag
+git tag -a v2.2.0 -m "Release v2.2.0: Descripción de cambios"
+
+# 5. Push con tags
+git push origin main --tags
+```
+
 ## 🤝 Contribuir
 
 1. Fork el repositorio
@@ -277,6 +316,21 @@ El sistema está optimizado para dispositivos móviles:
 3. Commit cambios (`git commit -m 'feat: nueva funcionalidad'`)
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Abrir Pull Request
+
+### Conventional Commits
+
+Usa estos prefijos en tus commits:
+
+- `feat:` Nueva funcionalidad
+- `fix:` Corrección de bugs
+- `docs:` Cambios en documentación
+- `style:` Cambios que no afectan el código (formato)
+- `refactor:` Refactorización de código
+- `test:` Agregar o modificar tests
+- `chore:` Tareas de mantenimiento
+- `perf:` Mejoras de rendimiento
+- `build:` Cambios en sistema de build
+- `ci:` Cambios en CI/CD
 
 ## 📝 Licencia
 
@@ -290,6 +344,6 @@ Proyecto propietario - Todos los derechos reservados
 
 ---
 
-**Versión:** 2.0  
-**Última actualización:** 2026-02-27  
+**Versión:** 2.1.0  
+**Última actualización:** 2026-04-25  
 **Estado:** ✅ En producción
