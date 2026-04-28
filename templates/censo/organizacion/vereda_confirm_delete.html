@@ -1,0 +1,193 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Vereda{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .delete-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .delete-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .delete-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .delete-title {
+        color: #dc2626 !important;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .vereda-info {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1. 5rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #6B7280;
+    }
+
+    .info-value {
+        color: #1F2937;
+    }
+
+    .warning-box {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .error-box {
+        background: #fee2e2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-section {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-delete {
+        background: #dc2626;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background: #b91c1c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-cancel {
+        background: white;
+        border: 2px solid #6B7280;
+        color: #6B7280;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #6B7280;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="delete-card">
+        <div class="delete-header">
+            <div class="delete-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="delete-title">¿Eliminar Vereda?</h3>
+            <p class="text-muted">Esta acción no se puede deshacer.</p>
+        </div>
+
+        <div class="vereda-info">
+            <div class="info-row">
+                <span class="info-label">Vereda:</span>
+                <span class="info-value"><strong>{{ vereda.sidewalk_name }}</strong></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Organización:</span>
+                <span class="info-value">{{ organization.organization_name }}</span>
+            </div>
+            {% if vereda.description %}
+            <div class="info-row">
+                <span class="info-label">Descripción:</span>
+                <span class="info-value">{{ vereda.description|truncatewords:10 }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="info-label">Familias asociadas:</span>
+                <span class="info-value">
+                    <span class="badge bg-{% if familias_count > 0 %}danger{% else %}success{% endif %}">
+                        {{ familias_count }} familia{{ familias_count|pluralize }}
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        {% if familias_count > 0 %}
+        <div class="error-box">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>No se puede eliminar:</strong> Esta vereda tiene <strong>{{ familias_count }}</strong> familia(s) asociada(s).
+            Primero debe reasignar o eliminar las fichas familiares antes de poder eliminar la vereda.
+        </div>
+        {% else %}
+        <div class="warning-box">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Advertencia:</strong> Al eliminar esta vereda, se eliminará de forma permanente del sistema.
+            Esta acción no se puede revertir.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="btn-section">
+                {% if familias_count == 0 %}
+                <button type="submit" class="btn-delete">
+                    <i class="fas fa-trash me-2"></i>
+                    Sí, Eliminar Vereda
+                </button>
+                {% endif %}
+                <a href="{% url 'organization_manage' organization.id %}#veredas" class="btn-cancel">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

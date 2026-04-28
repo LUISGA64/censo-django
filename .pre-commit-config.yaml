@@ -1,0 +1,73 @@
+repos:
+  # Pre-commit hooks generales
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Eliminar espacios en blanco al final
+      - id: end-of-file-fixer
+        name: Asegurar línea final en archivos
+      - id: check-yaml
+        name: Verificar sintaxis YAML
+      - id: check-added-large-files
+        name: Verificar archivos grandes
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+        name: Verificar conflictos de merge
+      - id: check-json
+        name: Verificar sintaxis JSON
+      - id: check-toml
+        name: Verificar sintaxis TOML
+      - id: check-xml
+        name: Verificar sintaxis XML
+      - id: mixed-line-ending
+        name: Verificar finales de línea mixtos
+
+  # Black - Formateador de código Python
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        name: Formatear código con Black
+        language_version: python3.11
+        args: ['--line-length=100', '--target-version=py311']
+
+  # isort - Ordenar imports
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: Ordenar imports con isort
+        args: ["--profile", "black", "--line-length", "100"]
+
+  # Flake8 - Linter
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: Linter Flake8
+        args: [
+          '--max-line-length=100',
+          '--extend-ignore=E203,W503,E501',
+          '--exclude=migrations,__pycache__,venv,env'
+        ]
+
+  # Bandit - Security linter
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        name: Verificar vulnerabilidades de seguridad
+        args: ['-ll', '--skip', 'B101,B601']
+        exclude: ^tests/
+
+  # Django-specific checks
+  - repo: local
+    hooks:
+      - id: django-check
+        name: Django system check
+        entry: python manage.py check
+        language: system
+        pass_filenames: false
+        always_run: true
+

@@ -320,11 +320,34 @@ def profile(request):
 def association(request):
     """
     Vista optimizada para mostrar asociaciones.
+    Filtra por organización del usuario (multi-tenancy).
     Incluye paginación, búsqueda y carga optimizada de datos.
     """
     try:
-        # Query optimizado
-        associations_list = Association.objects.all().order_by('-id')
+        # Filtrar asociaciones según el usuario
+        if request.user.is_superuser:
+            # Superusuarios ven todas las asociaciones
+            associations_list = Association.objects.all()
+        elif hasattr(request.user, 'profile'):
+            # Usuarios normales solo ven la asociación de su organización
+            user_organization = request.user.profile.organization
+            
+            # Si el usuario tiene permiso para ver todas las organizaciones
+            if request.user.profile.can_view_all_organizations:
+                # Ver todas las asociaciones (administrador de asociación)
+                associations_list = Association.objects.all()
+            else:
+                # Ver solo la asociación de su organización
+                associations_list = Association.objects.filter(
+                    id=user_organization.association_id_id
+                )
+        else:
+            # Usuario sin perfil no ve ninguna asociación
+            associations_list = Association.objects.none()
+            messages.warning(request, "Tu usuario no tiene una organización asignada. Contacta al administrador.")
+
+        # Ordenar
+        associations_list = associations_list.order_by('-id')
 
         # Búsqueda (si se proporciona)
         search_query = request.GET.get('search', '').strip()
@@ -348,7 +371,8 @@ def association(request):
             'associations': associations,
             'search_query': search_query,
             'total_associations': associations_list.count(),
-            'segment': 'association'
+            'segment': 'association',
+            'user_organization': request.user.profile.organization if hasattr(request.user, 'profile') else None,
         }
 
         return render(request, 'censo/configuracion/association.html', context)

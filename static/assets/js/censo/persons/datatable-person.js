@@ -191,11 +191,85 @@ $(document).ready(function () {
         },
         initComplete: function() {
             $('#loadingSpinner').removeClass('active');
-            console.log('DataTable inicializado correctamente');
         },
         drawCallback: function() {
-            // Agregar tooltips de Bootstrap
-            $('[title]').tooltip();
+            // Destruir tooltips existentes antes de recrear
+            $('[data-bs-toggle="tooltip"]').each(function() {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    if (tooltip) {
+                        tooltip.dispose();
+                    }
+                }
+            });
+
+            // Inicializar nuevos tooltips
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+
+            // Inicializar dropdowns de Bootstrap manualmente
+            const dropdownElementList = document.querySelectorAll('.dropdown-actions [data-bs-toggle="dropdown"]');
+
+            // Verificar si Bootstrap está disponible
+            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                dropdownElementList.forEach(function(dropdownToggleEl) {
+                    // Destruir instancia previa si existe
+                    const existingDropdown = bootstrap.Dropdown.getInstance(dropdownToggleEl);
+                    if (existingDropdown) {
+                        existingDropdown.dispose();
+                    }
+
+                    // Crear nueva instancia con opciones explícitas
+                    new bootstrap.Dropdown(dropdownToggleEl, {
+                        boundary: 'viewport',
+                        reference: 'toggle',
+                        autoClose: true
+                    });
+
+                    // BACKUP: Event listener manual por si Bootstrap no funciona
+                    dropdownToggleEl.addEventListener('click', function(e) {
+                        const menu = this.nextElementSibling;
+                        if (menu) {
+                            // Forzar toggle manual si Bootstrap no responde
+                            setTimeout(() => {
+                                if (!menu.classList.contains('show')) {
+                                    menu.classList.add('show');
+                                    menu.style.position = 'absolute';
+                                    menu.style.inset = '0px 0px auto auto';
+                                    menu.style.margin = '0px';
+                                    menu.style.transform = 'translate(0px, 34px)';
+                                }
+                            }, 50);
+                        }
+                    });
+                });
+            } else {
+                // Fallback: event listeners manuales
+                dropdownElementList.forEach(function(dropdownToggleEl) {
+                    const newElement = dropdownToggleEl.cloneNode(true);
+                    dropdownToggleEl.parentNode.replaceChild(newElement, dropdownToggleEl);
+
+                    newElement.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Cerrar otros dropdowns
+                        document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+                            menu.classList.remove('show');
+                        });
+
+                        // Toggle del menú actual
+                        const menu = this.nextElementSibling;
+                        if (menu && menu.classList.contains('dropdown-menu')) {
+                            menu.classList.toggle('show');
+                        }
+                    });
+                });
+            }
         }
     });
 
@@ -221,6 +295,28 @@ $(document).ready(function () {
 
     // Hacer la función global para uso en otros scripts
     window.showNotification = showNotification;
+
+    // ========================================
+    // GESTIÓN DE DROPDOWNS (FALLBACK)
+    // ========================================
+
+    // Cerrar dropdowns cuando se hace clic fuera
+    $(document).on('click', function(e) {
+        // Si el click no es en un dropdown-toggle o dropdown-menu
+        if (!$(e.target).closest('.dropdown-actions').length) {
+            $('.dropdown-menu.show').removeClass('show');
+        }
+    });
+
+    // Prevenir que el dropdown se cierre al hacer clic dentro del menú
+    $(document).on('click', '.dropdown-menu', function(e) {
+        e.stopPropagation();
+    });
+
+    // Cerrar dropdown al hacer clic en un item del menú
+    $(document).on('click', '.dropdown-item', function() {
+        $(this).closest('.dropdown-menu').removeClass('show');
+    });
 
     // ========================================
     // FILTROS DE PERSONAS

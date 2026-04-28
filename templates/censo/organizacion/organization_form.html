@@ -1,0 +1,334 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if action == 'edit' %}Editar Organización{% else %}Nueva Organización{% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .form-section-title {
+        color: #1e3c72;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #344767;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 0.25rem rgba(30, 60, 114, 0.1);
+    }
+
+    .btn-save {
+        background: #00909E;
+        border: none;
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        background: #007a85;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 144, 158, 0.3);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: white;
+        border: 2px solid #6B7280;
+        color: #6B7280;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #6B7280;
+        color: white;
+    }
+
+    .preview-logo {
+        max-width: 200px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .required-field::after {
+        content: ' *';
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="mb-1">
+            <i class="fas fa-{% if action == 'edit' %}edit{% else %}plus{% endif %} me-2"></i>
+            {% if action == 'edit' %}
+                Editar Organización
+            {% else %}
+                Nueva Organización
+            {% endif %}
+        </h2>
+        <p class="text-muted mb-0">
+            {% if action == 'edit' %}
+                Actualice la información de {{ organization.organization_name }}
+            {% else %}
+                Complete los datos para crear una nueva organización
+            {% endif %}
+        </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="form-card">
+            <h5 class="form-section-title">
+                <i class="fas fa-info-circle"></i>
+                Información Básica
+            </h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.organization_name.id_for_label }}" class="form-label required-field">
+                        {{ form.organization_name.label }}
+                    </label>
+                    {{ form.organization_name }}
+                    {% if form.organization_name.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_name.errors }}
+                        </div>
+                    {% endif %}
+                    {% if form.organization_name.help_text %}
+                        <small class="form-text text-muted">{{ form.organization_name.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.organization_type_identification.id_for_label }}" class="form-label">
+                        {{ form.organization_type_identification.label }}
+                    </label>
+                    {{ form.organization_type_identification }}
+                    {% if form.organization_type_identification.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_type_identification.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.organization_identification.id_for_label }}" class="form-label required-field">
+                        {{ form.organization_identification.label }}
+                    </label>
+                    {{ form.organization_identification }}
+                    {% if form.organization_identification.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_identification.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.organization_territory.id_for_label }}" class="form-label required-field">
+                        {{ form.organization_territory.label }}
+                    </label>
+                    {{ form.organization_territory }}
+                    {% if form.organization_territory.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_territory.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.association_id.id_for_label }}" class="form-label required-field">
+                        {{ form.association_id.label }}
+                    </label>
+                    {{ form.association_id }}
+                    {% if form.association_id.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.association_id.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h5 class="form-section-title">
+                <i class="fas fa-address-card"></i>
+                Información de Contacto
+            </h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.organization_email.id_for_label }}" class="form-label required-field">
+                        {{ form.organization_email.label }}
+                    </label>
+                    {{ form.organization_email }}
+                    {% if form.organization_email.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.organization_mobile_phone.id_for_label }}" class="form-label">
+                        {{ form.organization_mobile_phone.label }}
+                    </label>
+                    {{ form.organization_mobile_phone }}
+                    {% if form.organization_mobile_phone.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_mobile_phone.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.organization_phone.id_for_label }}" class="form-label">
+                        {{ form.organization_phone.label }}
+                    </label>
+                    {{ form.organization_phone }}
+                    {% if form.organization_phone.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_phone.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label for="{{ form.organization_address.id_for_label }}" class="form-label required-field">
+                        {{ form.organization_address.label }}
+                    </label>
+                    {{ form.organization_address }}
+                    {% if form.organization_address.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_address.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h5 class="form-section-title">
+                <i class="fas fa-image"></i>
+                Logo de la Organización
+            </h5>
+
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="{{ form.organization_logo.id_for_label }}" class="form-label">
+                        {{ form.organization_logo.label }}
+                    </label>
+                    {{ form.organization_logo }}
+                    {% if form.organization_logo.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.organization_logo.errors }}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted d-block mt-1">
+                        Formatos aceptados: JPG, PNG, SVG. Tamaño máximo: 5MB.
+                    </small>
+                </div>
+
+                {% if action == 'edit' and organization.organization_logo %}
+                <div class="col-md-4 text-center">
+                    <label class="form-label d-block">Logo Actual</label>
+                    <img src="{{ organization.organization_logo.url }}"
+                         alt="{{ organization.organization_name }}"
+                         class="preview-logo">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{% if action == 'edit' %}{% url 'organization_manage' organization.id %}{% else %}{% url 'association' %}{% endif %}"
+               class="btn btn-cancel">
+                <i class="fas fa-times me-2"></i>
+                Cancelar
+            </a>
+            <button type="submit" class="btn btn-save">
+                <i class="fas fa-save me-2"></i>
+                {% if action == 'edit' %}Guardar Cambios{% else %}Crear Organización{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script>
+    // Preview de imagen al seleccionar archivo
+    document.querySelector('input[type="file"]')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                // Crear preview si no existe
+                let preview = document.querySelector('.preview-logo-new');
+                if (!preview) {
+                    const container = e.target.closest('.col-md-8');
+                    preview = document.createElement('img');
+                    preview.className = 'preview-logo preview-logo-new mt-3';
+                    container.appendChild(preview);
+                }
+                preview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Validación del formulario
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('form');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}
+

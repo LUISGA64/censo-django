@@ -1,0 +1,422 @@
+/* ============================================
+   NAVBAR ENHANCED - Mejoras UX/UI
+   Navbar profesional y moderno
+   ============================================ */
+
+/* ===== AVATAR CIRCULAR CON INICIALES ===== */
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.avatar-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.avatar-initials {
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+/* Avatar grande para dropdown */
+.avatar-circle-lg {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.avatar-initials-lg {
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+/* ===== BOTÓN DE TEMA MEJORADO ===== */
+.theme-toggle-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important; /* Circular */
+    border: 1px solid #dee2e6 !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+    color: #495057 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    cursor: pointer;
+}
+
+.theme-toggle-btn:hover {
+    background: #f8f9fa !important;
+    border-color: #adb5bd !important;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-toggle-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.theme-toggle-btn i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+    margin: 0;
+}
+
+.theme-toggle-btn:hover i {
+    transform: rotate(20deg);
+}
+
+/* Ocultar elementos relacionados con texto del tema */
+.theme-text {
+    display: none !important;
+}
+
+.btn-icon-only {
+    min-width: auto !important;
+    padding: 0 !important;
+}
+
+/* ===== DROPDOWN DE USUARIO ===== */
+.navbar-nav .dropdown-toggle {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.navbar-nav .dropdown-toggle:hover {
+    background: #f8f9fa;
+    border-color: #e9ecef;
+}
+
+.navbar-nav .dropdown-toggle::after {
+    display: none; /* Ocultamos la flecha por defecto de Bootstrap */
+}
+
+.navbar-nav .dropdown-menu {
+    animation: dropdownFadeIn 0.3s ease;
+    display: none !important; /* OCULTO POR DEFECTO */
+}
+
+.navbar-nav .dropdown-menu.show {
+    display: block !important; /* VISIBLE CUANDO TIENE CLASE .show */
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Items del dropdown */
+.dropdown-item {
+    border-radius: 6px;
+    margin: 0 6px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: #f8f9fa;
+    padding-left: 1.5rem !important;
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Cerrar sesión con estilo especial */
+.dropdown-item.text-danger:hover {
+    background: #fff5f5;
+    color: #dc3545 !important;
+}
+
+/* ===== INFO DE USUARIO EN NAVBAR ===== */
+.navbar-nav .nav-link .text-sm {
+    line-height: 1.2;
+}
+
+.navbar-nav .nav-link .text-xs {
+    line-height: 1;
+    opacity: 0.8;
+}
+
+/* ===== SEPARADOR VERTICAL ===== */
+.navbar-nav .nav-item > div {
+    opacity: 0.3;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .theme-toggle-btn {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .theme-toggle-btn i {
+        font-size: 16px;
+    }
+
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+    }
+
+    .avatar-initials {
+        font-size: 12px;
+    }
+}
+
+/* ===== TOOLTIPS MEJORADOS ===== */
+[title] {
+    position: relative;
+}
+
+/* ===== MEJORAS VISUALES ADICIONALES ===== */
+.navbar-nav {
+    gap: 0.5rem;
+}
+
+/* Prevenir scroll en navbar */
+.navbar-main,
+nav.navbar {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+}
+
+.navbar-collapse {
+    overflow: visible !important;
+}
+
+/* Efecto de enfoque accesible */
+.navbar-nav .nav-link:focus,
+.navbar-nav .btn:focus,
+.navbar-nav .dropdown-toggle:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Badge de estado (opcional para futuro) */
+.status-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background: #28a745;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+/* ===== ANIMACIONES SUAVES ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+body.dark-mode .theme-toggle-btn {
+    background: transparent !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .navbar-nav .dropdown-toggle:hover {
+    background: #2a2a2a;
+    border-color: #333;
+}
+
+body.dark-mode .dropdown-menu {
+    background: #1a1a1a;
+    border: 1px solid #333;
+}
+
+body.dark-mode .dropdown-item {
+    color: #e0e0e0;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .dropdown-divider {
+    border-color: #333;
+}
+
+body.dark-mode .text-secondary {
+    color: #aaa !important;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ===== MEJORAS ADICIONALES ===== */
+/* Indicador de sesión activa */
+.session-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #28a745;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Mejoras de contraste */
+.dropdown-menu .border-bottom {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.dark-mode .dropdown-menu .border-bottom {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===== FIX CRÍTICO: DROPDOWN FUNCIONAL ===== */
+/* Asegurar que el dropdown sea clickeable y funcione correctamente */
+
+/* Container del dropdown */
+.navbar-nav .nav-item.dropdown {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+/* Toggle button (avatar + nombre) */
+.navbar-nav .dropdown-toggle,
+.navbar-nav #navbarDropdownUser {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 1001 !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Menu desplegable - OCULTO POR DEFECTO */
+.navbar-nav .dropdown-menu {
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+    position: absolute !important;
+    will-change: transform !important;
+    display: none !important; /* OCULTO POR DEFECTO */
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Menu cuando está visible - FORZAR VISIBILIDAD */
+.navbar-nav .dropdown-menu.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+/* Items individuales del dropdown */
+.navbar-nav .dropdown-item,
+.navbar-nav .dropdown-menu .dropdown-item {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+    display: flex !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Links dentro de items */
+.navbar-nav .dropdown-item[href],
+.navbar-nav a.dropdown-item,
+.navbar-nav .dropdown-item:link,
+.navbar-nav .dropdown-item:visited {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix específico para cerrar sesión */
+.dropdown-item.text-danger,
+a.dropdown-item.text-danger,
+.navbar-nav .dropdown-menu a.text-danger {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    color: #dc3545 !important;
+}
+
+/* Asegurar que hover funcione */
+.navbar-nav .dropdown-item:hover {
+    pointer-events: auto !important;
+}
+
+/* Íconos dentro del dropdown */
+.navbar-nav .dropdown-item i {
+    pointer-events: none !important;
+}
+
+/* Spans dentro del dropdown */
+.navbar-nav .dropdown-item span {
+    pointer-events: none !important;
+}
+
+/* Eliminar cualquier overlay que pueda bloquear clicks */
+.navbar-nav .dropdown::before,
+.navbar-nav .dropdown::after,
+.navbar-nav .dropdown-menu::before,
+.navbar-nav .dropdown-menu::after {
+    display: none !important;
+    content: none !important;
+}
+
