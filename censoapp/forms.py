@@ -2,7 +2,7 @@ from django import forms
 
 from .models import FamilyCard, Person, DocumentType, Gender, SecuritySocial, Kinship, EducationLevel, CivilState, \
     Occupancy, Sidewalks, Organizations, Eps, Handicap, MaterialConstruction, MaterialConstructionFamilyCard, \
-    HomeOwnership, CookingFuel
+    HomeOwnership, CookingFuel, BoardPosition
 from .choices import zone
 from crispy_forms.helper import FormHelper
 
@@ -622,3 +622,278 @@ class MaterialConstructionFamilyForm(forms.ModelForm):
 
 
 
+
+# ============================================
+# FORMS PARA ORGANIZACIONES Y JUNTA DIRECTIVA
+# ============================================
+
+class OrganizationForm(forms.ModelForm):
+    """Formulario para crear/editar organizaciones"""
+    
+    class Meta:
+        model = Organizations
+        fields = [
+            'organization_name', 'organization_identification', 
+            'organization_type_identification', 'organization_territory',
+            'organization_email', 'organization_mobile_phone', 
+            'organization_phone', 'organization_address', 
+            'organization_logo', 'association_id'
+        ]
+        widgets = {
+            'organization_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de la organización',
+                'required': True
+            }),
+            'organization_identification': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'NIT o identificación',
+                'required': True
+            }),
+            'organization_type_identification': forms.Select(attrs={
+                'class': 'form-control'
+            }, choices=[
+                ('NIT', 'NIT'),
+                ('CC', 'Cédula de Ciudadanía'),
+                ('CE', 'Cédula de Extranjería'),
+                ('OTRO', 'Otro')
+            ]),
+            'organization_territory': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Territorio',
+                'required': True
+            }),
+            'organization_email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'correo@ejemplo.com',
+                'required': True
+            }),
+            'organization_mobile_phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Celular'
+            }),
+            'organization_phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Teléfono fijo'
+            }),
+            'organization_address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Dirección',
+                'required': True
+            }),
+            'organization_logo': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'association_id': forms.Select(attrs={
+                'class': 'form-control',
+                'required': True
+            })
+        }
+        labels = {
+            'organization_name': 'Nombre de la Organización',
+            'organization_identification': 'Identificación (NIT)',
+            'organization_type_identification': 'Tipo de Identificación',
+            'organization_territory': 'Territorio',
+            'organization_email': 'Correo Electrónico',
+            'organization_mobile_phone': 'Celular',
+            'organization_phone': 'Teléfono',
+            'organization_address': 'Dirección',
+            'organization_logo': 'Logo',
+            'association_id': 'Asociación'
+        }
+        error_messages = {
+            'organization_name': {
+                'required': 'El nombre es obligatorio.',
+                'max_length': 'El nombre no puede tener más de 50 caracteres.'
+            },
+            'organization_identification': {
+                'required': 'La identificación es obligatoria.',
+                'unique': 'Ya existe una organización con esta identificación.'
+            },
+            'organization_email': {
+                'required': 'El correo electrónico es obligatorio.',
+                'invalid': 'Ingrese un correo electrónico válido.'
+            }
+        }
+
+
+class BoardPositionForm(forms.ModelForm):
+    """Formulario para crear/editar cargos de junta directiva"""
+    
+    class Meta:
+        model = BoardPosition
+        fields = [
+            'position_name', 'holder_person', 'alternate_person',
+            'can_sign_documents', 'start_date', 'end_date',
+            'is_active', 'observations'
+        ]
+        widgets = {
+            'position_name': forms.Select(attrs={
+                'class': 'form-control',
+                'required': True
+            }),
+            'holder_person': forms.Select(attrs={
+                'class': 'form-control',
+                'required': True
+            }),
+            'alternate_person': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'can_sign_documents': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'style': 'width: 20px; height: 20px; cursor: pointer;'
+            }),
+            'start_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'required': True
+            }),
+            'end_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'style': 'width: 20px; height: 20px; cursor: pointer;'
+            }),
+            'observations': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones opcionales...'
+            })
+        }
+        labels = {
+            'position_name': 'Cargo',
+            'holder_person': 'Titular del Cargo',
+            'alternate_person': 'Suplente (opcional)',
+            'can_sign_documents': '¿Autorizado para firmar documentos?',
+            'start_date': 'Fecha de Inicio',
+            'end_date': 'Fecha de Finalización (opcional)',
+            'is_active': '¿Cargo activo?',
+            'observations': 'Observaciones'
+        }
+        help_texts = {
+            'holder_person': 'Persona que ocupa el cargo como titular',
+            'alternate_person': 'Persona que actúa como suplente',
+            'can_sign_documents': 'Autorizar a esta persona para firmar documentos oficiales',
+            'start_date': 'Fecha en que inició en el cargo',
+            'end_date': 'Dejar en blanco si el cargo está activo',
+            'is_active': 'Indica si el cargo está actualmente activo'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        organization = kwargs.pop('organization', None)
+        super().__init__(*args, **kwargs)
+        
+        # Filtrar personas por organización si se proporciona
+        if organization:
+            from .models import FamilyCard
+            people = Person.objects.filter(
+                family_card__organization=organization,
+                state=True
+            ).order_by('first_name_1', 'last_name_1')
+            
+            self.fields['holder_person'].queryset = people
+            self.fields['alternate_person'].queryset = people
+            self.fields['alternate_person'].required = False
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        holder = cleaned_data.get('holder_person')
+        alternate = cleaned_data.get('alternate_person')
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        
+        # Validar que titular y suplente no sean la misma persona
+        if holder and alternate and holder == alternate:
+            raise forms.ValidationError(
+                'El titular y el suplente no pueden ser la misma persona.'
+            )
+        
+        # Validar fechas
+        if start_date and end_date:
+            if end_date < start_date:
+                raise forms.ValidationError(
+                    'La fecha de finalización no puede ser anterior a la fecha de inicio.'
+                )
+        
+        return cleaned_data
+
+class VeredaForm(forms.ModelForm):
+    """Formulario para crear/editar veredas"""
+    
+    class Meta:
+        model = Sidewalks
+        fields = ['sidewalk_name', 'description', 'latitude', 'longitude']
+        widgets = {
+            'sidewalk_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Vereda Norte',
+                'maxlength': 40,
+                'required': True
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción de la vereda (opcional)...'
+            }),
+            'latitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 2.3167',
+                'step': '0.0000001',
+                'min': '-90',
+                'max': '90'
+            }),
+            'longitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: -76.4000',
+                'step': '0.0000001',
+                'min': '-180',
+                'max': '180'
+            })
+        }
+        labels = {
+            'sidewalk_name': 'Nombre de la Vereda',
+            'description': 'Descripción',
+            'latitude': 'Latitud GPS',
+            'longitude': 'Longitud GPS'
+        }
+        help_texts = {
+            'sidewalk_name': 'Nombre de la vereda (máximo 40 caracteres)',
+            'description': 'Breve descripción de la ubicación o características de la vereda',
+            'latitude': 'Coordenada de latitud (opcional, ejemplo: 2.3167)',
+            'longitude': 'Coordenada de longitud (opcional, ejemplo: -76.4000)'
+        }
+        error_messages = {
+            'sidewalk_name': {
+                'required': 'El nombre de la vereda es obligatorio.',
+                'max_length': 'El nombre no puede tener más de 40 caracteres.'
+            }
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        latitude = cleaned_data.get('latitude')
+        longitude = cleaned_data.get('longitude')
+        
+        # Validar que si se proporciona una coordenada, se proporcionen ambas
+        if (latitude is not None and longitude is None) or (longitude is not None and latitude is None):
+            raise forms.ValidationError(
+                'Si proporciona coordenadas GPS, debe proporcionar tanto latitud como longitud.'
+            )
+        
+        # Validar rangos de coordenadas
+        if latitude is not None:
+            if latitude < -90 or latitude > 90:
+                raise forms.ValidationError(
+                    'La latitud debe estar entre -90 y 90 grados.'
+                )
+        
+        if longitude is not None:
+            if longitude < -180 or longitude > 180:
+                raise forms.ValidationError(
+                    'La longitud debe estar entre -180 y 180 grados.'
+                )
+        
+        return cleaned_data

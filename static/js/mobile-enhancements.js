@@ -561,20 +561,6 @@
 
         // Exponer utilidades globalmente
         window.MobileUtils = MobileUtils;
-
-        // Log de dispositivo (solo en desarrollo)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.log('📱 Optimizaciones móviles cargadas');
-            console.log('Dispositivo:', {
-                isMobile,
-                isTablet,
-                isTouchDevice,
-                isIOS,
-                screenSize: `${window.innerWidth}x${window.innerHeight}`,
-                deviceMemory: navigator.deviceMemory || 'N/A',
-                connection: navigator.connection?.effectiveType || 'N/A'
-            });
-        }
     });
 
     // ========================================

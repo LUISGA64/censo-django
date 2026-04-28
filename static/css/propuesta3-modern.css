@@ -1,0 +1,319 @@
+/* ============================================
+   PROPUESTA 3: "MODERN GLASS"
+   Contemporáneo, sofisticado y limpio
+   ============================================ */
+
+/* ===== VARIABLES CSS ===== */
+:root {
+    --sidebar-width: 260px;
+    --sidebar-bg: #fafbfc;                    /* Gris casi blanco */
+    --sidebar-border: 1px solid #eaedef;
+    --sidebar-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+
+    /* Estado Normal */
+    --item-text: #4a5568;
+    --item-icon: #718096;
+
+    /* Estado Hover */
+    --hover-bg: #f7fafc;
+    --hover-border: #cbd5e0;
+
+    /* Estado Activo */
+    --active-bg: #edf2f7;
+    --active-text: #2d3748;
+    --active-icon: #3182ce;                   /* Azul moderno */
+    --active-border: #3182ce;
+    --active-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+
+    /* Divisores */
+    --divider-color: #e2e8f0;
+
+    /* Scrollbar */
+    --scrollbar-thumb: rgba(113,128,150,0.25);
+    --scrollbar-thumb-hover: rgba(113,128,150,0.4);
+
+    /* Transiciones */
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s;
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.sidenav,
+aside.sidenav,
+#sidenav-main {
+    width: var(--sidebar-width) !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    background: var(--sidebar-bg) !important;
+    border-right: var(--sidebar-border) !important;
+    box-shadow: var(--sidebar-shadow) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transition: transform var(--transition-normal) ease-in-out;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* ===== HEADER ===== */
+.sidenav-header,
+.sidenav .sidenav-header {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    padding: 1.25rem 1rem !important;
+    background: var(--sidebar-bg) !important;
+    border-bottom: var(--sidebar-border) !important;
+    max-height: 80px !important;
+}
+
+.sidenav-header .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #1a202c;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+}
+
+.sidenav-header .navbar-brand-img {
+    height: 32px;
+    width: auto;
+}
+
+/* ===== HR DIVISOR ===== */
+.sidenav hr.horizontal,
+.sidenav .horizontal {
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    border: 0;
+    height: 1px;
+    background: var(--divider-color);
+    opacity: 1;
+}
+
+/* ===== ÁREA DE NAVEGACIÓN CON SCROLL FUNCIONAL ===== */
+.sidenav .navbar-collapse,
+.sidenav #sidenav-collapse-main,
+#sidenav-main .navbar-collapse,
+.sidenav .collapse.navbar-collapse {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - 140px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0.5rem 0 4rem 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--scrollbar-thumb) transparent !important;
+}
+
+/* Custom Scrollbar Webkit */
+.sidenav .navbar-collapse::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidenav .navbar-collapse::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidenav .navbar-collapse::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 10px;
+    transition: background-color var(--transition-fast);
+}
+
+.sidenav .navbar-collapse::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+}
+
+/* ===== LISTA DE NAVEGACIÓN ===== */
+.sidenav .navbar-nav {
+    padding: 0;
+    list-style: none;
+    margin: 0;
+}
+
+.sidenav .nav-item {
+    margin: 0.2rem 0.75rem;
+}
+
+/* ===== LINKS DE NAVEGACIÓN ===== */
+.sidenav .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.7rem 0.875rem;
+    color: var(--item-text);
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Estado Hover */
+.sidenav .nav-link:hover {
+    background: var(--hover-bg);
+    border-color: var(--hover-border);
+    transform: translateX(2px);
+}
+
+/* Estado Activo */
+.sidenav .nav-link.active {
+    background: var(--active-bg);
+    color: var(--active-text);
+    border-color: var(--active-border);
+    box-shadow: var(--active-shadow);
+    font-weight: 600;
+}
+
+/* ===== ICONOS ===== */
+.sidenav .icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidenav .nav-link:hover .icon {
+    border-color: #cbd5e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    transform: scale(1.05);
+}
+
+.sidenav .nav-link.active .icon {
+    background: rgba(49,130,206,0.08);      /* Fondo azul muy suave */
+    border-color: rgba(49,130,206,0.2);
+    box-shadow: 0 2px 6px rgba(49,130,206,0.12);
+}
+
+.sidenav .icon i {
+    font-size: 17px;
+    transition: all var(--transition-fast) ease;
+}
+
+/* Colores de iconos - estado normal */
+.sidenav .nav-link .icon i {
+    opacity: 0.7;
+}
+
+/* Colores de iconos - estado activo */
+.sidenav .nav-link.active .icon i {
+    opacity: 1 !important;
+    color: var(--active-icon) !important;
+    font-weight: 600;
+}
+
+/* ===== TEXTO DEL LINK ===== */
+.sidenav .nav-link-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== ENCABEZADOS DE SECCIÓN ===== */
+.sidenav .nav-item h6 {
+    padding: 1rem 1rem 0.5rem;
+    margin: 0.75rem 0 0.25rem;
+    color: #a0aec0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-top: 1px solid var(--divider-color);
+}
+
+.sidenav .nav-item:first-child h6 {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0.5rem;
+}
+
+/* ===== DIVISOR HORIZONTAL ===== */
+.sidenav hr.horizontal {
+    margin: 0;
+    border: 0;
+    height: 1px;
+    background: var(--divider-color);
+    opacity: 1;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Laptop pequeño (1366px - 1536px) */
+@media (max-width: 1536px) {
+    :root {
+        --sidebar-width: 250px;
+    }
+
+    .sidenav .nav-link {
+        padding: 0.65rem 0.825rem;
+        font-size: 0.85rem;
+    }
+
+    .sidenav .icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+}
+
+/* Tablet (768px - 991px) */
+@media (max-width: 991px) {
+    .sidenav {
+        transform: translateX(-100%);
+    }
+
+    .sidenav.show {
+        transform: translateX(0);
+    }
+}
+
+/* Móvil (menos de 768px) */
+@media (max-width: 767px) {
+    :root {
+        --sidebar-width: 280px;
+    }
+
+    .sidenav .nav-link {
+        padding: 0.875rem 1rem;
+        min-height: 48px;           /* ✅ Área táctil mínima 48px */
+    }
+
+    .sidenav .icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.sidenav .nav-link:focus {
+    outline: 2px solid var(--active-border);
+    outline-offset: 2px;
+}
+
+/* ===== ANIMACIONES SUAVES ===== */
+@media (prefers-reduced-motion: reduce) {
+    .sidenav,
+    .sidenav .nav-link,
+    .sidenav .icon,
+    .sidenav .icon i {
+        transition: none !important;
+    }
+}
+

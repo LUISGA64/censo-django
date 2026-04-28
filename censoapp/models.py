@@ -24,6 +24,40 @@ class Association(models.Model):
                                                help_text="Registre el departamento")
     association_email = models.EmailField(blank=False, null=False)
     association_logo = models.ImageField('Logo Association', null=True, blank=False, upload_to="Association")
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Estado Activo",
+        help_text="Indica si la asociación está activa"
+    )
+    # Campos adicionales informativos
+    legal_representative = models.CharField(
+        max_length=100, 
+        null=True, 
+        blank=True,
+        verbose_name="Representante Legal"
+    )
+    founding_date = models.DateField(
+        null=True, 
+        blank=True,
+        verbose_name="Fecha de Fundación"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True, 
+        null=True, 
+        blank=True,
+        verbose_name="Fecha de Creación"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, 
+        null=True, 
+        blank=True,
+        verbose_name="Fecha de Actualización"
+    )
+
+    class Meta:
+        verbose_name = "Asociación"
+        verbose_name_plural = "Asociaciones"
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.association_name} {self.association_identification}"

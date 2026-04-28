@@ -213,6 +213,13 @@
     <!-- Optimización Móvil CSS -->
     <link href="{% static 'css/mobile-optimizations.css' %}" rel="stylesheet"/>
 
+    <!-- Sidebar Propuesta 1: Minimalista Gris (RECOMENDADA) -->
+    <!-- Cambiar a propuesta2-corporate.css o propuesta3-modern.css para probar otras opciones -->
+    <link href="{% static 'css/propuesta1-minimalista.css' %}" rel="stylesheet"/>
+
+    <!-- Navbar Enhanced - Mejoras UX/UI -->
+    <link href="{% static 'css/navbar-enhanced.css' %}" rel="stylesheet"/>
+
     <link id="pagestyle_dark" href="{% static 'assets/css/dark-theme-core.css' %}" rel="stylesheet"/>
 
     <!-- Specific CSS goes HERE -->
@@ -325,8 +332,6 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(body, {
             attributes: true
         });
-
-        console.log('✅ Sidebar Enhanced: Funcionalidad cargada');
     }
 });
 </script>

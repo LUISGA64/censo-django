@@ -32,6 +32,10 @@ from .geolocation_views import (map_view, map_sidewalks_data, map_heatmap, map_c
 from .notification_views import (notifications_list, notification_detail, mark_as_read,
                                  mark_all_as_read, notifications_unread, notification_preferences,
                                  delete_notification)
+# Gestión de Organizaciones y Junta Directiva
+from .organization_views import (organization_manage, organization_edit, board_position_create,
+                                 board_position_edit, board_position_delete, board_history,
+                                 vereda_create, vereda_edit, vereda_delete)
 
 # ==============================================================================
 # API REST ROUTER
@@ -53,8 +57,21 @@ urlpatterns = [
     path('association', association, name='association'),
     path('createAssociation', login_required(CreateAssociation.as_view()), name='createAssociation'),
 
-    # Organizaciones
+    # Organizaciones - Gestión Completa
     path('organizacion/<int:pk>/', login_required(organization_detail), name='organization-detail'),
+    path('organizacion/<int:pk>/gestionar/', login_required(organization_manage), name='organization_manage'),
+    path('organizacion/<int:pk>/editar/', login_required(organization_edit), name='organization_edit'),
+
+    # Junta Directiva
+    path('organizacion/<int:organization_pk>/junta/crear/', login_required(board_position_create), name='board_position_create'),
+    path('junta/<int:pk>/editar/', login_required(board_position_edit), name='board_position_edit'),
+    path('junta/<int:pk>/eliminar/', login_required(board_position_delete), name='board_position_delete'),
+    path('organizacion/<int:organization_pk>/junta/historial/', login_required(board_history), name='board_history'),
+
+    # Veredas
+    path('organizacion/<int:organization_pk>/vereda/crear/', login_required(vereda_create), name='vereda_create'),
+    path('vereda/<int:pk>/editar/', login_required(vereda_edit), name='vereda_edit'),
+    path('vereda/<int:pk>/eliminar/', login_required(vereda_delete), name='vereda_delete'),
 
     # ----- FICHAS FAMILIARES -----
     path('familyCard/create', login_required(create_family_card), name='createFamilyCard'),

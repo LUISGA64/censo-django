@@ -285,3 +285,39 @@ docs/archive/
 *.bak
 *_backup.*
 *.backup
+
+# ============================================
+# ARCHIVOS DE DOCUMENTACIÓN TEMPORAL
+# ============================================
+# Archivos de debugging y pruebas
+FIX_*.txt
+PRUEBA_*.txt
+IMPLEMENTACION_*.txt
+INSTRUCCIONES_*.txt
+INSTRUCCIONES_*.md
+LIMPIEZA_*.txt
+MEJORAS_*.txt
+MEJORAS_*.md
+NAVBAR_*.txt
+NAVEGACION_*.md
+PROPUESTAS_*.md
+PRUEBAS_*.md
+RESUMEN_*.txt
+RESUMEN_*.md
+CAMBIOS_*.txt
+AJUSTES_*.txt
+EMPEZAR_*.txt
+EMPIEZA_*.txt
+PLAN_*.md
+
+# Archivos HTML de prueba
+comparacion_*.html
+diagnostico_*.html
+paletas_*.html
+test_*.html
+!tests/**/*.html
+
+# Otros archivos temporales de desarrollo
+comandos_*.txt
+CONSOLA_*.txt
+

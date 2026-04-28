@@ -1,0 +1,700 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Gestión de {{ organization.organization_name }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<style>
+    /* ===== TABS ESTILO EMTEL ===== */
+    .nav-tabs-emtel {
+        border-bottom: 3px solid #1e3c72;
+        padding-left: 0;
+        margin-bottom: 2rem;
+    }
+
+    .nav-tabs-emtel .nav-link {
+        border: none;
+        color: #6B7280;
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .nav-tabs-emtel .nav-link:hover {
+        color: #1e3c72;
+        background: #f0f4ff;
+    }
+
+    .nav-tabs-emtel .nav-link.active {
+        color: #1e3c72;
+        background: transparent;
+    }
+
+    .nav-tabs-emtel .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #00909E;
+    }
+
+    /* ===== CARDS ===== */
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .info-card h5 {
+        color: #1e3c72;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6B7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        color: #1F2937;
+        font-weight: 500;
+    }
+
+    /* ===== TABLA JUNTA DIRECTIVA ===== */
+    .board-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .board-table table {
+        margin: 0;
+    }
+
+    .board-table thead {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+    }
+
+    .board-table thead th {
+        font-weight: 600;
+        padding: 1rem;
+        border: none;
+    }
+
+    .board-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .board-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .badge-position {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .badge-signer {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge-regular {
+        background: #e3f2fd;
+        color: #1e3c72;
+    }
+
+    /* ===== STATS CARDS - COLORES DEL PROYECTO ===== */
+    .stat-card {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: white; /* Texto blanco por defecto */
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white; /* Icono blanco */
+    }
+
+    .stat-content {
+        color: white; /* Asegurar texto blanco */
+    }
+
+    .stat-content h3 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #FFFFFF; /* Blanco puro para los números */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Sombra para mejor legibilidad */
+    }
+
+    .stat-content p {
+        margin: 0;
+        opacity: 0.95; /* Casi opaco */
+        font-size: 0.9rem;
+        color: #FFFFFF; /* Blanco puro para las etiquetas */
+        font-weight: 600;
+    }
+
+    /* ===== BOTONES ===== */
+    .btn-emtel-primary {
+        background: #00909E;
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-emtel-primary:hover {
+        background: #007a85;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 144, 158, 0.3);
+        color: white;
+    }
+
+    .btn-emtel-secondary {
+        background: white;
+        border: 2px solid #1e3c72;
+        color: #1e3c72;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-emtel-secondary:hover {
+        background: #1e3c72;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+
+    .btn-action {
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-action-edit {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .btn-action-edit:hover {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .btn-action-delete {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .btn-action-delete:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-board {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .empty-board i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-board h5 {
+        color: #6B7280;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-board p {
+        color: #9CA3AF;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-landmark me-2"></i>
+                {{ organization.organization_name }}
+            </h2>
+            <p class="text-muted mb-0">
+                <i class="fas fa-id-card me-1"></i>
+                {{ organization.organization_type_identification }}: {{ organization.organization_identification }}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'association' %}" class="btn-emtel-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs de Navegación -->
+    <ul class="nav nav-tabs nav-tabs-emtel" id="organizationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                <i class="fas fa-info-circle me-2"></i>Información
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="board-tab" data-bs-toggle="tab" data-bs-target="#board" type="button" role="tab">
+                <i class="fas fa-users me-2"></i>Junta Directiva
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="veredas-tab" data-bs-toggle="tab" data-bs-target="#veredas" type="button" role="tab">
+                <i class="fas fa-map-marked-alt me-2"></i>Veredas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">
+                <i class="fas fa-chart-bar me-2"></i>Estadísticas
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de Tabs -->
+    <div class="tab-content" id="organizationTabsContent">
+
+        <!-- TAB: INFORMACIÓN -->
+        <div class="tab-pane fade show active" id="info" role="tabpanel">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="info-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-building"></i> Datos de la Organización</h5>
+                            <a href="{% url 'organization_edit' organization.id %}" class="btn-emtel-primary btn-sm">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </a>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Nombre</span>
+                                <span class="info-value">{{ organization.organization_name }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Identificación</span>
+                                <span class="info-value">{{ organization.organization_type_identification }}: {{ organization.organization_identification }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Territorio</span>
+                                <span class="info-value">{{ organization.organization_territory }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Correo Electrónico</span>
+                                <span class="info-value">
+                                    <a href="mailto:{{ organization.organization_email }}">{{ organization.organization_email }}</a>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Teléfono</span>
+                                <span class="info-value">{{ organization.organization_phone }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Celular</span>
+                                <span class="info-value">{{ organization.organization_mobile_phone }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Dirección</span>
+                                <span class="info-value">{{ organization.organization_address }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Asociación</span>
+                                <span class="info-value">{{ organization.association_id.association_name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    {% if organization.organization_logo %}
+                    <div class="info-card text-center">
+                        <h5><i class="fas fa-image"></i> Logo</h5>
+                        <img src="{{ organization.organization_logo.url }}"
+                             alt="{{ organization.organization_name }}"
+                             class="img-fluid rounded"
+                             style="max-height: 200px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: JUNTA DIRECTIVA -->
+        <div class="tab-pane fade" id="board" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Junta Directiva Vigente
+                </h5>
+                <div>
+                    <a href="{% url 'board_history' organization.id %}" class="btn-emtel-secondary btn-sm me-2">
+                        <i class="fas fa-history"></i>
+                        Ver Historial
+                    </a>
+                    <a href="{% url 'board_position_create' organization.id %}" class="btn-emtel-primary btn-sm">
+                        <i class="fas fa-plus"></i>
+                        Agregar Cargo
+                    </a>
+                </div>
+            </div>
+
+            {% if has_active_board %}
+            <div class="board-table">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Cargo</th>
+                            <th>Titular</th>
+                            <th>Suplente</th>
+                            <th>Período</th>
+                            <th>Firma</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for position in current_board %}
+                        <tr>
+                            <td>
+                                <span class="badge-position {% if position.can_sign_documents %}badge-signer{% else %}badge-regular{% endif %}">
+                                    <i class="fas fa-user-tie"></i>
+                                    {{ position.get_position_name_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if position.holder_person %}
+                                    <strong>{{ position.holder_person.full_name }}</strong><br>
+                                    <small class="text-muted">{{ position.holder_person.identification_person }}</small>
+                                {% else %}
+                                    <span class="text-muted">Sin asignar</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if position.alternate_person %}
+                                    {{ position.alternate_person.full_name }}<br>
+                                    <small class="text-muted">{{ position.alternate_person.identification_person }}</small>
+                                {% else %}
+                                    <span class="text-muted">Sin suplente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ position.start_date|date:"d/m/Y" }}
+                                    {% if position.end_date %}
+                                        - {{ position.end_date|date:"d/m/Y" }}
+                                    {% else %}
+                                        - Actual
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {% if position.can_sign_documents %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i> Autorizado
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No autorizado</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'board_position_edit' position.id %}"
+                                   class="btn btn-action btn-action-edit me-1"
+                                   title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'board_position_delete' position.id %}"
+                                   class="btn btn-action btn-action-delete"
+                                   title="Desactivar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if signers %}
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Firmantes autorizados:</strong>
+                {% for signer in signers %}
+                    {{ signer.holder_person.full_name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="empty-board">
+                <i class="fas fa-users-slash"></i>
+                <h5>No hay junta directiva configurada</h5>
+                <p>Agregue los miembros de la junta directiva para poder generar documentos oficiales.</p>
+                <a href="{% url 'board_position_create' organization.id %}" class="btn-emtel-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Agregar Primer Cargo
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- TAB: VEREDAS -->
+        <div class="tab-pane fade" id="veredas" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marked-alt me-2"></i>
+                    Veredas de la Organización
+                </h5>
+                <a href="{% url 'vereda_create' organization.id %}" class="btn-emtel-primary btn-sm">
+                    <i class="fas fa-plus"></i>
+                    Agregar Vereda
+                </a>
+            </div>
+
+            {% if veredas %}
+            <div class="board-table">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Coordenadas GPS</th>
+                            <th>Familias</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vereda in veredas %}
+                        <tr>
+                            <td>
+                                <strong>{{ vereda.sidewalk_name }}</strong>
+                            </td>
+                            <td>
+                                {% if vereda.description %}
+                                    {{ vereda.description|truncatewords:10 }}
+                                {% else %}
+                                    <span class="text-muted">Sin descripción</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if vereda.latitude and vereda.longitude %}
+                                    <small>
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ vereda.latitude }}, {{ vereda.longitude }}
+                                        <a href="https://www.google.com/maps?q={{ vereda.latitude }},{{ vereda.longitude }}"
+                                           target="_blank"
+                                           class="ms-2"
+                                           title="Ver en Google Maps">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </small>
+                                {% else %}
+                                    <span class="text-muted">Sin coordenadas</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ vereda.familycard_set.count }} familias
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'vereda_edit' vereda.id %}"
+                                   class="btn btn-action btn-action-edit me-1"
+                                   title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'vereda_delete' vereda.id %}"
+                                   class="btn btn-action btn-action-delete"
+                                   title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Total:</strong> {{ veredas.count }} vereda{{ veredas.count|pluralize }} registrada{{ veredas.count|pluralize }}
+            </div>
+
+            {% else %}
+            <div class="empty-board">
+                <i class="fas fa-map-marked-alt"></i>
+                <h5>No hay veredas registradas</h5>
+                <p>Agregue las veredas que pertenecen a esta organización para organizar mejor las fichas familiares.</p>
+                <a href="{% url 'vereda_create' organization.id %}" class="btn-emtel-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Agregar Primera Vereda
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- TAB: ESTADÍSTICAS -->
+        <div class="tab-pane fade" id="stats" role="tabpanel">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+                        <div class="stat-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="stat-content text-white">
+                            <h3>{{ total_fichas }}</h3>
+                            <p>Fichas Familiares</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #006B7D 0%, #00909E 100%);">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content text-white">
+                            <h3>{{ total_personas }}</h3>
+                            <p>Personas Registradas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #0f1d3a 0%, #1e3c72 100%);">
+                        <div class="stat-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div class="stat-content text-white">
+                            <h3>{{ total_veredas }}</h3>
+                            <p>Veredas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h5><i class="fas fa-chart-line"></i> Análisis Demográfico</h5>
+                <p class="text-muted">
+                    Esta organización cuenta con <strong>{{ total_personas }}</strong> personas registradas
+                    distribuidas en <strong>{{ total_fichas }}</strong> unidades familiares
+                    a través de <strong>{{ total_veredas }}</strong> veredas.
+                </p>
+
+                {% if has_active_board %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Tiene una junta directiva activa con {{ signers.count }} personas autorizadas para firmar documentos.
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atención:</strong> No hay junta directiva activa. Configure la junta para poder generar documentos oficiales.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script>
+    // Mantener el tab activo al recargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabTrigger = document.querySelector(`[data-bs-target="${hash}"]`);
+            if (tabTrigger) {
+                const tab = new bootstrap.Tab(tabTrigger);
+                tab.show();
+            }
+        }
+
+        // Guardar el tab activo en el hash
+        const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabButtons.forEach(button => {
+            button.addEventListener('shown.bs.tab', function(e) {
+                window.location.hash = e.target.getAttribute('data-bs-target');
+            });
+        });
+    });
+</script>
+{% endblock %}
+

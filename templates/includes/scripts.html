@@ -1,6 +1,6 @@
 {% load static %}
   <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
-  <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+  <!-- Solo usamos bootstrap.bundle.min.js que ya incluye Popper -->
   <script src="{% static 'assets/js/core/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
   <script src="{% static 'assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
@@ -25,3 +25,5 @@
 <script src="{% static 'js/global-search.js' %}"></script>
 <!-- Optimización Móvil JS -->
 <script src="{% static 'js/mobile-enhancements.js' %}"></script>
+<!-- Navbar Dropdown Fix - Solución dropdown usuario -->
+<script src="{% static 'js/navbar-dropdown-fix.js' %}"></script>
