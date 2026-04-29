@@ -46,6 +46,17 @@ tail -50 /var/log/tuusuario.pythonanywhere.com.error.log
 
 ## 🚨 Si Algo Sale Mal
 
+**Error: "Your local changes would be overwritten by merge: staticfiles"**
+```bash
+# Solución rápida
+git stash
+git pull origin master
+git rm -r --cached staticfiles/ 2>/dev/null
+git commit -m "chore: eliminar staticfiles del tracking" 2>/dev/null
+python manage.py collectstatic --noinput --clear
+```
+📖 Ver más: `SOLUCION_ERROR_STATICFILES.md`
+
 **Error de migración:**
 ```bash
 python manage.py showmigrations censoapp

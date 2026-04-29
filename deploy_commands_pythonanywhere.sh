@@ -30,11 +30,42 @@ echo ""
 
 # Paso 2: Actualizar código
 echo "📥 Paso 2: Descargando cambios desde GitHub..."
-git pull origin master
-if [ $? -ne 0 ]; then
+
+# Intentar pull normal primero
+git pull origin master 2>&1 | tee /tmp/git_pull_output.txt
+
+# Si hay error de merge con staticfiles
+if grep -q "staticfiles" /tmp/git_pull_output.txt && grep -q "overwritten by merge" /tmp/git_pull_output.txt; then
+    echo "⚠️  Detectado conflicto con staticfiles (archivos generados)"
+    echo "🔧 Aplicando solución automática..."
+
+    # Hacer stash de los cambios en staticfiles
+    git stash push -m "Auto-stash staticfiles before merge - $(date +%Y%m%d_%H%M%S)"
+
+    # Intentar pull de nuevo
+    git pull origin master
+
+    if [ $? -ne 0 ]; then
+        echo "❌ ERROR al descargar cambios después del stash"
+        exit 1
+    fi
+
+    # Eliminar staticfiles del tracking (sin borrar archivos físicos)
+    echo "🧹 Limpiando staticfiles del tracking de Git..."
+    git rm -r --cached staticfiles/ 2>/dev/null || true
+
+    # Si hay cambios, hacer commit
+    if git status --porcelain | grep -q "staticfiles"; then
+        git commit -m "chore: eliminar staticfiles del tracking de Git - auto-fixed" 2>/dev/null || true
+    fi
+
+    echo "✅ Conflicto resuelto automáticamente"
+elif [ $? -ne 0 ]; then
     echo "❌ ERROR al descargar cambios"
+    cat /tmp/git_pull_output.txt
     exit 1
 fi
+
 echo "✅ Código actualizado"
 echo ""
 
